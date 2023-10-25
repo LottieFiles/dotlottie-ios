@@ -1,0 +1,3 @@
+[submodule "Sources/Thorvg/Thorvg"]
+	path = Sources/Thorvg/Thorvg
+	url = git@github.com:thorvg/thorvg.git

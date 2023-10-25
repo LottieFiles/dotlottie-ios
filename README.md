@@ -1,4 +1,4 @@
-# DotLottie
+# dotLottie
 
 ### iOS player for .lottie and .json files.
 

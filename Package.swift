@@ -29,7 +29,8 @@ let package = Package(
             dependencies: ["DotLottie"]),
         .binaryTarget(
             name: "Thorvg",
-            path: "./Sources/DotLottie/Thorvg/Thorvg.xcframework.zip"
+            path: "./Sources/Thorvg/ios/Framework/Thorvg.xcframework"
+//            path: "./Sources/DotLottie/Backup/Thorvg/Thorvg.xcframework.zip"
         ),
     ]
 )

@@ -14,8 +14,8 @@ public class DotLottieCore {
     var buffer: [UInt32] = []
     var animation: OpaquePointer;
     var canvas: OpaquePointer;
-    var current_frame: UnsafeMutablePointer<UInt32> = UnsafeMutablePointer<UInt32>.allocate(capacity: 1);
-    var total_frames: UnsafeMutablePointer<UInt32> = UnsafeMutablePointer<UInt32>.allocate(capacity: 1);
+    var current_frame: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
+    var total_frames: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
     var WIDTH: UInt32 = 0;
     var HEIGHT: UInt32 = 0;
     @Published var paused = false;
@@ -72,9 +72,9 @@ public class DotLottieCore {
 
         // todo add direction -1
         if total_frames.pointee > 0 && current_frame.pointee >= total_frames.pointee - 1 {
-            current_frame.pointee = 0;
+            current_frame.pointee = 0.0;
         } else {
-            current_frame.pointee += 1;
+            current_frame.pointee += 1.0;
         }
         
         tvg_animation_set_frame(animation, current_frame.pointee);
