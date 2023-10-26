@@ -21,13 +21,50 @@ public struct DotLottie: UIViewRepresentable {
     @State private var image: CGImage?
     var dotLottiePlayer: DotLottieCore = DotLottieCore();
 
-    public init(animation_data: String, width: UInt32, height: UInt32, backgroundColor: CIImage = CIImage.white) {
-        dotLottiePlayer.load_animation(animation_data: animation_data, width: width, height: height);
-        
+    public init(animationUrl: String = "", width: UInt32, height: UInt32, backgroundColor: CIImage = CIImage.white) {
         self.width = width
         self.height = height
-        
         self.opaqueBackground = backgroundColor
+
+        if (animationUrl != "") {
+            fetchAndPlayAnimation(url: animationUrl)
+        }
+    }
+    
+    private func fetchAndPlayAnimation(url: String) {
+        if let url = URL(string: url) {
+            fetchStringFromURL(url: url) { string in
+                if let animationData = string {
+                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height);
+                    
+                    self.mtkView.isPaused = false
+                } else {
+                    print("Failed to load data from URL.")
+                }
+            }
+        } else {
+            print("Invalid URL")
+        }
+    }
+    
+    private func fetchStringFromURL(url: URL, completion: @escaping (String?) -> Void) {
+        let session = URLSession.shared
+        
+        let task = session.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("Error: \(error)")
+                completion(nil)
+                return
+            }
+            
+            if let data = data, let string = String(data: data, encoding: .utf8) {
+                completion(string)
+            } else {
+                completion(nil)
+            }
+        }
+        
+        task.resume()
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -42,7 +79,7 @@ public struct DotLottie: UIViewRepresentable {
         self.mtkView.preferredFramesPerSecond = 30
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         self.mtkView.enableSetNeedsDisplay = true
-        self.mtkView.isPaused = false
+        self.mtkView.isPaused = true
         
         return mtkView
     }
@@ -89,37 +126,45 @@ public struct DotLottie: UIViewRepresentable {
             }
             
             parent.dotLottiePlayer.tick()
-            let frame = parent.dotLottiePlayer.render()!
+            if let frame = parent.dotLottiePlayer.render() {
+                let commandBuffer = metalCommandQueue.makeCommandBuffer()
 
-            let commandBuffer = metalCommandQueue.makeCommandBuffer()
-
-            let inputImage = CIImage(cgImage: frame)
-            var size = view.bounds
-        
-            size.size = view.drawableSize
-            size = AVMakeRect(aspectRatio: inputImage.extent.size, insideRect: size)
-  
-            var filteredImage = inputImage.transformed(by: CGAffineTransform(
-                scaleX: size.size.width / inputImage.extent.size.width,
-                y: size.size.height / inputImage.extent.size.height))
-        
-            let x = -size.origin.x
-            let y = -size.origin.y
+                let inputImage = CIImage(cgImage: frame)
+                var size = view.bounds
             
-            // Blend the image over an opaque background image.
-            // This is needed if the image is smaller than the view, or if it has transparent pixels.
-            filteredImage = filteredImage.composited(over: parent.opaqueBackground)
+                size.size = view.drawableSize
+                size = AVMakeRect(aspectRatio: inputImage.extent.size, insideRect: size)
+      
+                var filteredImage = inputImage.transformed(by: CGAffineTransform(
+                    scaleX: size.size.width / inputImage.extent.size.width,
+                    y: size.size.height / inputImage.extent.size.height))
+                
+#if targetEnvironment(simulator)
+                filteredImage = filteredImage.transformed(by: CGAffineTransform(scaleX: 1, y: -1))
+        .transformed(by: CGAffineTransform(translationX: 0, y: filteredImage.extent.height))
+#endif
             
-            self.mtlTexture = drawable.texture
-                        
-            ciContext.render(filteredImage,
-                to: drawable.texture,
-                commandBuffer: commandBuffer,
-                             bounds: CGRect(origin:CGPoint(x:x, y:y), size: view.drawableSize),
-                colorSpace: CGColorSpaceCreateDeviceRGB())
+                let x = -size.origin.x
+                let y = -size.origin.y
+                
+                // Blend the image over an opaque background image.
+                // This is needed if the image is smaller than the view, or if it has transparent pixels.
+                filteredImage = filteredImage.composited(over: parent.opaqueBackground)
+                
+                self.mtlTexture = drawable.texture
+                            
+                ciContext.render(filteredImage,
+                    to: drawable.texture,
+                    commandBuffer: commandBuffer,
+                                 bounds: CGRect(origin:CGPoint(x:x, y:y), size: view.drawableSize),
+                    colorSpace: CGColorSpaceCreateDeviceRGB())
 
-            commandBuffer?.present(drawable)
-            commandBuffer?.commit()
+                commandBuffer?.present(drawable)
+                commandBuffer?.commit()
+            } else {
+                print("NIL frame")
+                return ;
+            }
         }
     }
 }
