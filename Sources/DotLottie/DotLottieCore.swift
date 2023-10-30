@@ -21,7 +21,7 @@ class DotLottieCore {
     var WIDTH: UInt32 = 0;
     var HEIGHT: UInt32 = 0;
     var animationData: String = "";
-//    @Published var paused = false;
+    var direction = 1;
     
     init() {
         tvg_engine_init(TVG_ENGINE_SW, 0);
@@ -32,13 +32,15 @@ class DotLottieCore {
         self.currentFrame.pointee = 0;
     }
     
-    func load_animation(animation_data: String, width: UInt32, height: UInt32) {
+    func load_animation(animation_data: String, width: UInt32, height: UInt32, direction: Int = 1) {
         self.WIDTH = width;
         self.HEIGHT = height;
         
         self.animationData = animation_data
         
         self.buffer = [UInt32](repeating: 0, count: Int(width) * Int(height));
+        
+        self.direction = direction
         
         _ = self.buffer.withUnsafeMutableBufferPointer{ bufferPointer in
             tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888);
@@ -61,7 +63,7 @@ class DotLottieCore {
             
             tvg_animation_get_total_frame(self.animation, self.totalFrames);
             
-            tvg_animation_set_frame(animation, 0);
+            tvg_animation_set_frame(animation, direction == 1 ? 0.0 : self.totalFrames.pointee - 1);
             tvg_canvas_push(self.canvas, frame_image);
             tvg_canvas_draw(self.canvas);
             tvg_canvas_sync(self.canvas);
@@ -69,17 +71,22 @@ class DotLottieCore {
     }
     
     func tick() {
-//        if (self.paused) {
-//            return ;
-//        }
-        
         tvg_animation_get_frame(animation, currentFrame);
+        print("Direction : \(direction)")
 
         // todo add direction -1
-        if totalFrames.pointee > 0 && currentFrame.pointee >= totalFrames.pointee - 1 {
-            currentFrame.pointee = 0.0;
-        } else {
-            currentFrame.pointee += 1.0;
+        if direction == 1  {
+            if currentFrame.pointee > 0 && currentFrame.pointee >= totalFrames.pointee - 1.0 {
+                currentFrame.pointee = 0.0;
+            } else {
+                currentFrame.pointee += 1.0;
+            }
+        } else if direction == -1 {
+            if currentFrame.pointee <= 0 {
+                currentFrame.pointee = totalFrames.pointee - 1.0;
+            } else {
+                currentFrame.pointee -= 1.0;
+            }
         }
         
         tvg_animation_set_frame(animation, currentFrame.pointee);

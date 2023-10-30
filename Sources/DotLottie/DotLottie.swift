@@ -18,21 +18,29 @@ public struct DotLottie: UIViewRepresentable {
     var height: UInt32;
     let opaqueBackground: CIImage
     var frameRate = 60
-    
     /*
                 Playback settings
      */
     var autoplay: Bool;
-    
+    var direction = 1
+
     @State private var image: CGImage?
     var dotLottiePlayer: DotLottieCore = DotLottieCore();
 
-    public init(animationUrl: String = "", animationBundleName: String = "", width: UInt32, height: UInt32, autoplay: Bool = false, backgroundColor: CIImage = CIImage.white) {
+    public init(
+        animationUrl: String = "",
+        animationBundleName: String = "",
+        width: UInt32,
+        height: UInt32,
+        autoplay: Bool = false,
+        direction: Int = 1,
+        backgroundColor: CIImage = CIImage.white) {
         self.width = width
         self.height = height
         self.opaqueBackground = backgroundColor
         
         self.autoplay = autoplay
+        self.direction = direction
 
         if (animationUrl != "") {
             fetchAndPlayAnimation(url: animationUrl)
@@ -44,7 +52,7 @@ public struct DotLottie: UIViewRepresentable {
     private func fetchAndPlayAnimationFromBundle(url: String) {
         fetchJsonFromBundle(animation_name: url) { string in
                 if let animationData = string {
-                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height);
+                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height, direction: direction);
                     
                     print("Autoplay: \(self.autoplay)")
                     self.mtkView.isPaused = !self.autoplay
@@ -58,7 +66,7 @@ public struct DotLottie: UIViewRepresentable {
         if let url = URL(string: url) {
             fetchJsonFromUrl(url: url) { string in
                 if let animationData = string {
-                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height);
+                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height, direction: direction);
                     
                     print("Autoplay: \(self.autoplay)")
                     self.mtkView.isPaused = !self.autoplay
