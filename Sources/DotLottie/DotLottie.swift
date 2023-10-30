@@ -17,27 +17,51 @@ public struct DotLottie: UIViewRepresentable {
     var width: UInt32;
     var height: UInt32;
     let opaqueBackground: CIImage
+    var frameRate = 60
+    
+    /*
+                Playback settings
+     */
+    var autoplay: Bool;
     
     @State private var image: CGImage?
     var dotLottiePlayer: DotLottieCore = DotLottieCore();
 
-    public init(animationUrl: String = "", width: UInt32, height: UInt32, backgroundColor: CIImage = CIImage.white) {
+    public init(animationUrl: String = "", animationBundleName: String = "", width: UInt32, height: UInt32, autoplay: Bool = false, backgroundColor: CIImage = CIImage.white) {
         self.width = width
         self.height = height
         self.opaqueBackground = backgroundColor
+        
+        self.autoplay = autoplay
 
         if (animationUrl != "") {
             fetchAndPlayAnimation(url: animationUrl)
+        } else if (animationBundleName != "") {
+            fetchAndPlayAnimationFromBundle(url: animationUrl)
         }
+    }
+    
+    private func fetchAndPlayAnimationFromBundle(url: String) {
+        fetchJsonFromBundle(animation_name: url) { string in
+                if let animationData = string {
+                    dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height);
+                    
+                    print("Autoplay: \(self.autoplay)")
+                    self.mtkView.isPaused = !self.autoplay
+                } else {
+                    print("Failed to load data from URL.")
+                }
+            }
     }
     
     private func fetchAndPlayAnimation(url: String) {
         if let url = URL(string: url) {
-            fetchStringFromURL(url: url) { string in
+            fetchJsonFromUrl(url: url) { string in
                 if let animationData = string {
                     dotLottiePlayer.load_animation(animation_data: animationData, width: width, height: height);
                     
-                    self.mtkView.isPaused = false
+                    print("Autoplay: \(self.autoplay)")
+                    self.mtkView.isPaused = !self.autoplay
                 } else {
                     print("Failed to load data from URL.")
                 }
@@ -45,26 +69,6 @@ public struct DotLottie: UIViewRepresentable {
         } else {
             print("Invalid URL")
         }
-    }
-    
-    private func fetchStringFromURL(url: URL, completion: @escaping (String?) -> Void) {
-        let session = URLSession.shared
-        
-        let task = session.dataTask(with: url) { data, response, error in
-            if let error = error {
-                print("Error: \(error)")
-                completion(nil)
-                return
-            }
-            
-            if let data = data, let string = String(data: data, encoding: .utf8) {
-                completion(string)
-            } else {
-                completion(nil)
-            }
-        }
-        
-        task.resume()
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -76,10 +80,12 @@ public struct DotLottie: UIViewRepresentable {
         self.mtkView.framebufferOnly = false
         self.mtkView.isOpaque = false
         self.mtkView.delegate = context.coordinator
-        self.mtkView.preferredFramesPerSecond = 30
+        self.mtkView.preferredFramesPerSecond = self.frameRate
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         self.mtkView.enableSetNeedsDisplay = true
-        self.mtkView.isPaused = true
+        self.mtkView.isPaused = !self.autoplay
+        
+        print("MAKING MAKE UI VIEW \(self.autoplay)")
         
         return mtkView
     }
@@ -92,7 +98,7 @@ public struct DotLottie: UIViewRepresentable {
     }
     
     public func setSpeed(speed: Int) {
-        self.mtkView.preferredFramesPerSecond = 30 * speed;
+        self.mtkView.preferredFramesPerSecond = self.frameRate * speed;
     }
     
     public class Coordinator : NSObject, MTKViewDelegate {
@@ -149,7 +155,7 @@ public struct DotLottie: UIViewRepresentable {
                 
                 // Blend the image over an opaque background image.
                 // This is needed if the image is smaller than the view, or if it has transparent pixels.
-                filteredImage = filteredImage.composited(over: parent.opaqueBackground)
+//                filteredImage = filteredImage.composited(over: parent.opaqueBackground)
                 
                 self.mtlTexture = drawable.texture
                             

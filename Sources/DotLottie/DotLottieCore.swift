@@ -21,7 +21,7 @@ class DotLottieCore {
     var WIDTH: UInt32 = 0;
     var HEIGHT: UInt32 = 0;
     var animationData: String = "";
-    @Published var paused = false;
+//    @Published var paused = false;
     
     init() {
         tvg_engine_init(TVG_ENGINE_SW, 0);
@@ -69,9 +69,9 @@ class DotLottieCore {
     }
     
     func tick() {
-        if (self.paused) {
-            return ;
-        }
+//        if (self.paused) {
+//            return ;
+//        }
         
         tvg_animation_get_frame(animation, currentFrame);
 
