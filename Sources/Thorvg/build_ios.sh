@@ -5,7 +5,7 @@ rm -rf ./ios/
 
 cd ./Thorvg/
 
-meson setup --backend=ninja build -Dlog=true -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ./cross/ios_x86_64.txt
+meson setup --backend=ninja build -Dlog=true -Dloaders="lottie, png, jpg" -Dbindings="capi" --cross-file ./cross/ios_x86_64.txt
 # meson setup --backend=ninja build -Dlog=true -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ./cross/ios_aarch64.txt
 
 ninja -C build install
