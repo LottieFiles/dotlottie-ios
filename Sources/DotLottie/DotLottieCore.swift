@@ -10,8 +10,6 @@ import CoreGraphics
 import SwiftUI
 import Thorvg
 
-/** ⚠️ If you modify DotLottieCore - You HAVE to rebuild Thorvg using build_ios.sh so that the changes appear in the Thorvg.xcframework ⚠️ */
-
 class DotLottieCore {
     var buffer: [UInt32] = []
     var animation: OpaquePointer;
@@ -72,9 +70,7 @@ class DotLottieCore {
     
     func tick() {
         tvg_animation_get_frame(animation, currentFrame);
-        print("Direction : \(direction)")
-
-        // todo add direction -1
+        
         if direction == 1  {
             if currentFrame.pointee > 0 && currentFrame.pointee >= totalFrames.pointee - 1.0 {
                 currentFrame.pointee = 0.0;

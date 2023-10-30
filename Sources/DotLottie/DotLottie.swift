@@ -18,6 +18,7 @@ public struct DotLottie: UIViewRepresentable {
     var height: UInt32;
     let opaqueBackground: CIImage
     var frameRate = 60
+    
     /*
                 Playback settings
      */
@@ -93,8 +94,6 @@ public struct DotLottie: UIViewRepresentable {
         self.mtkView.enableSetNeedsDisplay = true
         self.mtkView.isPaused = !self.autoplay
         
-        print("MAKING MAKE UI VIEW \(self.autoplay)")
-        
         return mtkView
     }
     
@@ -162,7 +161,10 @@ public struct DotLottie: UIViewRepresentable {
                 let y = -size.origin.y
                 
                 // Blend the image over an opaque background image.
-                // This is needed if the image is smaller than the view, or if it has transparent pixels.
+                // This is needed if the image is smaller than the view, or if it has transparent
+                
+                // Commented out for the moment due to memory errors
+//                filteredImage = filteredImage.copy() as! CIImage
 //                filteredImage = filteredImage.composited(over: parent.opaqueBackground)
                 
                 self.mtlTexture = drawable.texture
