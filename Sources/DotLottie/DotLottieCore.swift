@@ -14,6 +14,7 @@ class DotLottieCore {
     var buffer: [UInt32] = []
     var animation: OpaquePointer;
     var canvas: OpaquePointer;
+    var bg: OpaquePointer;
     var currentFrame: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
     var totalFrames: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
     var WIDTH: UInt32 = 0;
@@ -28,6 +29,15 @@ class DotLottieCore {
         self.canvas = tvg_swcanvas_create();
         self.totalFrames.pointee = 0;
         self.currentFrame.pointee = 0;
+        self.bg = tvg_shape_new();
+
+        //set a background
+        tvg_canvas_push(self.canvas, self.bg);
+    }
+
+    func set_background_color(r: UInt8, g: UInt8, b: UInt8, a: UInt8)
+    {
+        tvg_shape_set_fill_color(self.bg, r, g, b, a);
     }
     
     func load_animation(animation_data: String, width: UInt32, height: UInt32, direction: Int = 1) {
@@ -43,6 +53,14 @@ class DotLottieCore {
         _ = self.buffer.withUnsafeMutableBufferPointer{ bufferPointer in
             tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888);
         }
+
+        //clear the canvas
+        tvg_canvas_clear(self.canvas, false);
+
+        //reset the bg region
+        tvg_shape_reset(self.bg);
+        tvg_shape_append_rect(self.bg, 0, 0, Float32(width), Float32(height), 0, 0);
+        tvg_canvas_push(self.canvas, self.bg);
         
         let frame_image = tvg_animation_get_picture(self.animation);
         
@@ -57,8 +75,6 @@ class DotLottieCore {
         if (load_result != TVG_RESULT_SUCCESS ) {
             tvg_animation_del(self.animation)
         } else {
-            tvg_paint_scale(frame_image, 1.0);
-            
             tvg_animation_get_total_frame(self.animation, self.totalFrames);
             
             tvg_animation_set_frame(animation, direction == 1 ? 0.0 : self.totalFrames.pointee - 1);
