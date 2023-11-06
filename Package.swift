@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "DotLottie",
     // Todo - When Thorvg can build for arm, add more platforms here!
-    platforms: [.iOS(.v16)],
+    platforms: [.iOS(.v16), .macOS(.v11)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -23,7 +23,8 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "DotLottie",
-            dependencies: ["Thorvg"]),
+            dependencies: ["Thorvg"],
+            path: "Sources/DotLottie/"),
         .testTarget(
             name: "DotLottieTests",
             dependencies: ["DotLottie"]),
