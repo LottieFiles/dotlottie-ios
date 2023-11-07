@@ -13,87 +13,39 @@ import SwiftUI
 public struct DotLottieView: ViewRepresentable {
     public typealias UIViewType = MTKView
     var mtkView: MTKView = MTKView()
-    var width: UInt32
-    var height: UInt32
     let opaqueBackground: CIImage
     
     // Playback settings
     let framerate: Int
     
-    @ObservedObject var dotLottie = DotLottie(animationData: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
-    
+    @ObservedObject var dotLottie = DotLottie(animationData: nil, fileName: nil, webURL: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
+
     public init(
-        animationUrl: String = "",
-        animationBundleName: String = "",
+        webURL: String = "",
+        fileName: String = "",
         data: String = "",
-        width: UInt32,
-        height: UInt32,
+        width: UInt32 = 512,
+        height: UInt32 = 512,
         framerate: Int = 30,
         autoplay: Bool = false,
         loop: Bool = false,
         direction: Int = 1,
         backgroundColor: CIImage = CIImage.white) {
-            self.width = width
-            self.height = height
+
             self.opaqueBackground = backgroundColor
             self.framerate = framerate
             self.dotLottie.autoplay(autoplay: autoplay)
             self.dotLottie.loop(loop: loop)
             self.dotLottie.direction(direction: direction)
             
-            if (animationUrl != "") {
-                fetchAndPlayAnimation(url: animationUrl)
-            } else if (animationBundleName != "") {
-                fetchAndPlayAnimationFromBundle(url: animationUrl)
-            } else if (data != "") {
-                do {
-                   try dotLottie.loadAnimation(animationData: data, width: width, height: height)
-                    
-                } catch {
-                    self.mtkView.isPaused = true
-                }
-            }
-
-            if (autoplay) {
-                self.dotLottie.play()
+            if (webURL != "") {
+                dotLottie.loadAnimation(webURL: webURL, width: width, height: height)
+            } else if (fileName != "") {
+                dotLottie.loadAnimation(fileName: fileName, width: width, height: height)
+            } else if (data != "" ) {
+                dotLottie.loadAnimation(animationData: data, width: width, height: height)
             }
         }
-    
-    private func fetchAndPlayAnimationFromBundle(url: String) {
-        fetchJsonFromBundle(animation_name: url) { string in
-            if let animationData = string {
-                do {
-                    try dotLottie.loadAnimation(animationData: animationData, width: width, height: height)
-                } catch {
-                    self.mtkView.isPaused = true
-                }
-                
-                self.mtkView.isPaused = !self.dotLottie.getAutoplay()
-            } else {
-                print("Failed to load data from URL.")
-            }
-        }
-    }
-    
-    private func fetchAndPlayAnimation(url: String) {
-        if let url = URL(string: url) {
-            fetchJsonFromUrl(url: url) { string in
-                if let animationData = string {
-                    do {
-                        try dotLottie.loadAnimation(animationData: animationData, width: width, height: height)
-                    } catch {
-                        self.mtkView.isPaused = true
-                    }
-
-                    self.mtkView.isPaused = !self.dotLottie.getAutoplay()
-                } else {
-                    print("Failed to load data from URL.")
-                }
-            }
-        } else {
-            print("Invalid URL")
-        }
-    }
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(self, mtkView: self.mtkView)
@@ -154,9 +106,7 @@ public struct DotLottieView: ViewRepresentable {
     // Speed is actually the preffered frame rate
     public func setSpeed(speed: Int) {
         if (speed > 0) {
-            self.dotLottie.speed(speed: speed)
-            
-            
+                self.dotLottie.speed(speed: speed)
         }
     }
 }

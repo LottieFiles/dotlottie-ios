@@ -34,8 +34,10 @@ public enum AnimationEvent {
 // It manages the lifecycle of a renderer as well as advancing the animation and returning frames to the views.
 // The playback loop is left up to the subclasses to manage leaving the implementation open for the most pratical one per platform.
 // In the future this class will manage multiple animations contained inside a single .lottie.
+
+
+
 public class DotLottie: ObservableObject, PlayerEvents {
-    // Our model containing the playback settings of the current animation
     @Published private var model: AnimationModel = AnimationModel(id: "animation_0")
     
     var callbacks: [AnimationEvent: [() -> Void]] = [:]
@@ -52,6 +54,8 @@ public class DotLottie: ObservableObject, PlayerEvents {
     
     public init(
         animationData: String?,
+        fileName: String?,
+        webURL: URL?,
         direction: Int?,
         loop: Bool?,
         autoplay: Bool?,
@@ -62,6 +66,8 @@ public class DotLottie: ObservableObject, PlayerEvents {
         height: UInt32?) {
             thorvg = Thorvg()
             
+            model.width = width ?? model.width
+            model.height = width ?? model.height
             model.direction = direction ?? model.direction
             model.loop = loop ?? model.loop
             model.autoplay = autoplay ?? model.autoplay
@@ -83,7 +89,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
         }
     
     // Todo: Manage swapping out animation at runtime
-    public func loadAnimation(animationData: String, width: UInt32, height: UInt32) throws {
+    public func loadAnimation(animationData: String, width: UInt32, height: UInt32) {
         do {
             try thorvg.loadAnimation(animationData: animationData, width: width, height: height)
             
@@ -91,16 +97,32 @@ public class DotLottie: ObservableObject, PlayerEvents {
             if (model.direction == -1) {
                 thorvg.frame(no: thorvg.totalFrame() - 1)
             }
-        } catch let error as ThorvgOperationFailure {
+        
+            model.playing = model.autoplay
+        } catch {
             model.error = true
             
-            callCallbacks(event: .onLoadError)
+            model.playing = false
             
-            throw error
+            callCallbacks(event: .onLoadError)
         }
         
         // Fire load event
         callCallbacks(event: .onLoad)
+    }
+    
+    public func loadAnimation(webURL: String, width: UInt32?, height: UInt32?) {
+        self.model.width = width ?? self.model.width
+        self.model.height = height ?? self.model.height
+        
+        fetchAndPlayAnimationFromURL(url: webURL)
+    }
+    
+    public func loadAnimation(fileName: String, width: UInt32?, height: UInt32?) {
+        self.model.width = width ?? self.model.width
+        self.model.height = height ?? self.model.height
+        
+        fetchAndPlayAnimationFromBundle(url: fileName)
     }
     
     // Give the view an image to render
@@ -177,7 +199,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
             
             // Calculate the new frame number to be displayed
             var spedUpFrame = (((newFrame) * originalDeltaTime / newDeltaTime)).rounded()
-                        
+            
             if spedUpFrame >= totalFrames - 1 {
                 spedUpFrame = 0
             }
@@ -186,8 +208,39 @@ public class DotLottie: ObservableObject, PlayerEvents {
         } else {
             thorvg.frame(no: newFrame)
         }
-
+        
         thorvg.draw()
+    }
+    
+    private func fetchAndPlayAnimationFromBundle(url: String) -> Void {
+        fetchJsonFromBundle(animation_name: url) { string in
+            if let animationData = string {
+                self.loadAnimation(animationData: animationData, width: self.model.width, height: self.model.height)
+            } else {
+                print("Failed to load data from main bundle.")
+                
+                self.callCallbacks(event: .onLoadError)
+            }
+        }
+    }
+    
+    private func fetchAndPlayAnimationFromURL(url: String) {
+        if let url = URL(string: url) {
+            fetchJsonFromUrl(url: url) { string in
+                if let animationData = string {
+
+                    self.loadAnimation(animationData: animationData, width: self.model.width, height: self.model.height)
+                } else {
+                    print("Failed to load data from URL.")
+                    
+                    self.callCallbacks(event: .onLoadError)
+                }
+            }
+        } else {
+            print("Invalid URL")
+            
+            callCallbacks(event: .onLoadError)
+        }
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {
@@ -197,7 +250,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
         callbacks[event]?.append(callback)
     }
     
-    private func callCallbacks(event: AnimationEvent) {
+    public func callCallbacks(event: AnimationEvent) {
         if let eventCallbacks = callbacks[event] {
             for callback in eventCallbacks {
                 callback()

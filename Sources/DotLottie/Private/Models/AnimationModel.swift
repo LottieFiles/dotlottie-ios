@@ -10,6 +10,10 @@ import Foundation
 struct AnimationModel {
     var animationData: String?
     
+    var width: UInt32 = 512
+    
+    var height: UInt32 = 512
+    
     var error: Bool = false
     
     var id: String
