@@ -20,10 +20,6 @@ public struct DotLottieView: ViewRepresentable {
     // Playback settings
     let framerate: Int
     
-    // Events
-//    var callbacks: [AnimationEvent: [() -> Void]] = [:]
-    
-    //    var dotLottiePlayer: DotLottieRenderer = DotLottieRenderer();
     @ObservedObject var dotLottie = DotLottie(animationData: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
     
     public init(
@@ -50,13 +46,14 @@ public struct DotLottieView: ViewRepresentable {
             } else if (animationBundleName != "") {
                 fetchAndPlayAnimationFromBundle(url: animationUrl)
             } else if (data != "") {
-                if (!dotLottie.loadAnimation(animationData: data, width: width, height: height)) {
+                do {
+                   try dotLottie.loadAnimation(animationData: data, width: width, height: height)
+                    
+                } catch {
                     self.mtkView.isPaused = true
-
-                    return ;
                 }
             }
-            
+
             if (autoplay) {
                 self.dotLottie.play()
             }
@@ -65,10 +62,10 @@ public struct DotLottieView: ViewRepresentable {
     private func fetchAndPlayAnimationFromBundle(url: String) {
         fetchJsonFromBundle(animation_name: url) { string in
             if let animationData = string {
-                if (!dotLottie.loadAnimation(animationData: animationData, width: width, height: height)) {
+                do {
+                    try dotLottie.loadAnimation(animationData: animationData, width: width, height: height)
+                } catch {
                     self.mtkView.isPaused = true
-
-                    return
                 }
                 
                 self.mtkView.isPaused = !self.dotLottie.getAutoplay()
@@ -82,11 +79,12 @@ public struct DotLottieView: ViewRepresentable {
         if let url = URL(string: url) {
             fetchJsonFromUrl(url: url) { string in
                 if let animationData = string {
-                    if (!dotLottie.loadAnimation(animationData: animationData, width: width, height: height)) {
-                        self.mtkView.isPaused = !self.dotLottie.getAutoplay()
-
-                        return
+                    do {
+                        try dotLottie.loadAnimation(animationData: animationData, width: width, height: height)
+                    } catch {
+                        self.mtkView.isPaused = true
                     }
+
                     self.mtkView.isPaused = !self.dotLottie.getAutoplay()
                 } else {
                     print("Failed to load data from URL.")
@@ -158,9 +156,7 @@ public struct DotLottieView: ViewRepresentable {
         if (speed > 0) {
             self.dotLottie.speed(speed: speed)
             
-            print("SPEED \(speed)")
             
-            self.mtkView.preferredFramesPerSecond = framerate * speed;
         }
     }
 }

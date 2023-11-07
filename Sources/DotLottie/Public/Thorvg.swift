@@ -10,6 +10,10 @@ import CoreGraphics
 import SwiftUI
 import Thorvg
 
+enum ThorvgOperationFailure : Error {
+    case operationFailed(description: String)
+}
+
 /// MARK: - DotLottieRenderer
 
 /// The 'DotLottieRenderer' class wraps Thorvg and manages loading and rendering frames of animations.
@@ -55,12 +59,22 @@ class Thorvg {
         self.bg = tvg_shape_new();
     }
     
+    func executeThorvgOperation(_ operation: () -> Tvg_Result, description: String) throws {
+        let result = operation()
+
+        guard result == TVG_RESULT_SUCCESS else {
+            let errorDescription = "Thorvg operation failed: \(description). Error code: \(result)"
+            throw ThorvgOperationFailure.operationFailed(description: errorDescription)
+        }
+    }
+    
+    
     func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
         tvg_shape_set_fill_color(self.bg, r, g, b, a);
     }
     
     /// Loads the animation data passed as a string (JSON content of a Lottie animation) - Returns false on failure
-    func loadAnimation(animationData: String, width: UInt32, height: UInt32, direction: Int = 1) -> Bool {
+    func loadAnimation(animationData: String, width: UInt32, height: UInt32, direction: Int = 1) throws {
         self.WIDTH = width;
         self.HEIGHT = height;
         
@@ -70,18 +84,25 @@ class Thorvg {
         
         self.direction = direction
         
-        _ = self.buffer.withUnsafeMutableBufferPointer{ bufferPointer in
-            tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888);
+        try self.buffer.withUnsafeMutableBufferPointer { bufferPointer in
+            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
+                throw ThorvgOperationFailure.operationFailed(description: "Set Target")
+            }
         }
         
-        //clear the canvas
-        tvg_canvas_clear(self.canvas, false);
-        
-        //reset the bg region
-        tvg_shape_reset(self.bg);
-        tvg_shape_append_rect(self.bg, 0, 0, Float32(width), Float32(height), 0, 0);
-        
-        tvg_canvas_push(self.canvas, self.bg);
+        do {
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            
+            try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
+            
+            //reset the bg region
+            try executeThorvgOperation( { tvg_shape_append_rect(self.bg, 0, 0, Float32(width), Float32(height), 0, 0) }, description: "Shape Append Rect" )
+            
+            try executeThorvgOperation( { tvg_canvas_push(self.canvas, self.bg) }, description: "Canvas Push" )
+            
+        } catch let error as ThorvgOperationFailure {
+            throw error
+        }
         
         let frame_image = tvg_animation_get_picture(self.animation);
         
@@ -93,39 +114,27 @@ class Thorvg {
             }
         }
         
-        if (load_result != TVG_RESULT_SUCCESS) {
+        guard load_result == TVG_RESULT_SUCCESS else {
             tvg_animation_del(self.animation)
             
-            print("ERROR LOADING ANIMATION")
-            
-            return false
-        } else {
-            tvg_animation_get_total_frame(self.animation, self.totalFramesState);
-            tvg_animation_get_duration(self.animation, self.durationState);
-            tvg_animation_set_frame(animation, direction == 1 ? 0.0 : self.totalFramesState.pointee - 1);
-            
-            tvg_canvas_push(self.canvas, frame_image);
-            tvg_canvas_draw(self.canvas);
-            tvg_canvas_sync(self.canvas);
+            throw ThorvgOperationFailure.operationFailed(description: "Picture Load Data")
         }
         
-        return true
+        do {
+            try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
+            
+            try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
+            
+            try executeThorvgOperation({ tvg_canvas_push(self.canvas, frame_image) }, description: "Canvas Push")
+            
+            try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
+            
+            try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
+        } catch let error as ThorvgOperationFailure {
+            
+            throw error
+        }
     }
-    
-    // Goes to the frame passed as argument
-    //    func setFrame(frame: Float32) {
-    //        if frame >= 0 && currentFrameState.pointee <= totalFramesState.pointee - 1.0 {
-    //            currentFrameState.pointee = frame;
-    //        }
-    //
-    //        tvg_animation_set_frame(animation, currentFrameState.pointee);
-    //
-    //        tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
-    //
-    //        //Draw the canvas
-    //        tvg_canvas_draw(canvas);
-    //        tvg_canvas_sync(canvas);
-    //    }
     
     func currentFrame() -> Float32 {
         tvg_animation_get_frame(animation, currentFrameState);
@@ -134,10 +143,10 @@ class Thorvg {
     }
     
     func frame(no: Float32) {
-        if no >= 0 && currentFrameState.pointee <= totalFramesState.pointee - 1.0 {
+        if no >= 0 && no <= totalFramesState.pointee - 1.0 {
             currentFrameState.pointee = no;
             tvg_animation_set_frame(animation, no);
-    
+            
             tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
             tvg_canvas_draw(canvas);
             tvg_canvas_sync(canvas);
@@ -159,27 +168,6 @@ class Thorvg {
         tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
         tvg_canvas_draw(canvas);
         tvg_canvas_sync(canvas);
-    }
-    
-    /// Advance the animation by one frame depending on the current direction.
-    func tick() {
-        tvg_animation_get_frame(animation, currentFrameState);
-        
-        if _direction == 1  {
-            if currentFrameState.pointee > 0 && currentFrameState.pointee >= totalFramesState.pointee - 1.0 {
-                currentFrameState.pointee = 0.0;
-            } else {
-                currentFrameState.pointee += 1.0;
-            }
-        } else if _direction == -1 {
-            if currentFrameState.pointee <= 0 {
-                currentFrameState.pointee = totalFramesState.pointee - 1.0;
-            } else {
-                currentFrameState.pointee -= 1.0;
-            }
-        }
-        
-        self.draw()
     }
     
     /// Returns the current frame as a CGImage

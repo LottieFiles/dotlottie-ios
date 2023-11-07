@@ -61,7 +61,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
         width: UInt32?,
         height: UInt32?) {
             thorvg = Thorvg()
-
+            
             model.direction = direction ?? model.direction
             model.loop = loop ?? model.loop
             model.autoplay = autoplay ?? model.autoplay
@@ -70,10 +70,12 @@ public class DotLottie: ObservableObject, PlayerEvents {
             model.defaultActiveAnimation = defaultActiveAnimation ?? model.defaultActiveAnimation
             
             if let data = animationData {
-                if (!thorvg.loadAnimation(animationData: data, width: width ?? 512, height: height ?? 512)) {
+                do {
+                    try thorvg.loadAnimation(animationData: data, width: width ?? 512, height: height ?? 512)
+                } catch {
                     model.error = true
                     
-                    return
+                    callCallbacks(event: .onLoadError)
                 }
             }
             
@@ -81,77 +83,110 @@ public class DotLottie: ObservableObject, PlayerEvents {
         }
     
     // Todo: Manage swapping out animation at runtime
-    public func loadAnimation(animationData: String, width: UInt32, height: UInt32) -> Bool {
-        if (!thorvg.loadAnimation(animationData: animationData, width: width, height: height)) {
+    public func loadAnimation(animationData: String, width: UInt32, height: UInt32) throws {
+        do {
+            try thorvg.loadAnimation(animationData: animationData, width: width, height: height)
+            
+            // Go to the last frame if we're playing backwards
+            if (model.direction == -1) {
+                thorvg.frame(no: thorvg.totalFrame() - 1)
+            }
+        } catch let error as ThorvgOperationFailure {
+            model.error = true
+            
             callCallbacks(event: .onLoadError)
             
-            return false;
+            throw error
         }
         
-        // Go to the last frame if we're playing backwards
-        if (model.direction == -1) {
-            thorvg.frame(no: thorvg.totalFrame() - 1)
-        }
-
         // Fire load event
         callCallbacks(event: .onLoad)
-        
-        return true
     }
     
     // Give the view an image to render
     public func render() -> CGImage? {
         return thorvg.render()
     }
-
+    
     public func tick() {
         if (model.error) {
             return
         }
+        
         if (stopped) {
             thorvg.frame(no: 0.0)
             return
         }
-
+        
         let currentFrame = thorvg.currentFrame();
         let totalFrames = thorvg.totalFrame();
+        var newFrame = currentFrame
         
         if model.direction == 1  {
-            if currentFrame > 0 && currentFrame >= totalFrames - 1.0 {
-                thorvg.frame(no: 0.0);
+            if currentFrame >= totalFrames - 1.0 {
+                newFrame = 0.0
                 
                 // If we're not looping - Set playing to false
                 if (!model.loop) {
                     model.playing = false
                     
                     callCallbacks(event: .onComplete)
+                    thorvg.draw()
+                    return
                 } else {
                     callCallbacks(event: .onLoop)
                 }
             } else {
-                thorvg.frame(no: currentFrame + 1.0);
-
+                newFrame = currentFrame + 1.0
+                
                 callCallbacks(event: .onFrame)
             }
         } else if model.direction == -1 {
             if currentFrame <= 0 {
-                thorvg.frame(no: totalFrames - 1.0);
+                newFrame = totalFrames - 1.0
                 
                 // If we're not looping - Set playing to false
                 if (!model.loop) {
                     model.playing = false
                     
                     callCallbacks(event: .onComplete)
+                    thorvg.draw()
+                    return
                 } else {
                     callCallbacks(event: .onLoop)
                 }
             } else {
-                thorvg.frame(no: currentFrame - 1.0);
+                newFrame = currentFrame - 1.0
                 
                 callCallbacks(event: .onFrame)
             }
         }
         
+        if (self.model.speed > 1) {
+            // Original frame rate in frames per second (fps)
+            let originalFPS: Float32 = 30.0
+            
+            // Speed-up factor (e.g., 2.0 for 2x speed)
+            let speedUpFactor: Int = self.model.speed
+            
+            // Calculate the original time between frames (deltaTime)
+            let originalDeltaTime: Float32 = 1.0 / originalFPS
+            
+            // Calculate the new time between frames (newDeltaTime) based on the speed-up factor
+            let newDeltaTime: Float32 = originalDeltaTime / Float32(speedUpFactor)
+            
+            // Calculate the new frame number to be displayed
+            var spedUpFrame = (((newFrame) * originalDeltaTime / newDeltaTime)).rounded()
+                        
+            if spedUpFrame >= totalFrames - 1 {
+                spedUpFrame = 0
+            }
+            
+            thorvg.frame(no: spedUpFrame)
+        } else {
+            thorvg.frame(no: newFrame)
+        }
+
         thorvg.draw()
     }
     
@@ -193,10 +228,10 @@ public class DotLottie: ObservableObject, PlayerEvents {
     public func duration() -> Float32 {
         return thorvg.duration()
     }
-
+    
     public func play() {
         self.stopped = false
-
+        
         self.model.playing = true
         
         callCallbacks(event: .onPlay)
@@ -204,7 +239,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
     
     public func pause() {
         self.stopped = false
-
+        
         self.model.playing = false
         
         callCallbacks(event: .onPause)
@@ -213,7 +248,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
     public func stop() {
         self.stopped = true
         self.model.playing = false
-
+        
         self.thorvg.frame(no: 0.0)
         
         callCallbacks(event: .onStop)
@@ -235,7 +270,7 @@ public class DotLottie: ObservableObject, PlayerEvents {
         model.direction = direction
         thorvg.direction = direction
     }
-
+    
     public func getDirection() -> Int {
         return model.direction
     }
