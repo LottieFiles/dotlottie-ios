@@ -59,7 +59,7 @@ class Thorvg {
         self.bg = tvg_shape_new();
     }
     
-    func executeThorvgOperation(_ operation: () -> Tvg_Result, description: String) throws {
+    private func executeThorvgOperation(_ operation: () -> Tvg_Result, description: String) throws {
         let result = operation()
 
         guard result == TVG_RESULT_SUCCESS else {

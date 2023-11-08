@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Sam on 03/11/2023.
 //
@@ -10,12 +10,11 @@ import MetalKit
 import AVFoundation
 
 public class Coordinator : NSObject, MTKViewDelegate {
-    var parent: DotLottieView
-    var ciContext: CIContext!
-    var metalDevice: MTLDevice!
-    
-    var metalCommandQueue: MTLCommandQueue!
-    var mtlTexture: MTLTexture!
+    private var parent: DotLottieView
+    private var ciContext: CIContext!
+    private var metalDevice: MTLDevice!
+    private var metalCommandQueue: MTLCommandQueue!
+    private var mtlTexture: MTLTexture!
     
     init(_ parent: DotLottieView, mtkView: MTKView) {
         self.parent = parent

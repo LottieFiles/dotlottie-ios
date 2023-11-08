@@ -10,41 +10,36 @@ import MetalKit
 import CoreImage
 import SwiftUI
 
+// Should the view have conntrols on the model as well ?
+// ie: Play / pause etc?
 public struct DotLottieView: ViewRepresentable {
     public typealias UIViewType = MTKView
-    var mtkView: MTKView = MTKView()
-    let opaqueBackground: CIImage
+    private var mtkView: MTKView = MTKView()
+    public var opaqueBackground: CIImage
     
     // Playback settings
-    let framerate: Int
+    let framerate: Int = 60
     
-    @ObservedObject var dotLottie = DotLottie(animationData: nil, fileName: nil, webURL: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
+//    @ObservedObject var dotLottie = DotLottie(animationData: nil, fileName: nil, webURL: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
+    
+    @ObservedObject internal var dotLottie: DotLottieViewModel
 
-    public init(
-        webURL: String = "",
-        fileName: String = "",
-        data: String = "",
-        width: UInt32 = 512,
-        height: UInt32 = 512,
-        framerate: Int = 30,
-        autoplay: Bool = false,
-        loop: Bool = false,
-        direction: Int = 1,
-        backgroundColor: CIImage = CIImage.white) {
+    public init(dotLottie: DotLottieViewModel) {
+        self.dotLottie = dotLottie
 
-            self.opaqueBackground = backgroundColor
-            self.framerate = framerate
-            self.dotLottie.autoplay(autoplay: autoplay)
-            self.dotLottie.loop(loop: loop)
-            self.dotLottie.direction(direction: direction)
+        self.opaqueBackground = CIImage.white
+//            self.framerate = framerate
+//            self.dotLottie.autoplay(autoplay: autoplay)
+//            self.dotLottie.loop(loop: loop)
+//            self.dotLottie.direction(direction: direction)
             
-            if (webURL != "") {
-                dotLottie.loadAnimation(webURL: webURL, width: width, height: height)
-            } else if (fileName != "") {
-                dotLottie.loadAnimation(fileName: fileName, width: width, height: height)
-            } else if (data != "" ) {
-                dotLottie.loadAnimation(animationData: data, width: width, height: height)
-            }
+//            if (webURL != "") {
+//                dotLottie.loadAnimation(webURL: webURL, width: width, height: height)
+//            } else if (fileName != "") {
+//                dotLottie.loadAnimation(fileName: fileName, width: width, height: height)
+//            } else if (data != "" ) {
+//                dotLottie.loadAnimation(animationData: data, width: width, height: height)
+//            }
         }
     
     public func makeCoordinator() -> Coordinator {
