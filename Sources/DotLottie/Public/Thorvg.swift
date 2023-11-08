@@ -110,6 +110,19 @@ class Thorvg {
         
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
+                
+                var outputString = ""
+                print("Contents of bufferPointer:")
+                        for i in 0..<self.animationData.utf8.count {
+                            let char = bufferPointer[i]
+                            outputString.append(String(UnicodeScalar(UInt8(char))))
+                        }
+                print(outputString)
+                
+                print("----")
+                
+                print(animationData)
+                
                 load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
             }
         }
@@ -121,6 +134,15 @@ class Thorvg {
         }
         
         do {
+            //resize the animation with the given aspect ratio.
+            let w: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
+            let h: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
+            
+            try executeThorvgOperation( { tvg_picture_get_size(frame_image, w, h) }, description: "Get size")
+            let scale = (Float32(width) / w.pointee)
+            
+            try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
+                        
             try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
             
             try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
@@ -131,7 +153,6 @@ class Thorvg {
             
             try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
         } catch let error as ThorvgOperationFailure {
-            
             throw error
         }
     }

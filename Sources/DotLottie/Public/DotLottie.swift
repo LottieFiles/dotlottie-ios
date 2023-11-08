@@ -38,6 +38,7 @@ public enum AnimationEvent {
 
 
 public class DotLottie: ObservableObject, PlayerEvents {
+    // Model for the current animation
     @Published private var model: AnimationModel = AnimationModel(id: "animation_0")
     
     var callbacks: [AnimationEvent: [() -> Void]] = [:]
