@@ -10,8 +10,6 @@ import MetalKit
 import CoreImage
 import SwiftUI
 
-// Should the view have conntrols on the model as well ?
-// ie: Play / pause etc?
 public struct DotLottieView: ViewRepresentable {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()
@@ -19,8 +17,6 @@ public struct DotLottieView: ViewRepresentable {
     
     // Playback settings
     let framerate: Int = 60
-    
-//    @ObservedObject var dotLottie = DotLottie(animationData: nil, fileName: nil, webURL: nil, direction: nil, loop: nil, autoplay: nil, speed: nil, playMode: nil, defaultActiveAnimation: nil, width: nil, height: nil)
     
     @ObservedObject internal var dotLottie: DotLottieViewModel
 
@@ -32,14 +28,6 @@ public struct DotLottieView: ViewRepresentable {
 //            self.dotLottie.autoplay(autoplay: autoplay)
 //            self.dotLottie.loop(loop: loop)
 //            self.dotLottie.direction(direction: direction)
-            
-//            if (webURL != "") {
-//                dotLottie.loadAnimation(webURL: webURL, width: width, height: height)
-//            } else if (fileName != "") {
-//                dotLottie.loadAnimation(fileName: fileName, width: width, height: height)
-//            } else if (data != "" ) {
-//                dotLottie.loadAnimation(animationData: data, width: width, height: height)
-//            }
         }
     
     public func makeCoordinator() -> Coordinator {

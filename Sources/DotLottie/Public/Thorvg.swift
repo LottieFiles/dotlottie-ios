@@ -111,17 +111,17 @@ class Thorvg {
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
                 
-                var outputString = ""
-                print("Contents of bufferPointer:")
-                        for i in 0..<self.animationData.utf8.count {
-                            let char = bufferPointer[i]
-                            outputString.append(String(UnicodeScalar(UInt8(char))))
-                        }
-                print(outputString)
-                
-                print("----")
-                
-                print(animationData)
+//                var outputString = ""
+//                print("Contents of bufferPointer:")
+//                        for i in 0..<self.animationData.utf8.count {
+//                            let char = bufferPointer[i]
+//                            outputString.append(String(UnicodeScalar(UInt8(char))))
+//                        }
+//                print(outputString)
+//
+//                print("----")
+//
+//                print(animationData)
                 
                 load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
             }

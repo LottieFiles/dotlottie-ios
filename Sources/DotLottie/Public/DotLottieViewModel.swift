@@ -36,7 +36,7 @@ public enum AnimationEvent {
 // In the future this class will manage multiple animations contained inside a single .lottie.
 
 
-
+// rename to animation?
 public class DotLottieViewModel: ObservableObject, PlayerEvents {
     // Model for the current animation
     @Published private var model: AnimationModel = AnimationModel(id: "animation_0")
@@ -85,7 +85,12 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
                     callCallbacks(event: .onLoadError)
                 }
             } else if webURL != "" {
-                loadAnimation(webURL: webURL, width: width, height: height)
+                if webURL.contains(".lottie") {
+                    print("Fetching dotLottie...")
+                    fetchAndPlayAnimationFromDotLottie(url: webURL)
+                } else {
+                    loadAnimation(webURL: webURL, width: width, height: height)
+                }
             } else if fileName != "" {
                 loadAnimation(fileName: fileName, width: width, height: height)
             }
@@ -217,6 +222,26 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
         }
         
         thorvg.draw()
+    }
+    
+    private func fetchAndPlayAnimationFromDotLottie(url: String) {
+        
+        if let url = URL(string: url) {
+            fetchDotLottieAndUnzip(url: url) { animationData in
+                if let data = animationData {
+                    print(data)
+                    self.loadAnimation(animationData: data, width: self.model.width, height: self.model.height)
+                } else {
+                    print("Failed to load data from main bundle.")
+                    
+                    self.callCallbacks(event: .onLoadError)
+                }
+            }
+        } else {
+            print("Invalid URL")
+            
+            callCallbacks(event: .onLoadError)
+        }
     }
     
     private func fetchAndPlayAnimationFromBundle(url: String) {
