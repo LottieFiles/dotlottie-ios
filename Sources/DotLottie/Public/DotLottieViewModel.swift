@@ -139,7 +139,13 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     
     // Give the view an image to render
     public func render() -> CGImage? {
-        return thorvg.render()
+        if let image = thorvg.render() {
+            return image
+        }
+        
+        self.callCallbacks(event: .onLoadError)
+    
+        return nil
     }
     
     public func tick() {
@@ -225,14 +231,15 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     }
     
     private func fetchAndPlayAnimationFromDotLottie(url: String) {
-        
         if let url = URL(string: url) {
-            fetchDotLottieAndUnzip(url: url) { animationData in
-                if let data = animationData {
-                    print(data)
+//                        fetchDotLottieAndUnzipAndWriteToDisk(url: url) { animationData in
+//                                        if let (data, _) = animationData {
+                        fetchDotLottieAndUnzip(url: url) { animationData in
+                                if let data = animationData {
+
                     self.loadAnimation(animationData: data, width: self.model.width, height: self.model.height)
                 } else {
-                    print("Failed to load data from main bundle.")
+                    print("Failed to load data from : \(url)")
                     
                     self.callCallbacks(event: .onLoadError)
                 }

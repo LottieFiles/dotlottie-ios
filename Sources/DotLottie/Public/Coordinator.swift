@@ -31,6 +31,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        print("Resizing...")
     }
     
     public func draw(in view: MTKView) {
@@ -54,8 +55,8 @@ public class Coordinator : NSObject, MTKViewDelegate {
                 y: size.size.height / inputImage.extent.size.height))
             
 #if targetEnvironment(simulator)
-            filteredImage = filteredImage.transformed(by: CGAffineTransform(scaleX: 1, y: -1))
-                .transformed(by: CGAffineTransform(translationX: 0, y: filteredImage.extent.height))
+//            filteredImage = filteredImage.transformed(by: CGAffineTransform(scaleX: 1, y: -1))
+//                .transformed(by: CGAffineTransform(translationX: 0, y: filteredImage.extent.height))
 #endif
             
             let x = -size.origin.x
@@ -79,6 +80,8 @@ public class Coordinator : NSObject, MTKViewDelegate {
             commandBuffer?.commit()
         } else {
             print("NIL frame")
+            
+            parent.dotLottie.pause()
             return ;
         }
     }
