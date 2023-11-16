@@ -157,6 +157,95 @@ class Thorvg {
         }
     }
     
+    /// Loads the animation from a disk path - Returns false on failure
+    func loadAnimation(path: String, width: UInt32, height: UInt32, direction: Int = 1) throws {
+        self.WIDTH = width;
+        self.HEIGHT = height;
+        
+//        self.animationData = animationData
+        
+        self.buffer = [UInt32](repeating: 0, count: Int(width) * Int(height));
+        
+        self.direction = direction
+        
+        try self.buffer.withUnsafeMutableBufferPointer { bufferPointer in
+            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
+                throw ThorvgOperationFailure.operationFailed(description: "Set Target")
+            }
+        }
+        
+        do {
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            
+            try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
+            
+            //reset the bg region
+            try executeThorvgOperation( { tvg_shape_append_rect(self.bg, 0, 0, Float32(width), Float32(height), 0, 0) }, description: "Shape Append Rect" )
+            
+            try executeThorvgOperation( { tvg_canvas_push(self.canvas, self.bg) }, description: "Canvas Push" )
+            
+        } catch let error as ThorvgOperationFailure {
+            throw error
+        }
+        
+        let frame_image = tvg_animation_get_picture(self.animation);
+        
+        var load_result: Tvg_Result = TVG_RESULT_UNKNOWN;
+        
+        if let c_string = self.animationData.cString(using: .utf8) {
+            c_string.withUnsafeBufferPointer{ bufferPointer in
+                
+//                var outputString = ""
+//                print("Contents of bufferPointer:")
+//                        for i in 0..<self.animationData.utf8.count {
+//                            let char = bufferPointer[i]
+//                            outputString.append(String(UnicodeScalar(UInt8(char))))
+//                        }
+//                print(outputString)
+//
+//                print("----")
+//
+//                print(animationData)
+                
+//                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
+                print("THORVG: Loading from \(path)")
+                
+                load_result = tvg_picture_load(frame_image, path)
+            }
+        }
+        
+        guard load_result == TVG_RESULT_SUCCESS else {
+            tvg_animation_del(self.animation)
+            
+            throw ThorvgOperationFailure.operationFailed(description: "Picture Load Data")
+        }
+        
+        do {
+            //resize the animation with the given aspect ratio.
+            let w: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
+            let h: UnsafeMutablePointer<Float32> = UnsafeMutablePointer<Float32>.allocate(capacity: 1);
+            
+            try executeThorvgOperation( { tvg_picture_get_size(frame_image, w, h) }, description: "Get size")
+            let scale = (Float32(width) / w.pointee)
+            
+            try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
+                        
+            try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
+            
+            try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
+            
+            try executeThorvgOperation({ tvg_canvas_push(self.canvas, frame_image) }, description: "Canvas Push")
+            
+            try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
+            
+            print("Drawing to canvas")
+            
+            try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
+        } catch let error as ThorvgOperationFailure {
+            throw error
+        }
+    }
+    
     func currentFrame() -> Float32 {
         tvg_animation_get_frame(animation, currentFrameState);
         

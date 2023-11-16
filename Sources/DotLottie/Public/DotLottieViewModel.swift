@@ -123,6 +123,35 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
         callCallbacks(event: .onLoad)
     }
     
+    public func loadAnimation(path: String, width: UInt32?, height: UInt32?) {
+        do {
+            try thorvg.loadAnimation(path: path, width: width ?? self.model.width, height: height ?? self.model.height)
+            
+            // Go to the last frame if we're playing backwards
+            if (model.direction == -1) {
+                thorvg.frame(no: thorvg.totalFrame() - 1)
+            }
+            
+            DispatchQueue.main.async{
+                self.model.playing = self.model.autoplay
+            }
+        } catch let error {
+            DispatchQueue.main.async {
+                self.model.error = true
+                
+                self.model.playing = false
+            }
+            
+            print("Error loading from thorvg: \(error)")
+            
+            callCallbacks(event: .onLoadError)
+        }
+        
+        // Fire load event
+        callCallbacks(event: .onLoad)
+    }
+    
+    
     public func loadAnimation(webURL: String, width: UInt32?, height: UInt32?) {
         self.model.width = width ?? self.model.width
         self.model.height = height ?? self.model.height
@@ -232,12 +261,16 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     
     private func fetchAndPlayAnimationFromDotLottie(url: String) {
         if let url = URL(string: url) {
-//                        fetchDotLottieAndUnzipAndWriteToDisk(url: url) { animationData in
-//                                        if let (data, _) = animationData {
-                        fetchDotLottieAndUnzip(url: url) { animationData in
-                                if let data = animationData {
+//                        fetchDotLottieAndUnzip(url: url) { animationData in
+//                                if let data = animationData {
+                                    fetchDotLottieAndUnzipAndWriteToDisk(url: url) { path in
+                                                    if var (filePath) = path {
 
-                    self.loadAnimation(animationData: data, width: self.model.width, height: self.model.height)
+//                    self.loadAnimation(animationData: data, width: self.model.width, height: self.model.height)
+                                                        print("Passing on the file path ! \(filePath)")
+                                                        filePath = filePath.replacingOccurrences(of: "file:///", with: "/")
+                                                        
+                                                        self.loadAnimation(path: filePath, width: self.model.width, height: self.model.height)
                 } else {
                     print("Failed to load data from : \(url)")
                     

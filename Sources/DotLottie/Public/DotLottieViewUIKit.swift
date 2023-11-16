@@ -5,6 +5,7 @@
 //  Created by Sam on 14/11/2023.
 //
 
+#if os(iOS)
 import Foundation
 import UIKit
 
@@ -46,3 +47,4 @@ public class DotLottieViewUIKit: UIViewController {
 //    window.rootViewController = navigationController
 //    window.makeKeyAndVisible()
 //}
+#endif
