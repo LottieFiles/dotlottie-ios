@@ -91,11 +91,18 @@ func writeImageToFile(imageName: String, archive: Archive) -> URL? {
     return destinationURL
 }
 
-func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> String {
-    let fileManager = FileManager()
-    let currentWorkingPath = fileManager.currentDirectoryPath
+func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL? {
+    let fileManager = FileManager.default
+
+    // Get the URL for the Documents directory
+    let documentsDirectory = try fileManager.url(for: .documentDirectory,
+                                                 in: .userDomainMask,
+                                                 appropriateFor: nil,
+                                                 create: false)
+    
+//    let currentWorkingPath = fileManager.currentDirectoryPath
     var txtData = Data()
-    var destinationURL = URL(fileURLWithPath: currentWorkingPath)
+    var destinationURL = documentsDirectory
     
     var animationName = "dotLottie"
     var animationFileName = "dotLottie.json"
@@ -109,7 +116,7 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
     animationFileName = entry.path.components(separatedBy: "/").last ?? "dotLottie.json"
     
     // Add the animation name to the directory path
-    // i.e: ..data/animations/animation1.json
+    // i.e: ..data/animations/animation1
     // Todo: Prepend file name before animations
     destinationURL.appendPathComponent("animations/\(animationName)/")
     
@@ -117,12 +124,9 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
     var fileDestination = destinationURL
     fileDestination.appendPathComponent(animationFileName)
     
-    print(">> Destination URL \(destinationURL)")
-    
     do {
         // Create directory if it doesn't exist
         if !fileManager.fileExists(atPath: destinationURL.path) {
-            print(">>>> Creating dir")
             try fileManager.createDirectory(at: destinationURL, withIntermediateDirectories: true, attributes: nil)
         }
         
@@ -133,8 +137,6 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
         
         // Write to disk
         if !fileManager.fileExists(atPath: "\(fileDestination)") {
-            print(">>> Writing \(animationFileName) to file: \(fileDestination.absoluteString)")
-            
             try txtData.write(to: fileDestination)
         }
         
@@ -152,7 +154,7 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
                         
                         // Write images to disk too
                         guard let imageEntry = archive["images/\(name)"] else {
-                            return ""
+                            return nil
                         }
                         
                         var imgData = Data()
@@ -168,8 +170,6 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
                         
                         // Write to disk
                         if !fileManager.fileExists(atPath: imgPath.absoluteString) {
-                            print(">>> Writing \(name) to file: \(imgPath.absoluteString)")
-                            
                             try imgData.write(to: imgPath)
                         }
                     }
@@ -177,13 +177,13 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> Str
             }
         }
         
-        return (fileDestination.absoluteString)
+        return (fileDestination)
     } catch let error {
         throw WriteToFileError.writeFailure(description: "Error writing to disk: \(error)")
     }
 }
 
-func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (String?) -> Void) {
+func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (URL?) -> Void) {
     let session = URLSession.shared
     
     do {
@@ -207,7 +207,6 @@ func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (Strin
                 let archive = try Archive(data: data, accessMode: .read)
                 
                 for entry in archive {
-                    
                     if entry.path == "manifest.json" {
                         var txtData = Data()
                         _ = try archive.extract(entry) { data in
@@ -222,6 +221,9 @@ func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (Strin
                         let path = try writeAnimationAndAssetsToDisk(entry: entry, archive: archive)
                         
                         completion(path)
+                        
+                        // For the moment we only support opening the first animation
+                        return
                     }
                 }
             } catch let error {
@@ -229,7 +231,6 @@ func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (Strin
                 
                 completion(nil)
                 return
-
             }
         }
     }
@@ -237,95 +238,65 @@ func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (Strin
     task.resume()
 }
 
-//func fetchDotLottieAndUnzip(url: URL, completion: @escaping (String?) -> Void) {
-//    let session = URLSession.shared
-//
-//    do {
-//        try verifyUrlType(url: url.absoluteString)
-//    } catch {
-//        print("URL seems fishy 🐠")
-//        return ;
-//    }
-//
-//    let task = session.dataTask(with: url) { data, response, error in
-//        if let error = error {
-//            print("Error: \(error)")
-//            return
-//        }
-//
-//        if let data = data {
-//            do {
-//                let archive = try Archive(data: data, accessMode: .read)
-//
-//                for entry in archive {
-//                    do {
-//                        if entry.path == "manifest.json" {
-//                            var txtData = Data()
-//                            _ = try archive.extract(entry) { data in
-//                                txtData.append(data)
-//                            }
-//
-//                            // The manifest
-//                            _ = String(decoding: txtData, as: UTF8.self)
-//                        }
-//
-//                        if entry.path.contains("animations") && entry.path.contains("json") {
-//                            var txtData = Data()
-//
-//                            _ = try archive.extract(entry) { data in
-//                                txtData.append(data)
-//                            }
-//
-//                            let v = String(decoding: txtData, as: UTF8.self)
-//
-//                            var decodedData = try JSONSerialization.jsonObject(with: v.data(using: .utf8)!, options: [.mutableContainers]) as? [String: Any]
-//
-//                            if let assetsArray = decodedData?["assets"] as? NSArray {
-//                                // Create a mutable copy of the assets array
-//                                let mutableAssetsArray = NSMutableArray(array: assetsArray)
-//
-//                                // Iterate over each asset in the array
-//                                for index in 0..<mutableAssetsArray.count {
-//                                    if let asset = mutableAssetsArray[index] as? NSMutableDictionary {
-//                                        // Modify the value of a specific key inside each asset
-//                                        if let name = asset["p"] as? String {
-//                                            asset["e"] = 1
-//                                            asset["p"] = getImageDataFromZip(fileName: name, archive: archive)
-//                                        }
-//                                    }
-//                                }
-//
-//                                decodedData?["assets"] = mutableAssetsArray
-//                            }
-//
-//                            // Convert the modified dictionary back to JSON data
-//                            let modifiedJsonData = try JSONSerialization.data(withJSONObject: decodedData!)
-//
-//                            // Convert JSON data to a string
-//                            if let modifiedJsonString = String(data: modifiedJsonData, encoding: .utf8) {
-//
-//                                //                                print(modifiedJsonString)
-//
-//                                completion(modifiedJsonString)
-//                            } else {
-//                                print("Error converting JSON data to a string.")
-//                                completion(nil)
-//                            }
-//                        }
-//                    } catch {
-//                        print("Read Error")
-//                        completion(nil)
-//                    }
-//                }
-//            } catch {
-//                print("Archive error")
-//                completion(nil)
-//            }
-//        }
-//    }
-//
-//    task.resume()
-//}
+func getAnimationDataFromFile(at url: URL) -> String? {
+    do {
+        let filedata = try String(contentsOf: url)
+        
+        return filedata
+    } catch {
+        print("Error reading file:", error)
+    }
+    
+    return nil
+}
+
+func getAnimationWidthHeight(filePath: URL) -> (UInt32?, UInt32?) {
+    var aWidth: UInt32? = nil
+    var aHeight: UInt32? = nil
+
+    if let animationData = getAnimationDataFromFile(at: filePath) {
+        do {
+            if let data = animationData.data(using: .utf8) {
+                let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
+                
+                // Loop over assets of the animation
+                if let width = decodedData?["w"] {
+                    aWidth = width as? UInt32
+                    print("Parsed width: \(width)")
+                }
+                if let height = decodedData?["h"] {
+                    aHeight = height as? UInt32
+                    print("Parsed height: \(height)")
+                }
+            }
+        } catch let error {
+            print(error)
+        }
+    }
+    
+    return (aWidth, aHeight)
+}
+
+func getAnimationWidthHeight(animationData: String) -> (Int?, Int?) {
+    do {
+        if let data = animationData.data(using: .utf8) {
+            let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
+            
+            // Loop over assets of the animation
+            if let width = decodedData?["w"] {
+                print(width)
+            }
+            if let height = decodedData?["h"] {
+                print(height)
+            }
+
+        }
+    } catch let error {
+        print(error)
+    }
+        
+    return (nil, nil)
+}
 
 func verifyUrlType(url: String) throws -> Void {
     let stringCheck: NSString = NSString(string: url)

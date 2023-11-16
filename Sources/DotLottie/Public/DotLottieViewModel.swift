@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Sam on 31/10/2023.
 //
@@ -86,13 +86,16 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
                 }
             } else if webURL != "" {
                 if webURL.contains(".lottie") {
-                    print("Fetching dotLottie...")
                     fetchAndPlayAnimationFromDotLottie(url: webURL)
                 } else {
                     loadAnimation(webURL: webURL, width: width, height: height)
                 }
             } else if fileName != "" {
-                loadAnimation(fileName: fileName, width: width, height: height)
+                if fileName.contains(".lottie") {
+                    // Todo
+                } else {
+                    loadAnimation(fileName: fileName, width: width, height: height)
+                }
             }
             
             self.model.playing = model.autoplay
@@ -173,7 +176,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
         }
         
         self.callCallbacks(event: .onLoadError)
-    
+        
         return nil
     }
     
@@ -261,16 +264,16 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     
     private func fetchAndPlayAnimationFromDotLottie(url: String) {
         if let url = URL(string: url) {
-//                        fetchDotLottieAndUnzip(url: url) { animationData in
-//                                if let data = animationData {
-                                    fetchDotLottieAndUnzipAndWriteToDisk(url: url) { path in
-                                                    if var (filePath) = path {
-
-//                    self.loadAnimation(animationData: data, width: self.model.width, height: self.model.height)
-                                                        print("Passing on the file path ! \(filePath)")
-                                                        filePath = filePath.replacingOccurrences(of: "file:///", with: "/")
-                                                        
-                                                        self.loadAnimation(path: filePath, width: self.model.width, height: self.model.height)
+            fetchDotLottieAndUnzipAndWriteToDisk(url: url) { path in
+                if let filePath = path {
+                    
+//                    print("URL : \(filePath)")
+                    
+                    print(getAnimationWidthHeight(filePath: filePath))
+                    
+                    let (width, height) = getAnimationWidthHeight(filePath: filePath)
+                    
+                    self.loadAnimation(path: filePath.path, width: width != nil ? width : self.model.width, height: height != nil ? height : self.model.height)
                 } else {
                     print("Failed to load data from : \(url)")
                     
