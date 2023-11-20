@@ -1,9 +1,9 @@
-////
-////  DotLottieView.swift
-////
-////
-////  Created by Sam on 25/10/2023.
-////
+//
+//  DotLottieView.swift
+//
+//
+//  Created by Sam on 25/10/2023.
+//
 //
 import Metal
 import MetalKit
@@ -24,11 +24,7 @@ public struct DotLottieView: ViewRepresentable {
         self.dotLottie = dotLottie
 
         self.opaqueBackground = CIImage.white
-//            self.framerate = framerate
-//            self.dotLottie.autoplay(autoplay: autoplay)
-//            self.dotLottie.loop(loop: loop)
-//            self.dotLottie.direction(direction: direction)
-        }
+    }
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(self, mtkView: self.mtkView)

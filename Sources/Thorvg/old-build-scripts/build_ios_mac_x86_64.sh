@@ -4,12 +4,14 @@ rm -rf ./ios/
 
 cd ./Thorvg/
 
-meson setup --backend=ninja ios-build -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ./cross/ios_x86_64.txt
-ninja -C ios-build install
+meson . ios-build -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ./cross/ios_x86_64.txt
+#ninja -C ios-build install
 
-meson setup --backend=ninja macos-build -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ../macos_x86_64.txt
-ninja -C macos-build install
+meson . macos-build -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ../macos_x86_64.txt
+#ninja -C macos-build install
 
+#meson . aarch64-apple-ios-build -Dloaders="all" -Dsavers="all" -Dbindings="capi" --cross-file ../ios_cross.txt
+#ninja -C aarch64-apple-ios-build install
 
 # Set up initial configurations and paths
 PLISTBUDDY_EXEC="/usr/libexec/PlistBuddy"
@@ -30,6 +32,7 @@ EOF
 
 # Combine libraries using lipo
 mkdir -p ./artifacts/ios-simulator-arm64_x86_64
+#mkdir -p ./artifacts/aarch64-apple-ios-build
 mkdir -p ./artifacts/macosx_x86_64
 # mkdir -p ./artifacts/aarch64-apple-ios
 
@@ -43,6 +46,9 @@ mkdir -p ./artifacts/macosx_x86_64
 lipo -create \
     "./ios-build/src/libthorvg.dylib" \
     -o "./artifacts/ios-simulator-arm64_x86_64/libthorvg.dylib"
+#lipo -create \
+#    "./aarch64-apple-ios-build/src/libthorvg.dylib" \
+#    -o "./artifacts/aarch64-apple-ios-build/libthorvg.dylib"
 lipo -create \
     "./macos-build/src/libthorvg.dylib" \
     -o "./artifacts/macosx_x86_64/libthorvg.dylib"
@@ -77,8 +83,8 @@ for TARGET_TRIPLE in "ios-simulator-arm64_x86_64" "macosx_x86_64" ; do
                     $FRAMEWORK_PATH/Info.plist
 
     case $TARGET_TRIPLE in
-        aarch64-apple-ios)
-            $PLISTBUDDY_EXEC -c "Add :CFBundleSupportedPlatforms:0 string iPhoneOS" $FRAMEWORK_PATH/Info.plist
+        aarch64-apple-ios-build)
+            $PLISTBUDDY_EXEC -c "Add :CFBundleSupportedPlatforms:1 string iPhoneOS" $FRAMEWORK_PATH/Info.plist
             ;;
         macosx_x86_64)
             $PLISTBUDDY_EXEC -c "Add :CFBundleSupportedPlatforms:1 string MacOSX" $FRAMEWORK_PATH/Info.plist
@@ -92,6 +98,12 @@ for TARGET_TRIPLE in "ios-simulator-arm64_x86_64" "macosx_x86_64" ; do
             ;;
     esac
 
+#        arm64-apple-ios-simulator)
+#            $PLISTBUDDY_EXEC -c "Add :CFBundleSupportedPlatforms:1 string iPhoneOS" \
+#                             -c "Add :CFBundleSupportedPlatforms:1 string iPhoneSimulator" \
+#                             $FRAMEWORK_PATH/Info.plist
+
+
     install_name_tool -id @rpath/Thorvg.framework/Thorvg $FRAMEWORK_PATH/Thorvg
 done
 
@@ -102,6 +114,10 @@ xcodebuild -create-xcframework \
     -framework "./artifacts/macosx_x86_64/Thorvg.framework" \
     -framework "./artifacts/ios-simulator-arm64_x86_64/Thorvg.framework" \
     -output "./artifacts/Thorvg.xcframework"
+#    -framework "./artifacts/aarch64-apple-ios-build/Thorvg.framework" \
+
+
+#    -framework "./artifacts/ios-arm64_x86_64/Thorvg.framework" \
 
 echo "B"
 
@@ -123,7 +139,7 @@ cp $WRAPPER_FILE $BASE_DIR/Bindings
 sed -i "" -E 's/[[:<:]]thorvgFFI[[:>:]]/Thorvg/g' $BASE_DIR/Bindings/$WRAPPER_FILE_NAME
 
 #clean up
-rm -rf ./artifacts
+#rm -rf ./artifacts
 
 # move the generated folder up
 mv ios ../

@@ -1,10 +1,9 @@
 # build for the ios simulator(Intel)
 
 [binaries]
-cpp = ['clang++', '-arch', 'x86_64', '-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.sdk']
+cpp = ['clang++', '-arch', 'x86_64', '-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.sdk']
 ar = 'ar'
 strip = 'strip'
-pthread = 'pthread'
 
 [properties]
 root = '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer'

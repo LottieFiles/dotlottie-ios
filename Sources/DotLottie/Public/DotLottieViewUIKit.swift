@@ -8,9 +8,11 @@
 #if os(iOS)
 import Foundation
 import UIKit
+import Metal
+import MetalKit
+import CoreImage
 
 public class DotLottieViewUIKit: UIViewController {
-
     public override func viewDidLoad() {
         super.viewDidLoad()
         
