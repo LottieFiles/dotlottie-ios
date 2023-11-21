@@ -3,11 +3,10 @@
 [binaries]
 cpp = ['clang++', '-arch', 'x86_64', '-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']
 ar = 'ar'
-pthread = 'pthread'
 strip = 'strip'
 
 [properties]
-root = '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer'
+root = '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer'
 has_function_printf = true
 
 [built-in options]

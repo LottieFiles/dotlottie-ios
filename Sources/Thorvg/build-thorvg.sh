@@ -4,7 +4,7 @@
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m'
-THORVG_LOADERS="lottie,png,jpg"
+THORVG_LOADERS="all"
 PLISTBUDDY_EXEC="/usr/libexec/PlistBuddy"
 BINDINGS=./src/bindings/capi/thorvg_capi.h
 BASE_DIR="./exports"
@@ -20,6 +20,8 @@ IPHONE_AARCH="../cross/iphone_aarch.txt"
 
 WRAPPER_FILE=../../DotLottie/Public/Thorvg.swift
 WRAPPER_FILE_NAME=Thorvg.swift
+
+THORVG_FLAGS="-Ddefault_library=static -Dstatic=true -Dloaders=$THORVG_LOADERS -Dsavers=all  -Dbindings=capi"
 # ----------- VARIABLES -----------
 
 # ----------- FUNCTIONS -----------
@@ -33,12 +35,29 @@ display_help() {
     echo "Usage: $(basename "$0") [options] arguments..."
     echo "Options:" 
     echo "  -h, --help     Display this help message"
+    echo "  -c, --clean    Remove all files related to this CLI"
     echo "Arguments:"
     echo "  iphone_aarch: Build for iPhone arm64"
+    echo "  all: Build all targets"
     echo "  iphone_sim_aarch: Build for iPhone simulator arm64"
     echo "  iphone_sim_x86_64: Build for iPhone simulator x86_64"
     echo "  macos_aarch: Build for macOS arm64"
     echo "  macos_x86_64: Build for macOS x86_64"
+}
+
+display_success() {
+echo " __           _       _                               _      _           _                                   __       _ _       ";
+echo "/ _\ ___ _ __(_)_ __ | |_    ___ ___  _ __ ___  _ __ | | ___| |_ ___  __| |  ___ _   _  ___ ___ ___ ___ ___ / _|_   _| | |_   _ ";
+echo "\ \ / __| '__| | '_ \| __|  / __/ _ \| '_ \` _ \| '_ \| |/ _ | __/ _ \/ _\` | / __| | | |/ __/ __/ _ / __/ __| |_| | | | | | | | |";
+echo "_\ | (__| |  | | |_) | |_  | (_| (_) | | | | | | |_) | |  __| ||  __| (_| | \__ | |_| | (_| (_|  __\__ \__ |  _| |_| | | | |_| |";
+echo "\__/\___|_|  |_| .__/ \__|  \___\___/|_| |_| |_| .__/|_|\___|\__\___|\__,_| |___/\__,_|\___\___\___|___|___|_|  \__,_|_|_|\__, |";
+echo "               |_|                             |_|                                                                        |___/ ";
+}
+
+cleanup() {
+    echo "${GREEN} Commencing cleanup... ${NC}"
+    rm -rf exports Thorvg/iphone_aarch Thorvg/iphone_sim_aarch Thorvg/iphone_sim_x86_64 Thorvg/macos_x86_64 Thorvg/macos_aarch
+    echo "${GREEN} Finished cleanup! ${NC}"
 }
 
 # Function to execute a command and check its return value
@@ -55,33 +74,28 @@ execute_and_check() {
 }
 
 build_iOS_sim_x86() {
-    execute_and_check meson . iphone_sim_x86_64 -Dloaders="$THORVG_LOADERS" -Dsavers="all" -Dbindings="capi" --cross-file "$IPHONE_X86_SIM_CROSS"
+    execute_and_check meson . iphone_sim_x86_64 $THORVG_FLAGS --cross-file "$IPHONE_X86_SIM_CROSS"
     execute_and_check ninja -C iphone_sim_x86_64 install
-    # mkdir -p ./artifacts/iphone_sim_x86_64
 }
 
 build_iOS_sim_aarch() {
-    execute_and_check meson . iphone_sim_aarch -Dloaders="$THORVG_LOADERS" -Dsavers="all" -Dbindings="capi" --cross-file "$IPHONE_AARCH_SIM_CROSS"
+    execute_and_check meson . iphone_sim_aarch $THORVG_FLAGS --cross-file "$IPHONE_AARCH_SIM_CROSS"
     execute_and_check ninja -C iphone_sim_aarch install
-    # mkdir -p ./artifacts/iphone_sim_aarch
 }
 
 build_iOS_aarch() {
-    execute_and_check meson . iphone_aarch -Dloaders="$THORVG_LOADERS" -Dsavers="all" -Dbindings="capi" --cross-file "$IPHONE_AARCH"
+    execute_and_check meson . iphone_aarch $THORVG_FLAGS --cross-file "$IPHONE_AARCH"
     execute_and_check ninja -C iphone_aarch install
-    # mkdir -p ./artifacts/iphone_aarch
 }
 
 build_macOS_x86() {
-    execute_and_check meson . macos_x86_64 -Dloaders="$THORVG_LOADERS" -Dsavers="all" -Dbindings="capi" --cross-file "$MACOS_X86_CROSS"
+    execute_and_check meson . macos_x86_64 $THORVG_FLAGS --cross-file "$MACOS_X86_CROSS"
     execute_and_check ninja -C macos_x86_64 install
-    # mkdir -p ./artifacts/macos_x86_64
 }
 
 build_macOS_aarch() {
-    execute_and_check meson . macos_aarch -Dloaders="$THORVG_LOADERS" -Dsavers="all" -Dbindings="capi" --cross-file "$MACOS_AARCH"
+    execute_and_check meson . macos_aarch $THORVG_FLAGS --cross-file "$MACOS_AARCH"
     execute_and_check ninja -C macos_aarch install
-    # mkdir -p ./artifacts/macos_aarch
 }
 
 initial_setup() {
@@ -116,6 +130,10 @@ while [[ "$1" =~ ^- ]]; do
             display_help
             exit 0
             ;;
+        -c | --clean )
+            cleanup
+            exit 0
+        ;;
     esac
 done
 
@@ -130,8 +148,15 @@ if [ $# -gt 0 ]; then
 
     frameworks=""
 
+    arguments="$@"
+    
+    if [ "$arguments" = "all" ]; then
+        arguments="iphone_sim_x86_64 iphone_aarch iphone_sim_aarch macos_aarch macos_x86_64"
+    fi
+
+    
     # Loop over each argument
-    for arg in "$@"; do
+    for arg in $arguments; do
         echo "Processing argument: $arg"
         frameworks="${frameworks} -framework ./artifacts/${arg}/Thorvg.framework "
 
@@ -154,7 +179,8 @@ if [ $# -gt 0 ]; then
             build_macOS_x86
 
         else
-            echo "Argument '$arg' is neither 'some_value' nor 'another_value'"
+#            echo "Argument '$arg' is neither 'some_value' nor 'another_value'"
+            display_help
             # Perform actions for other values or handle differently
         fi
 
@@ -162,14 +188,14 @@ if [ $# -gt 0 ]; then
         mkdir -p ./artifacts/$arg
 
         execute_and_check lipo -create \
-            "./$arg/src/libthorvg.dylib" \
-            -o "./artifacts/$arg/libthorvg.dylib"
+            "./$arg/src/libthorvg.a" \
+            -o "./artifacts/$arg/libthorvg.a"
 
         FRAMEWORK_PATH="./artifacts/$arg/Thorvg.framework"
         mkdir -p $FRAMEWORK_PATH/Headers
         mkdir -p $FRAMEWORK_PATH/Modules
 
-        mv ./artifacts/$arg/libthorvg.dylib $FRAMEWORK_PATH/Thorvg
+        mv ./artifacts/$arg/libthorvg.a $FRAMEWORK_PATH/Thorvg
         cp $BINDINGS $FRAMEWORK_PATH/Headers/
         cp ./artifacts/include/module.modulemap $FRAMEWORK_PATH/Modules/
 
@@ -225,6 +251,8 @@ if [ $# -gt 0 ]; then
     rm -rf ./artifacts
 
     mv $BASE_DIR ../
+    
+    display_success
 else
     echo "$RED No arguments provided. $NC"
 
