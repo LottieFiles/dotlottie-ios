@@ -15,9 +15,6 @@ Note: This is due to the compilation of Thorvg currenly only building for x86_64
 
 ## How to build thorvg.xcframework
 
-If you want to change / add targets, modify the ```build_ios.sh``` script.
-It currently is targeting ```ios_x86_64```.
-
 - Pull the Thorvg submodule:
 
 ```bash
@@ -30,8 +27,28 @@ git submodule update --init --recursive
 cd Sources/Thorvg/
 ```
 
-- Run the ```build_ios.sh``` script:
+- Run the ```build_thorvg.sh``` script:
 
 ```bash
-sh build_ios.sh
+sh build_thorvg.sh -h
+```
+
+- How to cross compile for your architecture:
+
+For example if you're on a x86 based CPU:
+
+```bash
+sh build_thorvg.sh iphone_sim_x86_64 macos_x86_64 
+```
+
+For example if you're on a ARM basd CPU:
+
+```bash
+sh build_thorvg.sh iphone_sim_aarch macos_aarch 
+```
+
+Build for real iPhone device:
+
+```bash
+sh build_thorvg.sh iphone_aarch
 ```
