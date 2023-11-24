@@ -5,12 +5,14 @@
 //  Created by Sam on 25/10/2023.
 //
 //
+
 import Metal
 import MetalKit
 import CoreImage
 import SwiftUI
 
-public struct DotLottieView: ViewRepresentable {
+// View for SwiftUI and MacOS
+public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()
     public var opaqueBackground: CIImage
@@ -54,38 +56,7 @@ public struct DotLottieView: ViewRepresentable {
         uiView.isPaused = !self.dotLottie.playing()
     }
     
-    public func pause() {
-        self.dotLottie.pause()
-    }
-    
-    public func play() {
-        self.dotLottie.play()
-    }
-    
-    public func stop() {
-        self.dotLottie.stop()
-    }
-    
-    public func duration() -> Float32 {
-        return self.dotLottie.duration()
-    }
-    
-    public func speed() -> Int {
-        self.dotLottie.getSpeed()
-    }
-    
-    public func loop() -> Bool {
-        return self.dotLottie.getLoop()
-    }
-    
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {
         self.dotLottie.on(event: event, callback: callback)
-    }
-
-    // Speed is actually the preffered frame rate
-    public func setSpeed(speed: Int) {
-        if (speed > 0) {
-                self.dotLottie.speed(speed: speed)
-        }
     }
 }

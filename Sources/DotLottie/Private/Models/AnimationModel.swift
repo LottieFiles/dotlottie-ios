@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct AnimationModel {
+public struct AnimationModel {
     var animationData: String?
     
     var width: UInt32 = 512

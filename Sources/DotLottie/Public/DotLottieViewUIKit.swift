@@ -1,52 +1,87 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Sam on 14/11/2023.
 //
 
 #if os(iOS)
+
 import Foundation
 import UIKit
 import Metal
 import MetalKit
 import CoreImage
+import AVFoundation
+import Combine
 
-public class DotLottieViewUIKit: UIViewController {
-    public override func viewDidLoad() {
-        super.viewDidLoad()
+public class DotLottieViewUIKit: UIView, DotLottie {
+    private var metalView: MTKView!
+    private var coordinator: Coordinator!
+
+    var dotLottie = DotLottieViewModel()
+    var cancellableBag = Set<AnyCancellable>()
+    
+    public var opaqueBackground: CIImage = CIImage.red
+    
+    let framerate: Int = 60
+    
+    public init(frame: CGRect, dotLottie: DotLottieViewModel) {
+        self.dotLottie = dotLottie
         
-        // Set the background color of the view
-        view.backgroundColor = UIColor.white
+        super.init(frame: frame)
+                
+        // React to changes inside the DotLottieModels
+        dotLottie.$model.sink { value in
+            if self.metalView != nil {
+                self.metalView.isPaused = !value.playing
+            }
+        }.store(in: &cancellableBag)
         
-        // Create a label
-        let label = UILabel()
-        label.text = "Hello, UIKit!"
-        label.textAlignment = .center
-        label.textColor = UIColor.black
-        label.font = UIFont.systemFont(ofSize: 24)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        setupMetalView()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupMetalView() {
+        metalView = MTKView(frame: bounds)
         
-        // Add the label to the view
-        view.addSubview(label)
+        self.coordinator = Coordinator(self, mtkView: metalView)
         
-        // Set constraints for the label (center it in the view)
-        NSLayoutConstraint.activate([
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
+        if let metalDevice = MTLCreateSystemDefaultDevice() {
+            metalView.device = metalDevice
+        }
+        
+        // Set up Metal-related configurations for your MTKView
+        metalView.device = MTLCreateSystemDefaultDevice()
+        
+        metalView.isOpaque = false
+        
+        metalView.framebufferOnly = false
+        
+        metalView.delegate = self.coordinator
+        
+        metalView.preferredFramesPerSecond = self.framerate * self.dotLottie.getSpeed()
+        
+        metalView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
+        
+        metalView.enableSetNeedsDisplay = true
+        
+        metalView.isPaused = !self.dotLottie.playing()
+        
+        addSubview(metalView)
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        metalView.frame = bounds
+    }
+    
+    public func on(event: AnimationEvent, callback: @escaping () -> Void) {
+        self.dotLottie.on(event: event, callback: callback)
     }
 }
 
-// Usage: Creating and presenting the view controller
-//let viewController = MyViewController()
-//// Present the view controller in a navigation controller
-//let navigationController = UINavigationController(rootViewController: viewController)
-//navigationController.modalPresentationStyle = .fullScreen
-//
-//// Present the navigation controller in the main window
-//if let window = UIApplication.shared.windows.first {
-//    window.rootViewController = navigationController
-//    window.makeKeyAndVisible()
-//}
 #endif

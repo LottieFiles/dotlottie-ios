@@ -39,7 +39,8 @@ public enum AnimationEvent {
 // rename to animation?
 public class DotLottieViewModel: ObservableObject, PlayerEvents {
     // Model for the current animation
-    @Published private var model: AnimationModel = AnimationModel(id: "animation_0")
+    // Todo: Does this have to be public?
+    @Published public var model: AnimationModel = AnimationModel(id: "animation_0")
     
     internal var callbacks: [AnimationEvent: [() -> Void]] = [:]
     
@@ -408,4 +409,12 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
         
         return view
     }
+    
+#if os(iOS)
+    public func createDotLottieView() -> DotLottieViewUIKit {
+        let view: DotLottieViewUIKit = DotLottieViewUIKit(frame: CGRect.infinite, dotLottie: self)
+        
+        return view
+    }
+#endif
 }

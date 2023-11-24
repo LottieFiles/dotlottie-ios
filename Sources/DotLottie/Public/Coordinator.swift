@@ -10,13 +10,13 @@ import MetalKit
 import AVFoundation
 
 public class Coordinator : NSObject, MTKViewDelegate {
-    private var parent: DotLottieView
+    private var parent: DotLottie
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
     
-    init(_ parent: DotLottieView, mtkView: MTKView) {
+    init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
         
         super.init()
