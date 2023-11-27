@@ -39,9 +39,9 @@ public class Coordinator : NSObject, MTKViewDelegate {
             return
         }
         
-        parent.dotLottie.tick()
+        parent.dotLottieViewModel.tick()
         
-        if let frame = parent.dotLottie.render() {
+        if let frame = parent.dotLottieViewModel.render() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
             let inputImage = CIImage(cgImage: frame)
@@ -81,7 +81,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
         } else {
             print("NIL frame")
             
-            parent.dotLottie.pause()
+            parent.dotLottieViewModel.pause()
             return ;
         }
     }

@@ -91,7 +91,7 @@ class Thorvg {
         }
         
         do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
             
             try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
             
@@ -122,8 +122,8 @@ class Thorvg {
 //                print("----")
 //
 //                print(animationData)
-                
-                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
+                                
+                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", "", false)
             }
         }
         
@@ -175,7 +175,7 @@ class Thorvg {
         }
         
         do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
             
             try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
             
@@ -250,6 +250,14 @@ class Thorvg {
         tvg_animation_get_frame(animation, currentFrameState);
         
         return currentFrameState.pointee
+    }
+    
+    func clear() throws {
+        do {
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
+        } catch let error {
+            throw error
+        }
     }
     
     func frame(no: Float32) {

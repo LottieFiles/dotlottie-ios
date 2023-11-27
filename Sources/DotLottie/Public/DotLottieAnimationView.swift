@@ -15,24 +15,24 @@ import CoreImage
 import AVFoundation
 import Combine
 
-public class DotLottieViewUIKit: UIView, DotLottie {
+public class DotLottieAnimationView: UIView, DotLottie {
     private var metalView: MTKView!
     private var coordinator: Coordinator!
 
-    var dotLottie = DotLottieViewModel()
+    var dotLottieViewModel = DotLottieViewModel()
     var cancellableBag = Set<AnyCancellable>()
     
     public var opaqueBackground: CIImage = CIImage.red
     
     let framerate: Int = 60
     
-    public init(frame: CGRect, dotLottie: DotLottieViewModel) {
-        self.dotLottie = dotLottie
+    public init(frame: CGRect, dotLottieViewModel: DotLottieViewModel) {
+        self.dotLottieViewModel = dotLottieViewModel
         
         super.init(frame: frame)
                 
         // React to changes inside the DotLottieModels
-        dotLottie.$model.sink { value in
+        dotLottieViewModel.$animationModel.sink { value in
             if self.metalView != nil {
                 self.metalView.isPaused = !value.playing
             }
@@ -63,13 +63,13 @@ public class DotLottieViewUIKit: UIView, DotLottie {
         
         metalView.delegate = self.coordinator
         
-        metalView.preferredFramesPerSecond = self.framerate * self.dotLottie.getSpeed()
+        metalView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.getSpeed()
         
         metalView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
         metalView.enableSetNeedsDisplay = true
         
-        metalView.isPaused = !self.dotLottie.playing()
+        metalView.isPaused = !self.dotLottieViewModel.playing()
         
         addSubview(metalView)
     }
@@ -80,7 +80,7 @@ public class DotLottieViewUIKit: UIView, DotLottie {
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {
-        self.dotLottie.on(event: event, callback: callback)
+        self.dotLottieViewModel.on(event: event, callback: callback)
     }
 }
 

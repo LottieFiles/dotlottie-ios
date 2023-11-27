@@ -40,7 +40,7 @@ public enum AnimationEvent {
 public class DotLottieViewModel: ObservableObject, PlayerEvents {
     // Model for the current animation
     // Todo: Does this have to be public?
-    @Published public var model: AnimationModel = AnimationModel(id: "animation_0")
+    @Published public var animationModel: AnimationModel = AnimationModel(id: "animation_0")
     
     internal var callbacks: [AnimationEvent: [() -> Void]] = [:]
     
@@ -68,20 +68,20 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
         height: UInt32 = 512) {
             thorvg = Thorvg()
             
-            model.width = model.width
-            model.height = model.height
-            model.direction = direction
-            model.loop = loop
-            model.autoplay = autoplay
-            model.speed = speed
-            model.playMode = playMode
-            model.defaultActiveAnimation = defaultActiveAnimation
+            animationModel.width = animationModel.width
+            animationModel.height = animationModel.height
+            animationModel.direction = direction
+            animationModel.loop = loop
+            animationModel.autoplay = autoplay
+            animationModel.speed = speed
+            animationModel.playMode = playMode
+            animationModel.defaultActiveAnimation = defaultActiveAnimation
             
             if animationData != "" {
                 do {
                     try thorvg.loadAnimation(animationData: animationData, width: width, height: height)
                 } catch {
-                    model.error = true
+                    animationModel.error = true
                     
                     callCallbacks(event: .onLoadError)
                 }
@@ -99,26 +99,26 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
                 }
             }
             
-            self.model.playing = model.autoplay
+            self.animationModel.playing = animationModel.autoplay
         }
     
     // Todo: Manage swapping out animation at runtime
     public func loadAnimation(animationData: String, width: UInt32?, height: UInt32?) {
         do {
-            try thorvg.loadAnimation(animationData: animationData, width: width ?? self.model.width, height: height ?? self.model.height)
+            try thorvg.loadAnimation(animationData: animationData, width: width ?? self.animationModel.width, height: height ?? self.animationModel.height)
             
             // Go to the last frame if we're playing backwards
-            if (model.direction == -1) {
+            if (animationModel.direction == -1) {
                 thorvg.frame(no: thorvg.totalFrame() - 1)
             }
             
             DispatchQueue.main.async{
-                self.model.playing = self.model.autoplay
+                self.animationModel.playing = self.animationModel.autoplay
             }
         } catch {
-            model.error = true
+            animationModel.error = true
             
-            model.playing = false
+            animationModel.playing = false
             
             callCallbacks(event: .onLoadError)
         }
@@ -129,21 +129,21 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     
     public func loadAnimation(path: String, width: UInt32?, height: UInt32?) {
         do {
-            try thorvg.loadAnimation(path: path, width: width ?? self.model.width, height: height ?? self.model.height)
+            try thorvg.loadAnimation(path: path, width: width ?? self.animationModel.width, height: height ?? self.animationModel.height)
             
             // Go to the last frame if we're playing backwards
-            if (model.direction == -1) {
+            if (animationModel.direction == -1) {
                 thorvg.frame(no: thorvg.totalFrame() - 1)
             }
             
             DispatchQueue.main.async{
-                self.model.playing = self.model.autoplay
+                self.animationModel.playing = self.animationModel.autoplay
             }
         } catch let error {
             DispatchQueue.main.async {
-                self.model.error = true
+                self.animationModel.error = true
                 
-                self.model.playing = false
+                self.animationModel.playing = false
             }
             
             print("Error loading from thorvg: \(error)")
@@ -157,15 +157,15 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     
     
     public func loadAnimation(webURL: String, width: UInt32?, height: UInt32?) {
-        self.model.width = width ?? self.model.width
-        self.model.height = height ?? self.model.height
+        self.animationModel.width = width ?? self.animationModel.width
+        self.animationModel.height = height ?? self.animationModel.height
         
         fetchAndPlayAnimationFromURL(url: webURL)
     }
     
     public func loadAnimation(fileName: String, width: UInt32?, height: UInt32?) {
-        self.model.width = width ?? self.model.width
-        self.model.height = height ?? self.model.height
+        self.animationModel.width = width ?? self.animationModel.width
+        self.animationModel.height = height ?? self.animationModel.height
         
         fetchAndPlayAnimationFromBundle(url: fileName)
     }
@@ -182,7 +182,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     }
     
     public func tick() {
-        if (model.error) {
+        if (animationModel.error) {
             return
         }
         
@@ -191,17 +191,24 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
             return
         }
         
+        do {
+            try thorvg.clear()
+        }
+         catch {
+            print( "Clear error" )
+        }
+        
         let currentFrame = thorvg.currentFrame();
         let totalFrames = thorvg.totalFrame();
         var newFrame = currentFrame
         
-        if model.direction == 1  {
+        if animationModel.direction == 1  {
             if currentFrame >= totalFrames - 1.0 {
                 newFrame = 0.0
                 
                 // If we're not looping - Set playing to false
-                if (!model.loop) {
-                    model.playing = false
+                if (!animationModel.loop) {
+                    animationModel.playing = false
                     
                     callCallbacks(event: .onComplete)
                     thorvg.draw()
@@ -214,13 +221,13 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
                 
                 callCallbacks(event: .onFrame)
             }
-        } else if model.direction == -1 {
+        } else if animationModel.direction == -1 {
             if currentFrame <= 0 {
                 newFrame = totalFrames - 1.0
                 
                 // If we're not looping - Set playing to false
-                if (!model.loop) {
-                    model.playing = false
+                if (!animationModel.loop) {
+                    animationModel.playing = false
                     
                     callCallbacks(event: .onComplete)
                     thorvg.draw()
@@ -235,12 +242,12 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
             }
         }
         
-        if (self.model.speed > 1) {
+        if (self.animationModel.speed > 1) {
             // Original frame rate in frames per second (fps)
             let originalFPS: Float32 = 30.0
             
             // Speed-up factor (e.g., 2.0 for 2x speed)
-            let speedUpFactor: Int = self.model.speed
+            let speedUpFactor: Int = self.animationModel.speed
             
             // Calculate the original time between frames (deltaTime)
             let originalDeltaTime: Float32 = 1.0 / originalFPS
@@ -274,7 +281,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
                     
                     let (width, height) = getAnimationWidthHeight(filePath: filePath)
                     
-                    self.loadAnimation(path: filePath.path, width: width != nil ? width : self.model.width, height: height != nil ? height : self.model.height)
+                    self.loadAnimation(path: filePath.path, width: width != nil ? width : self.animationModel.width, height: height != nil ? height : self.animationModel.height)
                 } else {
                     print("Failed to load data from : \(url)")
                     
@@ -291,7 +298,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     private func fetchAndPlayAnimationFromBundle(url: String) {
         fetchJsonFromBundle(animation_name: url) { string in
             if let animationData = string {
-                self.loadAnimation(animationData: animationData, width: self.model.width, height: self.model.height)
+                self.loadAnimation(animationData: animationData, width: self.animationModel.width, height: self.animationModel.height)
             } else {
                 print("Failed to load data from main bundle.")
                 
@@ -305,7 +312,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
             fetchJsonFromUrl(url: url) { string in
                 if let animationData = string {
                     
-                    self.loadAnimation(animationData: animationData, width: self.model.width, height: self.model.height)
+                    self.loadAnimation(animationData: animationData, width: self.animationModel.width, height: self.animationModel.height)
                 } else {
                     print("Failed to load data from URL.")
                     
@@ -335,23 +342,23 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     }
     
     public func playing() -> Bool {
-        return model.playing
+        return animationModel.playing
     }
     
     public func autoplay(autoplay: Bool) {
-        model.autoplay = autoplay
+        animationModel.autoplay = autoplay
     }
     
     public func getAutoplay() -> Bool {
-        return model.autoplay
+        return animationModel.autoplay
     }
     
     public func speed(speed: Int) {
-        model.speed = speed
+        animationModel.speed = speed
     }
     
     public func getSpeed() -> Int {
-        return model.speed
+        return animationModel.speed
     }
     
     public func duration() -> Float32 {
@@ -361,7 +368,7 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     public func play() {
         self.stopped = false
         
-        self.model.playing = true
+        self.animationModel.playing = true
         
         callCallbacks(event: .onPlay)
     }
@@ -369,14 +376,14 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     public func pause() {
         self.stopped = false
         
-        self.model.playing = false
+        self.animationModel.playing = false
         
         callCallbacks(event: .onPause)
     }
     
     public func stop() {
         self.stopped = true
-        self.model.playing = false
+        self.animationModel.playing = false
         
         self.thorvg.frame(no: 0.0)
         
@@ -388,20 +395,20 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     }
     
     public func loop(loop: Bool) {
-        model.loop = loop
+        animationModel.loop = loop
     }
     
     public func getLoop() -> Bool {
-        return model.loop
+        return animationModel.loop
     }
     
     public func direction(direction: Int) {
-        model.direction = direction
+        animationModel.direction = direction
         thorvg.direction = direction
     }
     
     public func getDirection() -> Int {
-        return model.direction
+        return animationModel.direction
     }
     
     public func view() -> DotLottieView {
@@ -411,8 +418,8 @@ public class DotLottieViewModel: ObservableObject, PlayerEvents {
     }
     
 #if os(iOS)
-    public func createDotLottieView() -> DotLottieViewUIKit {
-        let view: DotLottieViewUIKit = DotLottieViewUIKit(frame: CGRect.infinite, dotLottie: self)
+    public func createDotLottieView() -> DotLottieAnimationView {
+        let view: DotLottieAnimationView = DotLottieAnimationView(frame: CGRect.infinite, dotLottieViewModel: self)
         
         return view
     }

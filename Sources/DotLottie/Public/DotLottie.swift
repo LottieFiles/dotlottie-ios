@@ -9,7 +9,7 @@ import Foundation
 import CoreImage
 
 protocol DotLottie {
-    var dotLottie: DotLottieViewModel { get set }
+    var dotLottieViewModel: DotLottieViewModel { get set }
     var opaqueBackground: CIImage { get set }
     func on(event: AnimationEvent, callback: @escaping () -> Void)
 }
