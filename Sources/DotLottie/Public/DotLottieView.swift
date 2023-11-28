@@ -20,9 +20,9 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     // Playback settings
     let framerate: Int = 60
     
-    @ObservedObject internal var dotLottieViewModel: DotLottieViewModel
+    @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
 
-    public init(dotLottie: DotLottieViewModel) {
+    public init(dotLottie: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottie
 
         self.opaqueBackground = CIImage.white
@@ -41,19 +41,19 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.delegate = context.coordinator
         
-        self.mtkView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.getSpeed()
+        self.mtkView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.speed()
         
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
         self.mtkView.enableSetNeedsDisplay = true
         
-        self.mtkView.isPaused = !self.dotLottieViewModel.playing()
+        self.mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
         
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        uiView.isPaused = !self.dotLottieViewModel.playing()
+        uiView.isPaused = !self.dotLottieViewModel.isPlaying()
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {

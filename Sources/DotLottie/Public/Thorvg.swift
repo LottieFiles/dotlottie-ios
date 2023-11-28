@@ -68,9 +68,10 @@ class Thorvg {
         }
     }
     
-    
     func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
-        tvg_shape_set_fill_color(self.bg, r, g, b, a);
+        print("TVG Background color")
+                tvg_shape_set_fill_color(self.bg, r, g, b, 0);
+        //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
     }
     
     /// Loads the animation data passed as a string (JSON content of a Lottie animation) - Returns false on failure
@@ -247,8 +248,6 @@ class Thorvg {
     }
     
     func currentFrame() -> Float32 {
-        tvg_animation_get_frame(animation, currentFrameState);
-        
         return currentFrameState.pointee
     }
     
@@ -273,7 +272,7 @@ class Thorvg {
         }
     }
     
-    func totalFrame() -> Float32 {
+    func totalFrames() -> Float32 {
         return totalFramesState.pointee
     }
     

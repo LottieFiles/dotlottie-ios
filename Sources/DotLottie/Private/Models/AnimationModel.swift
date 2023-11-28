@@ -7,6 +7,26 @@
 
 import Foundation
 
+public enum PlayerState {
+    case playing
+    case paused
+    case stopped
+}
+
+public enum Mode {
+    // From start to end
+    case forward
+
+    // From end to start
+    case reverse
+
+    // From start to end -> end to start
+    case bounce
+
+    // From end to start -> start to end
+    case bounceReverse
+}
+
 public struct AnimationModel {
     var animationData: String?
     
@@ -25,20 +45,14 @@ public struct AnimationModel {
     var loop: Bool = false
     
     var autoplay: Bool = false
-
-    var playing: Bool = false
     
     var speed: Int = 1
     
-    var playMode: PlayMode = PlayMode.normal
-        
-    var defaultActiveAnimation: Bool = false
-}
-
-public enum PlayMode: Hashable {
-    // From start to end
-    case normal
+    var segments: (Float32, Float32) = (0, 0)
     
-    // From start to end -> end to start
-    case bounce
+    var playerState: PlayerState = .paused
+
+    var mode: Mode = .forward
+
+    var defaultActiveAnimation: Bool = false
 }
