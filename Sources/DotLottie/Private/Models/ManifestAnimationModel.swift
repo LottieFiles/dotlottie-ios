@@ -22,7 +22,7 @@ struct ManifestAnimationModel {
     
     var loop: Loop?
     
-    var playMode: PlayMode = PlayMode.normal
+    var playMode: Mode = Mode.forward
     
     var speed: Double?
     

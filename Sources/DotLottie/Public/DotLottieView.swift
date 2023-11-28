@@ -5,12 +5,14 @@
 //  Created by Sam on 25/10/2023.
 //
 //
+
 import Metal
 import MetalKit
 import CoreImage
 import SwiftUI
 
-public struct DotLottieView: ViewRepresentable {
+// View for SwiftUI and MacOS
+public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()
     public var opaqueBackground: CIImage
@@ -18,10 +20,10 @@ public struct DotLottieView: ViewRepresentable {
     // Playback settings
     let framerate: Int = 60
     
-    @ObservedObject internal var dotLottie: DotLottieViewModel
+    @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
 
-    public init(dotLottie: DotLottieViewModel) {
-        self.dotLottie = dotLottie
+    public init(dotLottie: DotLottieAnimation) {
+        self.dotLottieViewModel = dotLottie
 
         self.opaqueBackground = CIImage.white
     }
@@ -39,53 +41,22 @@ public struct DotLottieView: ViewRepresentable {
         
         self.mtkView.delegate = context.coordinator
         
-        self.mtkView.preferredFramesPerSecond = self.framerate * self.dotLottie.getSpeed()
+        self.mtkView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.speed()
         
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
         self.mtkView.enableSetNeedsDisplay = true
         
-        self.mtkView.isPaused = !self.dotLottie.playing()
+        self.mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
         
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        uiView.isPaused = !self.dotLottie.playing()
-    }
-    
-    public func pause() {
-        self.dotLottie.pause()
-    }
-    
-    public func play() {
-        self.dotLottie.play()
-    }
-    
-    public func stop() {
-        self.dotLottie.stop()
-    }
-    
-    public func duration() -> Float32 {
-        return self.dotLottie.duration()
-    }
-    
-    public func speed() -> Int {
-        self.dotLottie.getSpeed()
-    }
-    
-    public func loop() -> Bool {
-        return self.dotLottie.getLoop()
+        uiView.isPaused = !self.dotLottieViewModel.isPlaying()
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {
-        self.dotLottie.on(event: event, callback: callback)
-    }
-
-    // Speed is actually the preffered frame rate
-    public func setSpeed(speed: Int) {
-        if (speed > 0) {
-                self.dotLottie.speed(speed: speed)
-        }
+        self.dotLottieViewModel.on(event: event, callback: callback)
     }
 }

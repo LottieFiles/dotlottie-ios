@@ -10,13 +10,13 @@ import MetalKit
 import AVFoundation
 
 public class Coordinator : NSObject, MTKViewDelegate {
-    private var parent: DotLottieView
+    private var parent: DotLottie
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
     
-    init(_ parent: DotLottieView, mtkView: MTKView) {
+    init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
         
         super.init()
@@ -39,9 +39,9 @@ public class Coordinator : NSObject, MTKViewDelegate {
             return
         }
         
-        parent.dotLottie.tick()
+        parent.dotLottieViewModel.tick()
         
-        if let frame = parent.dotLottie.render() {
+        if let frame = parent.dotLottieViewModel.render() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
             let inputImage = CIImage(cgImage: frame)
@@ -81,7 +81,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
         } else {
             print("NIL frame")
             
-            parent.dotLottie.pause()
+            parent.dotLottieViewModel.pause()
             return ;
         }
     }
