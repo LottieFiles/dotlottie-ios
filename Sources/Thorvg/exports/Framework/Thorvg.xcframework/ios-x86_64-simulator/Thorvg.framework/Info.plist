@@ -17,6 +17,7 @@
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>iPhoneSimulator</string>
+		<string>iPhoneSimulator</string>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1.0.0</string>

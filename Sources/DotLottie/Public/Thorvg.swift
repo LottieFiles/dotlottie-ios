@@ -153,6 +153,8 @@ class Thorvg {
             try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
             
             try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
+            
+            print("Finished loading animation : \(self.currentFrame()) \(self.totalFrames())")
         } catch let error as ThorvgOperationFailure {
             throw error
         }
@@ -260,15 +262,20 @@ class Thorvg {
     }
     
     func frame(no: Float32) {
-        if no >= 0 && no <= totalFramesState.pointee - 1.0 {
-            currentFrameState.pointee = no;
-            tvg_animation_set_frame(animation, no);
-            
-            tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
-            tvg_canvas_draw(canvas);
-            tvg_canvas_sync(canvas);
-        } else {
-            print("NOT Setting frame..")
+        do {
+            if no >= 0 && no <= totalFramesState.pointee - 1.0 {
+                currentFrameState.pointee = no;
+                try self.clear()
+                tvg_animation_set_frame(animation, no);
+                
+                tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
+                tvg_canvas_draw(canvas);
+                tvg_canvas_sync(canvas);
+            } else {
+                print("NOT Setting frame..")
+            }
+        } catch let error {
+            print(error)
         }
     }
     

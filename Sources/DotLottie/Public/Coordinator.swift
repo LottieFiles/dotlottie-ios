@@ -35,6 +35,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func draw(in view: MTKView) {
+        print("Still drawing")
         guard let drawable = view.currentDrawable else {
             return
         }

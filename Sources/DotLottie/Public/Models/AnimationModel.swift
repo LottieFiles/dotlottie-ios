@@ -11,6 +11,7 @@ public enum PlayerState {
     case playing
     case paused
     case stopped
+    case frozen
 }
 
 public enum Mode {
@@ -27,20 +28,19 @@ public enum Mode {
     case bounceReverse
 }
 
+/**
+    Settings for a single animation
+ */
 public struct AnimationModel {
     var animationData: String?
     
+    var url: String?
+
     var width: UInt32 = 512
     
     var height: UInt32 = 512
     
-    var error: Bool = false
-    
     var id: String
-    
-    var url: String?
-    
-    var direction: Int = 1
     
     var loop: Bool = false
     
@@ -48,11 +48,11 @@ public struct AnimationModel {
     
     var speed: Int = 1
     
-    var segments: (Float32, Float32) = (0, 0)
-    
-    var playerState: PlayerState = .paused
+    var segments: (Float32, Float32)?
 
     var mode: Mode = .forward
 
     var defaultActiveAnimation: Bool = false
+    
+    var error: Bool = false
 }

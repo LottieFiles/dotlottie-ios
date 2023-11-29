@@ -100,7 +100,6 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
                                                  appropriateFor: nil,
                                                  create: false)
     
-//    let currentWorkingPath = fileManager.currentDirectoryPath
     var txtData = Data()
     var destinationURL = documentsDirectory
     
@@ -109,8 +108,6 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
     
     if let url = URL(string: entry.path) {
         animationName = url.deletingPathExtension().lastPathComponent
-        
-        print(animationName) // This will print: animation1
     }
     
     animationFileName = entry.path.components(separatedBy: "/").last ?? "dotLottie.json"
@@ -183,6 +180,7 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
     }
 }
 
+// Todo refactor and make async
 func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (URL?) -> Void) {
     let session = URLSession.shared
     

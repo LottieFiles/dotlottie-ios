@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  DotLottieAnimation.swift
 //
 //
 //  Created by Sam on 31/10/2023.
@@ -26,6 +26,8 @@ public enum AnimationEvent {
     case onFrame
     case onLoop
     case onComplete
+    case onFreeze
+    case onUnFreeze
     case onDestroy
 }
 
@@ -36,19 +38,20 @@ public enum AnimationEvent {
 // The playback loop is left up to the subclasses to manage leaving the implementation open for the most pratical one per platform.
 // In the future this class will manage multiple animations contained inside a single .lottie.
 
-
-// rename to animation?
 public class DotLottieAnimation: ObservableObject, PlayerEvents {
-    // Model for the current animation
-    // Todo: Does this have to be public?
-    @Published public var animationModel: AnimationModel = AnimationModel(id: "animation_0")
+    @Published public var playerState: PlayerState = .paused
+    
+    private var animationModel: AnimationModel = AnimationModel(id: "animation_0")
     
     internal var callbacks: [AnimationEvent: [() -> Void]] = [:]
 
-    internal var loopCounter: Int = 0
+    private var loopCounter: Int = 0
 
     private var thorvg: Thorvg
     
+    private var animationData: String?
+
+    private var prevState: PlayerState?
     
 #if os(iOS)
     private var bgColor: UIColor?
@@ -60,21 +63,20 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         animationData: String = "",
         fileName: String = "",
         webURL: String = "",
-        direction: Int = 1,
         loop: Bool = false,
         autoplay: Bool = false,
         speed: Int = 1,
         mode: Mode = .forward,
         defaultActiveAnimation: Bool = false,
         width: UInt32 = 512,
-        height: UInt32 = 512) {
+        height: UInt32 = 512,
+        segments: (Float32, Float32)?) {
             thorvg = Thorvg()
             
             self.setBackgroundColor(bgColor: .orange)
             
             animationModel.width = animationModel.width
             animationModel.height = animationModel.height
-            animationModel.direction = direction
             animationModel.loop = loop
             animationModel.autoplay = autoplay
             animationModel.speed = speed
@@ -103,7 +105,16 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 }
             }
             
-            self.animationModel.playerState = animationModel.autoplay ? .playing : .paused
+            self.on(event: .onLoad) {
+                // Safely set the segments
+                if let initSegments = segments {
+                    self.setSegments(segments: initSegments)
+                } else {
+                    self.setSegments(segments: (self.currentFrame(), self.totalFrames()))
+                }
+                
+                self.playerState = self.animationModel.autoplay ? .playing : .paused
+            }
         }
     
     // Todo: Manage swapping out animation at runtime
@@ -111,18 +122,21 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         do {
             try thorvg.loadAnimation(animationData: animationData, width: width ?? self.animationModel.width, height: height ?? self.animationModel.height)
             
+            // Store the current loaded data for optional retrieval
+            self.animationData = animationData
+            
             // Go to the last frame if we're playing backwards
-            if (animationModel.direction == -1) {
+            if (animationModel.mode == .reverse) {
                 thorvg.frame(no: self.totalFrames() - 1)
             }
             
             DispatchQueue.main.async{
-                self.animationModel.playerState = self.animationModel.autoplay ? .playing : .paused
+                self.playerState = self.animationModel.autoplay ? .playing : .paused
             }
         } catch {
             animationModel.error = true
             
-            self.animationModel.playerState = .paused
+            self.playerState = .paused
             
             callCallbacks(event: .onLoadError)
         }
@@ -136,18 +150,18 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             try thorvg.loadAnimation(path: path, width: width ?? self.animationModel.width, height: height ?? self.animationModel.height)
             
             // Go to the last frame if we're playing backwards
-            if (animationModel.direction == -1) {
+            if (animationModel.mode == .reverse) {
                 thorvg.frame(no: self.totalFrames() - 1)
             }
             
             DispatchQueue.main.async{
-                self.animationModel.playerState = self.animationModel.autoplay ? PlayerState.playing : PlayerState.paused
+                self.playerState = self.animationModel.autoplay ? PlayerState.playing : PlayerState.paused
             }
         } catch let error {
             DispatchQueue.main.async {
                 self.animationModel.error = true
                 
-                self.animationModel.playerState = .paused
+                self.playerState = .paused
             }
             
             print("Error loading from thorvg: \(error)")
@@ -190,7 +204,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             return
         }
         
-        if (animationModel.playerState == .stopped) {
+        if (playerState == .stopped) {
             thorvg.frame(no: 0.0)
             return
         }
@@ -203,16 +217,17 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         }
         
         let currentFrame = self.currentFrame();
-        let totalFrames = self.totalFrames();
+        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames();
+        
         var newFrame = currentFrame
         
-        if animationModel.direction == 1  {
+        if animationModel.mode == .forward  {
             if currentFrame >= totalFrames - 1.0 {
                 newFrame = 0.0
                 
                 // If we're not looping - Set playing to false
                 if (!animationModel.loop) {
-                    animationModel.playerState = .paused
+                    playerState = .paused
     
                     callCallbacks(event: .onComplete)
                     thorvg.draw()
@@ -225,13 +240,13 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 
                 callCallbacks(event: .onFrame)
             }
-        } else if animationModel.direction == -1 {
+        } else if animationModel.mode == .reverse {
             if currentFrame <= 0 {
                 newFrame = totalFrames - 1.0
                 
                 // If we're not looping - Set playing to false
                 if (!animationModel.loop) {
-                    animationModel.playerState = .paused
+                    playerState = .paused
                     
                     callCallbacks(event: .onComplete)
                     thorvg.draw()
@@ -342,46 +357,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             }
         }
     }
-    
-    public func isPlaying() -> Bool {
-        return animationModel.playerState == .playing
-    }
-
-    public func isPaused() -> Bool {
-        return animationModel.playerState == .paused
-    }
-
-    public func isStopped() -> Bool {
-        return animationModel.playerState == .stopped
-    }
-
-    public func autoplay() -> Bool {
-        return animationModel.autoplay
-    }
-    
-    public func setAutoplay(autoplay: Bool) {
-        animationModel.autoplay = autoplay
-    }
-        
-    public func speed() -> Int {
-        return animationModel.speed
-    }
-
-    public func setSpeed(speed: Int) {
-        animationModel.speed = speed
-    }
-    
-    public func duration() -> Float32 {
-        return thorvg.duration()
-    }
-    
-    public func mode() -> Mode {
-        return animationModel.mode
-    }
-    
-    public func loopCount() -> Int {
-        return self.loopCounter
-    }
 
 #if os(iOS)
     public func setBackgroundColor(bgColor: UIColor) {
@@ -422,23 +397,37 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
 #endif
 
     public func play() {
-        self.animationModel.playerState = .playing
+        self.playerState = .playing
         
         callCallbacks(event: .onPlay)
     }
     
     public func pause() {
-        self.animationModel.playerState = .paused
+        self.playerState = .paused
         
         callCallbacks(event: .onPause)
     }
     
     public func stop() {
-        self.animationModel.playerState = .stopped
-        
-        self.thorvg.frame(no: 0.0)
+        self.thorvg.frame(no: animationModel.segments?.0 ?? 0.0)
+
+        self.playerState = .stopped
         
         callCallbacks(event: .onStop)
+    }
+    
+    public func freeze() {
+        self.prevState = self.playerState
+        
+        self.playerState = .frozen
+        
+        callCallbacks(event: .onFreeze)
+    }
+    
+    public func unfreeze() {
+        self.playerState = self.prevState ?? .paused
+        
+        callCallbacks(event: .onUnFreeze)
     }
     
     public func currentFrame() -> Float32 {
@@ -462,16 +451,82 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     }
 
     public func segments() -> (Float32, Float32) {
-        return animationModel.segments
+        return animationModel.segments ?? (0, self.totalFrames())
     }
     
-    public func direction() -> Int {
-        return animationModel.direction
+    public func setSegments(segments: (Float32, Float32)) {
+        var startFrame = segments.0
+        var endFrame = segments.1
+
+        if startFrame < 0 {
+           startFrame = 0
+        } else if startFrame > self.totalFrames() - 1 {
+            startFrame = self.totalFrames() - 1
+        }
+        
+        if endFrame < 0 {
+           endFrame = 0
+        } else if endFrame > self.totalFrames() - 1 {
+            endFrame = self.totalFrames() - 1
+        }
+        
+        animationModel.segments = (startFrame, endFrame)
+    }
+    
+    public func setMode(mode: Mode) {
+        animationModel.mode = mode
+    }
+//    public func direction() -> Int {
+//        return animationModel.mode == .forward ? 1 : -1
+//    }
+//
+//    public func setDirection(direction: Int) {
+//        animationModel.direction = direction
+//        thorvg.direction = direction
+//    }
+//    
+    public func isPlaying() -> Bool {
+        return playerState == .playing
     }
 
-    public func setDirection(direction: Int) {
-        animationModel.direction = direction
-        thorvg.direction = direction
+    public func isPaused() -> Bool {
+        return playerState == .paused
+    }
+
+    public func isStopped() -> Bool {
+        return playerState == .stopped
+    }
+    
+    public func isFrozen () -> Bool {
+        return playerState == .frozen
+    }
+
+    public func autoplay() -> Bool {
+        return animationModel.autoplay
+    }
+    
+    public func setAutoplay(autoplay: Bool) {
+        animationModel.autoplay = autoplay
+    }
+        
+    public func speed() -> Int {
+        return animationModel.speed
+    }
+
+    public func setSpeed(speed: Int) {
+        animationModel.speed = speed
+    }
+    
+    public func duration() -> Float32 {
+        return thorvg.duration()
+    }
+    
+    public func mode() -> Mode {
+        return animationModel.mode
+    }
+    
+    public func loopCount() -> Int {
+        return self.loopCounter
     }
     
     public func view() -> DotLottieView {
@@ -481,7 +536,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     }
     
 #if os(iOS)
-    public func createDotLottieView() -> DotLottieAnimationView {
+    public func view() -> DotLottieAnimationView {
         let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
         
         return view

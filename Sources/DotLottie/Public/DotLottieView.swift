@@ -47,13 +47,25 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.enableSetNeedsDisplay = true
         
+//        self.mtkView.isPaused = false
         self.mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
         
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        uiView.isPaused = !self.dotLottieViewModel.isPlaying()
+        print("Update view..")
+
+        if self.dotLottieViewModel.isStopped() {
+            uiView.draw()
+            uiView.isPaused = true
+        } else if self.dotLottieViewModel.isPaused() {
+            uiView.isPaused = true
+        } else if self.dotLottieViewModel.isPlaying() {
+            uiView.isPaused = false
+        } else if self.dotLottieViewModel.isFrozen() {
+            uiView.isPaused = true
+        }
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {

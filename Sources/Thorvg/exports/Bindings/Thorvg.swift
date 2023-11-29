@@ -68,9 +68,10 @@ class Thorvg {
         }
     }
     
-    
     func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
-        tvg_shape_set_fill_color(self.bg, r, g, b, a);
+        print("TVG Background color")
+                tvg_shape_set_fill_color(self.bg, r, g, b, 0);
+        //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
     }
     
     /// Loads the animation data passed as a string (JSON content of a Lottie animation) - Returns false on failure
@@ -91,7 +92,7 @@ class Thorvg {
         }
         
         do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
             
             try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
             
@@ -122,8 +123,8 @@ class Thorvg {
 //                print("----")
 //
 //                print(animationData)
-                
-                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
+                                
+                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", "", false)
             }
         }
         
@@ -175,7 +176,7 @@ class Thorvg {
         }
         
         do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false) }, description: "Clear canvas" )
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
             
             try executeThorvgOperation( { tvg_shape_reset(self.bg) }, description: "Shape reset" )
             
@@ -247,9 +248,15 @@ class Thorvg {
     }
     
     func currentFrame() -> Float32 {
-        tvg_animation_get_frame(animation, currentFrameState);
-        
         return currentFrameState.pointee
+    }
+    
+    func clear() throws {
+        do {
+            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
+        } catch let error {
+            throw error
+        }
     }
     
     func frame(no: Float32) {
@@ -265,7 +272,7 @@ class Thorvg {
         }
     }
     
-    func totalFrame() -> Float32 {
+    func totalFrames() -> Float32 {
         return totalFramesState.pointee
     }
     
