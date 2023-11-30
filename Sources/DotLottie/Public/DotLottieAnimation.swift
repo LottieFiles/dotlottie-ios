@@ -53,6 +53,8 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
 
     private var prevState: PlayerState?
     
+    private var direction: Int = 1
+    
 #if os(iOS)
     private var bgColor: UIColor?
 #elseif os(macOS)
@@ -110,9 +112,10 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 if let initSegments = segments {
                     self.setSegments(segments: initSegments)
                 } else {
-                    self.setSegments(segments: (self.currentFrame(), self.totalFrames()))
+                    self.setSegments(segments: (0.0, self.totalFrames()))
                 }
                 
+                self.prevState = self.playerState
                 self.playerState = self.animationModel.autoplay ? .playing : .paused
             }
         }
@@ -131,11 +134,13 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             }
             
             DispatchQueue.main.async{
+                self.prevState = self.playerState
                 self.playerState = self.animationModel.autoplay ? .playing : .paused
             }
         } catch {
             animationModel.error = true
             
+            self.prevState = self.playerState
             self.playerState = .paused
             
             callCallbacks(event: .onLoadError)
@@ -155,12 +160,14 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             }
             
             DispatchQueue.main.async{
+                self.prevState = self.playerState
                 self.playerState = self.animationModel.autoplay ? PlayerState.playing : PlayerState.paused
             }
         } catch let error {
             DispatchQueue.main.async {
                 self.animationModel.error = true
                 
+                self.prevState = self.playerState
                 self.playerState = .paused
             }
             
@@ -195,8 +202,160 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         }
         
         self.callCallbacks(event: .onLoadError)
-        
         return nil
+    }
+    
+    private func forwardTick() {
+        let currentFrame = self.currentFrame()
+        let minFrame = self.animationModel.segments?.0 ?? 0
+        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames() - 1.0
+        var newFrame = currentFrame + 1.0
+
+        if newFrame >= totalFrames {
+            newFrame = minFrame
+            
+            // If we're not looping - Set playing to false
+            if (!animationModel.loop) {
+                thorvg.frame(no: newFrame)
+                
+                playerState = .paused
+
+                callCallbacks(event: .onComplete)
+                return
+            } else {
+                callCallbacks(event: .onLoop)
+            }
+        }
+        
+        callCallbacks(event: .onFrame)
+        thorvg.frame(no: newFrame)
+    }
+    
+    private func reverseTick() {
+        let currentFrame = self.currentFrame()
+        let minFrames = self.animationModel.segments?.0 ?? 0.0
+        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames() - 1.0
+        var newFrame = currentFrame - 1.0
+
+        // If the animation is paused or stopped, we start from the first frame. Otherwise we keep the same direction and current frame.
+        if (self.prevState == .paused || self.prevState == .stopped) {
+            self.direction = -1
+            newFrame = totalFrames
+            
+            self.prevState = self.playerState
+            
+            thorvg.frame(no: newFrame)
+            
+            callCallbacks(event: .onFrame)
+            return
+        }
+        
+        if newFrame <= minFrames {
+            newFrame = totalFrames
+            
+            // If we're not looping - Set playing to false
+            if (!animationModel.loop) {
+                thorvg.frame(no: newFrame)
+
+                playerState = .paused
+                
+                callCallbacks(event: .onComplete)
+                return
+            } else {
+                callCallbacks(event: .onLoop)
+            }
+        }
+        
+        callCallbacks(event: .onFrame)
+        thorvg.frame(no: newFrame)
+    }
+    
+    private func bounceTick() {
+        let currentFrame = self.currentFrame()
+        let minFrames = self.animationModel.segments?.0 ?? 0.0
+        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames() - 1.0;
+        var newFrame = direction == 1 ? currentFrame + 1.0 : currentFrame - 1.0
+
+        // If the animation is paused or stopped, we start from the first frame. Otherwise we keep the same direction and current frame.
+        if (self.prevState == .paused || self.prevState == .stopped) {
+            self.direction = 1
+            newFrame = minFrames
+            
+            self.prevState = self.playerState
+            
+            thorvg.frame(no: newFrame)
+            
+            callCallbacks(event: .onFrame)
+            return       
+        }
+
+        if newFrame <= minFrames {
+            newFrame = minFrames
+            self.direction = 1
+
+            // If we're not looping - Set playing to false
+            if (!animationModel.loop) {
+                thorvg.frame(no: newFrame)
+
+                playerState = .paused
+
+                callCallbacks(event: .onComplete)
+                return
+            } else {
+                callCallbacks(event: .onLoop)
+            }
+        } else if newFrame >= totalFrames {
+            newFrame = totalFrames
+            self.direction = -1
+        }
+        
+        callCallbacks(event: .onFrame)
+
+        thorvg.frame(no: newFrame)
+    }
+    
+    private func bounceReverseTick() {
+        let currentFrame = self.currentFrame()
+        let minFrames = self.animationModel.segments?.0 ?? 0.0
+        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames() - 1.0
+        var newFrame = direction == 1 ? currentFrame + 1.0 : currentFrame - 1.0
+
+        // If the animation is paused or stopped, we start from the last frame. Otherwise we keep the same direction and current frame.
+        if (self.prevState == .paused || self.prevState == .stopped) {
+            self.direction = -1
+            newFrame = totalFrames
+            
+            self.prevState = self.playerState
+            
+            thorvg.frame(no: newFrame)
+            
+            callCallbacks(event: .onFrame)
+            return
+        }
+        
+        if newFrame <= minFrames {
+            newFrame = minFrames
+            self.direction = 1
+        } else if newFrame >= totalFrames {
+            newFrame = totalFrames
+            self.direction = -1
+            
+            // If we're not looping - Set playing to false
+            if (!animationModel.loop) {
+                thorvg.frame(no: newFrame)
+
+                playerState = .paused
+
+                callCallbacks(event: .onComplete)
+                return
+            } else {
+                callCallbacks(event: .onLoop)
+            }
+        }
+        
+        callCallbacks(event: .onFrame)
+
+        thorvg.frame(no: newFrame)
     }
     
     public func tick() {
@@ -216,75 +375,40 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             print( "Clear error" )
         }
         
-        let currentFrame = self.currentFrame();
-        let totalFrames = self.animationModel.segments?.1 ?? self.totalFrames();
-        
-        var newFrame = currentFrame
-        
         if animationModel.mode == .forward  {
-            if currentFrame >= totalFrames - 1.0 {
-                newFrame = 0.0
-                
-                // If we're not looping - Set playing to false
-                if (!animationModel.loop) {
-                    playerState = .paused
-    
-                    callCallbacks(event: .onComplete)
-                    thorvg.draw()
-                    return
-                } else {
-                    callCallbacks(event: .onLoop)
-                }
-            } else {
-                newFrame = currentFrame + 1.0
-                
-                callCallbacks(event: .onFrame)
-            }
+            self.forwardTick()
         } else if animationModel.mode == .reverse {
-            if currentFrame <= 0 {
-                newFrame = totalFrames - 1.0
-                
-                // If we're not looping - Set playing to false
-                if (!animationModel.loop) {
-                    playerState = .paused
-                    
-                    callCallbacks(event: .onComplete)
-                    thorvg.draw()
-                    return
-                } else {
-                    callCallbacks(event: .onLoop)
-                }
-            } else {
-                newFrame = currentFrame - 1.0
-                
-                callCallbacks(event: .onFrame)
-            }
+            self.reverseTick()
+        } else if animationModel.mode == .bounce {
+            self.bounceTick()
+        } else if animationModel.mode == .bounceReverse {
+            self.bounceReverseTick()
         }
         
-        if (self.animationModel.speed > 1) {
-            // Original frame rate in frames per second (fps)
-            let originalFPS: Float32 = 30.0
-            
-            // Speed-up factor (e.g., 2.0 for 2x speed)
-            let speedUpFactor: Int = self.animationModel.speed
-            
-            // Calculate the original time between frames (deltaTime)
-            let originalDeltaTime: Float32 = 1.0 / originalFPS
-            
-            // Calculate the new time between frames (newDeltaTime) based on the speed-up factor
-            let newDeltaTime: Float32 = originalDeltaTime / Float32(speedUpFactor)
-            
-            // Calculate the new frame number to be displayed
-            var spedUpFrame = (((newFrame) * originalDeltaTime / newDeltaTime)).rounded()
-            
-            if spedUpFrame >= totalFrames - 1 {
-                spedUpFrame = 0
-            }
-            
-            thorvg.frame(no: spedUpFrame)
-        } else {
-            thorvg.frame(no: newFrame)
-        }
+//        if (self.animationModel.speed > 1) {
+//            // Original frame rate in frames per second (fps)
+//            let originalFPS: Float32 = 30.0
+//            
+//            // Speed-up factor (e.g., 2.0 for 2x speed)
+//            let speedUpFactor: Int = self.animationModel.speed
+//            
+//            // Calculate the original time between frames (deltaTime)
+//            let originalDeltaTime: Float32 = 1.0 / originalFPS
+//            
+//            // Calculate the new time between frames (newDeltaTime) based on the speed-up factor
+//            let newDeltaTime: Float32 = originalDeltaTime / Float32(speedUpFactor)
+//            
+//            // Calculate the new frame number to be displayed
+//            var spedUpFrame = (((newFrame) * originalDeltaTime / newDeltaTime)).rounded()
+//            
+//            if spedUpFrame >= totalFrames - 1 {
+//                spedUpFrame = 0
+//            }
+//            
+//            thorvg.frame(no: spedUpFrame)
+//        } else {
+//            thorvg.frame(no: newFrame)
+//        }
         
         thorvg.draw()
     }
@@ -293,9 +417,15 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         if let url = URL(string: url) {
             fetchDotLottieAndUnzipAndWriteToDisk(url: url) { path in
                 if let filePath = path {
-                    let (width, height) = getAnimationWidthHeight(filePath: filePath)
                     
-                    self.loadAnimation(path: filePath.path, width: width != nil ? width : self.animationModel.width, height: height != nil ? height : self.animationModel.height)
+                    do {
+                        let (animWidth, animHeight) = try getAnimationWidthHeight(filePath: filePath)
+                        self.loadAnimation(path: filePath.path, width: animWidth != nil ? animWidth : self.animationModel.width, height: animHeight != nil ? animHeight : self.animationModel.height)
+                    } catch let error {
+                        print(error)
+                        self.callCallbacks(event: .onLoadError)
+                    }
+                    
                 } else {
                     print("Failed to load data from : \(url)")
                     
@@ -397,20 +527,27 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
 #endif
 
     public func play() {
+        self.prevState = self.playerState
         self.playerState = .playing
         
         callCallbacks(event: .onPlay)
     }
     
     public func pause() {
+        self.prevState = self.playerState
         self.playerState = .paused
         
         callCallbacks(event: .onPause)
     }
     
     public func stop() {
-        self.thorvg.frame(no: animationModel.segments?.0 ?? 0.0)
-
+        if mode() == .forward || mode() == .bounce {
+            self.thorvg.frame(no: animationModel.segments?.0 ?? 0.0)
+        } else if mode() == .reverse || mode() == .bounceReverse {
+            self.thorvg.frame(no: animationModel.segments?.1 ?? self.totalFrames())
+        }
+        
+        self.prevState = self.playerState
         self.playerState = .stopped
         
         callCallbacks(event: .onStop)
@@ -476,7 +613,10 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     public func setMode(mode: Mode) {
         animationModel.mode = mode
     }
+
 //    public func direction() -> Int {
+//        if direction != nil
+//            return direction
 //        return animationModel.mode == .forward ? 1 : -1
 //    }
 //

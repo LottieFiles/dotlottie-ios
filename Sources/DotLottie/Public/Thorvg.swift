@@ -267,7 +267,6 @@ class Thorvg {
                 currentFrameState.pointee = no;
                 try self.clear()
                 tvg_animation_set_frame(animation, no);
-                
                 tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
                 tvg_canvas_draw(canvas);
                 tvg_canvas_sync(canvas);

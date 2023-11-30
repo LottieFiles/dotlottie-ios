@@ -35,13 +35,9 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func draw(in view: MTKView) {
-        print("Still drawing")
         guard let drawable = view.currentDrawable else {
             return
         }
-        
-        parent.dotLottieViewModel.tick()
-        
         if let frame = parent.dotLottieViewModel.render() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
@@ -79,6 +75,9 @@ public class Coordinator : NSObject, MTKViewDelegate {
             
             commandBuffer?.present(drawable)
             commandBuffer?.commit()
+                        
+            parent.dotLottieViewModel.tick()
+
         } else {
             print("NIL frame")
             

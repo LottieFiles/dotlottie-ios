@@ -12,6 +12,12 @@ enum WriteToFileError : Error {
     case writeFailure(description: String)
 }
 
+enum FileErrors : Error {
+    case invalidFileExtension
+    case dowloadFailed
+    case fileNotFound(path: String)
+}
+
 func fetchJsonFromUrl(url: URL, completion: @escaping (String?) -> Void) {
     let session = URLSession.shared
     
@@ -40,55 +46,6 @@ func fetchJsonFromBundle(animation_name: String, completion: @escaping (String?)
         }
     }
     completion(nil);
-}
-
-private func getImageDataFromZip(fileName: String, archive: Archive) -> String {
-    guard let entry = archive["images/\(fileName)"] else {
-        return ""
-    }
-    
-    var txtData = Data()
-    var v = ""
-    
-    do {
-        _ = try archive.extract(entry) { data in
-            
-            txtData.append(data)
-            
-            v = txtData.base64EncodedString()
-            
-            v = "data:image/png;base64," + v
-        }
-    } catch {
-        print("ERROR EXTRACTING IMAGE DATA")
-    }
-    
-    return v
-}
-
-func writeImageToFile(imageName: String, archive: Archive) -> URL? {
-    let fileManager = FileManager()
-    
-    let currentWorkingPath = fileManager.currentDirectoryPath
-    
-    guard let entry = archive["images/\(imageName)"] else {
-        print("Error inflating image file: Invalid image name inside of .lottie")
-        
-        return nil
-    }
-    
-    var destinationURL = URL(fileURLWithPath: currentWorkingPath)
-    destinationURL.appendPathComponent(imageName)
-    
-    do {
-        let _ = try archive.extract(entry, to: destinationURL)
-        
-        print("Extracted image to \(destinationURL)")
-    } catch {
-        print("Extracting entry from archive failed with error:\(error)")
-    }
-    
-    return destinationURL
 }
 
 func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL? {
@@ -248,7 +205,7 @@ func getAnimationDataFromFile(at url: URL) -> String? {
     return nil
 }
 
-func getAnimationWidthHeight(filePath: URL) -> (UInt32?, UInt32?) {
+func getAnimationWidthHeight(filePath: URL) throws -> (UInt32?, UInt32?) {
     var aWidth: UInt32? = nil
     var aHeight: UInt32? = nil
 
@@ -268,29 +225,39 @@ func getAnimationWidthHeight(filePath: URL) -> (UInt32?, UInt32?) {
                 }
             }
         } catch let error {
-            print(error)
+            throw error
         }
+    } else {
+        throw FileErrors.fileNotFound(path: filePath.absoluteString)
     }
     
     return (aWidth, aHeight)
 }
 
-func getAnimationWidthHeight(animationData: String) -> (Int?, Int?) {
+/**
+    Returns a tuple containing the width, height of the animationData.
+    If width or height are unfindable, result will be nil.
+ */
+func getAnimationWidthHeight(animationData: String) throws -> (UInt32?, UInt32?) {
+    var animWidth: UInt32? = nil
+    var animHeight: UInt32?  = nil
+    
     do {
         if let data = animationData.data(using: .utf8) {
             let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
             
             // Loop over assets of the animation
             if let width = decodedData?["w"] {
-                print(width)
+                animWidth = width as? UInt32
             }
             if let height = decodedData?["h"] {
-                print(height)
+                animHeight = height as? UInt32
             }
-
+            
+            return (animWidth, animHeight)
         }
     } catch let error {
-        print(error)
+        throw error
     }
         
     return (nil, nil)
@@ -302,9 +269,4 @@ func verifyUrlType(url: String) throws -> Void {
     if stringCheck.pathExtension != "json" && stringCheck.pathExtension != "lottie" {
         throw FileErrors.invalidFileExtension
     }
-}
-
-enum FileErrors : Error {
-    case invalidFileExtension
-    case dowloadFailed
 }

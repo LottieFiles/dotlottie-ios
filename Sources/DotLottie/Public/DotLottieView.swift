@@ -54,8 +54,6 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        print("Update view..")
-
         if self.dotLottieViewModel.isStopped() {
             uiView.draw()
             uiView.isPaused = true
