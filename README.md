@@ -134,7 +134,6 @@ The `DotLottieAnimation` instance emits the following events that can be listene
 | `loop`      | Emitted when the animation completes a loop.                            |
 | `complete`  | Emitted when the animation completes.                                   |
 | `frame`     | Emitted when the animation reaches a new frame.                         |
-| `destroy`   | Emitted when the animation is destroyed.                                |
 | `freeze`    | Emitted when the animation is freezed and the animation loop stops.     |
 | `unfreeze`  | Emitted when the animation is unfreezed and the animation loop resumes. |
 

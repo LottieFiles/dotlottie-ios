@@ -31,7 +31,6 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        print("Resizing...")
     }
     
     public func draw(in view: MTKView) {

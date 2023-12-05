@@ -52,26 +52,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         return mtkView
     }
     
-    public func updateView(_ uiView: MTKView, context: Context) {
-        // Create a UILabel for the error emoji if needed
-//        let errorLabel = UILabel()
-//        errorLabel.font = UIFont.systemFont(ofSize: 40)
-//        errorLabel.textAlignment = .center
-//        errorLabel.text = "⚠️"
-//
-//        if self.dotLottieViewModel.playerState == .error {
-//            uiView.isPaused = true
-//            // Add the errorLabel as an overlay on top of the MTKView
-//            uiView.addSubview(errorLabel)
-//            errorLabel.translatesAutoresizingMaskIntoConstraints = false
-//            NSLayoutConstraint.activate([
-//                errorLabel.centerXAnchor.constraint(equalTo: uiView.centerXAnchor),
-//                errorLabel.centerYAnchor.constraint(equalTo: uiView.centerYAnchor)
-//            ])
-//        } else {
-//            uiView.willRemoveSubview(errorLabel)
-//        }
-        
+    public func updateView(_ uiView: MTKView, context: Context) {        
         if self.dotLottieViewModel.isStopped() {
             // Tell the coordinator to draw the last frame before pausing
             uiView.draw()

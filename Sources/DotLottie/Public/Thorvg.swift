@@ -69,7 +69,6 @@ class Thorvg {
     }
     
     func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
-        print("TVG Background color")
         tvg_shape_set_fill_color(self.bg, r, g, b, 0);
         //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
     }
@@ -212,8 +211,6 @@ class Thorvg {
             try executeThorvgOperation({ tvg_canvas_push(self.canvas, frame_image) }, description: "Canvas Push")
             
             try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
-            
-            print("Drawing to canvas")
             
             try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
         } catch let error as ThorvgOperationFailure {

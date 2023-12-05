@@ -33,6 +33,7 @@ public class DotLottieAnimationView: UIView, DotLottie {
 
         dotLottieViewModel.$playerState.sink { value in
             if self.metalView != nil {
+                self.metalView.draw()
                 self.metalView.isPaused = !(value == PlayerState.playing)
             }
         }.store(in: &cancellableBag)

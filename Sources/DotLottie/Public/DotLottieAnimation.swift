@@ -651,7 +651,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         
         bgColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         
-        print(UInt8(red), UInt8(green), UInt8(blue), UInt8(alpha))
         thorvg.setBackgroundColor(r: UInt8(red) * 255, g: UInt8(green)  * 255, b: UInt8(blue)  * 255, a: UInt8(alpha) * 255)
     }
     
