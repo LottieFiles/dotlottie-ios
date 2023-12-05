@@ -103,22 +103,20 @@ class AnimationViewController: UIViewController {
 
 `DotLottieAnimation` instances expose the following methods that can be used to control the animation:
 
-| Method                                                    | Description                                                                                                                                                                                                                                                   |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `play()`                                                  | Begins playback from the current animation position.                                                                                                                                                                                                          |
-| `pause()`                                                 | Pauses the animation without resetting its position.                                                                                                                                                                                                          |
-| `stop()`                                                  | Halts playback and returns the animation to its initial frame.                                                                                                                                                                                                |
-| `setSpeed(speed: Int)`                                 | Sets the playback speed with the given multiplier.                                                                                                                                                                                                            |
-| `setLoop(loop: Bool)`                                  | Configures whether the animation should loop continuously.                                                                                                                                                                                                    |
-| `setFrame(frame: Float32)`                                 | Directly navigates the animation to a specified frame.                                                                                                                                                                                                        |
-|
-| `load(config: Config)`                                    | Loads a new configuration or a new animation.                                                                                                                                                                                                                 |
-| `setMode(mode: Mode)`                                   | Sets the animation play mode.                                                                                                                                                                                                                                 |
-| `setSegments(segments: (Float32, Float32))`       | Sets the start and end frame of the animation.                                                                                                                                                                                                                |
-| `freeze()`                                                | Freezes the animation by stopping the animation loop.                                                                                                                                                                                                         |
-| `unfreeze()`                                              | Unfreezes the animation by resuming the animation loop.                                                                                                                                                                                                       |
-| `setBackgroundColor(color: UIColor / NSColor)`                       | Sets the background color of the animation.                                                                                                                                                                                                                      |
-|
+| Event       | Description                                                             | 
+| ----------- | ----------------------------------------------------------------------- | 
+| `play()` | Begins playback from the current animation position. |
+| `pause()` | Pauses the animation without resetting its position. |
+| `stop()` | Halts playback and returns the animation to its initial frame. |
+| `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
+| `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
+| `setFrame(frame: Float32)` | Directly navigates the animation to a specified frame. |
+| `load(config: Config)` | Loads a new configuration or a new animation. |
+| `setMode(mode: Mode)` | Sets the animation play mode. |
+| `setSegments(segments: (Float32, Float32))` | Sets the start and end frame of the animation. |
+| `freeze()` | Freezes the animation by stopping the animation loop. |
+| `unFreeze()` | Unfreezes the animation by resuming the animation loop. |
+| `setBackgroundColor(color: UIColor / NSColor)` | Sets the background color of the animation. |
 
 ### Event callbacks
 
