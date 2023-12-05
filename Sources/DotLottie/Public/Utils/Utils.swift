@@ -16,41 +16,131 @@ enum FileErrors : Error {
     case invalidFileExtension
     case dowloadFailed
     case fileNotFound(path: String)
+    case widthHeightNotFound
 }
 
-func fetchJsonFromUrl(url: URL, completion: @escaping (String?) -> Void) {
+enum FetchErrors: Error {
+    case fileNotFound(animationName: String, extensionName: String)
+    case couldNotExportFromBundle(animationName: String)
+}
+
+enum NetworkingErrors: Error {
+    case invalidServerResponse
+}
+
+enum WriteErrors: Error {
+    case failedToWriteToDisk
+}
+
+enum DotLottieErrors: Error {
+    case missingAnimations
+}
+
+/// Fetches the .lottie from the URL and attempts to write the file contents to disk.
+/// - Parameter url: Web URL to the animation
+/// - Throws: failedToWriteToDisk, missingAnimations
+/// - Returns: URL pointing to the location on disk the animation was written to.
+func fetchDotLottieAndWriteToDisk(url: URL) async throws -> URL {
+    // Verify if the URL is valid
+    do {
+        try verifyUrlType(url: url.absoluteString)
+    } catch let error {
+        print("URL is invalid.")
+        throw error
+    }
+    
+    // Fetch data
+    do {
+        let data = try await fetchFileFromURL(url: url)
+        
+        return try writeDotLottieToDisk(dotLottie: data)
+    } catch let error {
+        throw error
+    }
+}
+
+
+/// Attempts to write doLottie contents to disk.
+/// - Parameter dotLottie: Data of the .lottie file.
+/// - Throws: failedToWriteToDisk, missingAnimations
+/// - Returns: URL pointing to the location on disk to where the animation was written to.
+func writeDotLottieToDisk(dotLottie: Data) throws -> URL {
+    // Fetch data
+    do {
+        // Attempt to read .lottie file
+        let archive = try Archive(data: dotLottie, accessMode: .read)
+        
+        for entry in archive {
+            if entry.path == "manifest.json" {
+                var txtData = Data()
+                _ = try archive.extract(entry) { data in
+                    txtData.append(data)
+                }
+                
+                // The manifest
+                _ = String(decoding: txtData, as: UTF8.self)
+            }
+            
+            if entry.path.contains("animations") && entry.path.contains("json") {
+                guard let path = try writeAnimationAndAssetsToDisk(entry: entry, archive: archive) else {
+                    throw WriteErrors.failedToWriteToDisk
+                }
+                
+                // For the moment we return straight away as we only support one animaion
+                return path
+            }
+        }
+
+    } catch let error {
+        throw error
+    }
+    
+    throw DotLottieErrors.missingAnimations
+}
+
+
+/// Fetches JSON or .lottie from requested URL.
+/// - Parameter url: Web URL to the animation.
+/// - Throws: invalidServerResponse
+/// - Returns: Data object from the response
+func fetchFileFromURL(url: URL) async throws -> Data {
     let session = URLSession.shared
     
-    let task = session.dataTask(with: url) { data, response, error in
-        if let error = error {
-            print("Error: \(error)")
-            completion(nil)
-            return
-        }
-        
-        if let data = data, let string = String(data: data, encoding: .utf8) {
-            completion(string)
-        } else {
-            completion(nil)
-        }
-    }
+    let (data, response) = try await session.data(from: url)
     
-    task.resume()
+    guard let httpResponse = response as? HTTPURLResponse,
+            httpResponse.statusCode == 200 else {
+        throw NetworkingErrors.invalidServerResponse
+      }
+    
+    return data
 }
 
-func fetchJsonFromBundle(animation_name: String, completion: @escaping (String?) -> Void) {
-    if let fileURL = Bundle.main.url(forResource: animation_name, withExtension: "json") {
-        if let fileContents = try? String(contentsOf: fileURL) {
-            completion(fileContents);
-            return ;
+
+/// Attempts to retrieve animation from the main bundle.
+/// - Parameter animationName: Name of the animation asset.
+/// - Throws: couldNotExportFromBundle, fileNotFound.
+/// - Returns: The data.
+func fetchFileFromBundle(animationName: String, extensionName: String) throws -> Data {
+    if let fileURL = Bundle.main.url(forResource: animationName, withExtension: extensionName) {
+        guard let fileContents = try? Data(contentsOf: fileURL) else {
+            throw FetchErrors.couldNotExportFromBundle(animationName: animationName)
         }
+        return (fileContents);
     }
-    completion(nil);
+    throw FetchErrors.fileNotFound(animationName: animationName, extensionName: extensionName)
 }
 
+
+/// Loops through an entry of the .lottie archive and write the animation along with its image assets to disk.
+/// - Parameters:
+///   - entry: An Entry of the archive we want to extract.
+///   - archive: The Zip archive.
+/// - Throws: writeFailure
+/// - Returns: URL on disk pointing to where the animation and assets were written to.
 func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL? {
     let fileManager = FileManager.default
-
+    
     // Get the URL for the Documents directory
     let documentsDirectory = try fileManager.url(for: .documentDirectory,
                                                  in: .userDomainMask,
@@ -63,18 +153,18 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
     var animationName = "dotLottie"
     var animationFileName = "dotLottie.json"
     
+    // Get filename without extension
     if let url = URL(string: entry.path) {
         animationName = url.deletingPathExtension().lastPathComponent
     }
     
+    // Get filename with extension
     animationFileName = entry.path.components(separatedBy: "/").last ?? "dotLottie.json"
     
-    // Add the animation name to the directory path
-    // i.e: ..data/animations/animation1
-    // Todo: Prepend file name before animations
+    // Add the animation name to the directory path under the animation directory
     destinationURL.appendPathComponent("animations/\(animationName)/")
     
-    // Create file destination URL
+    // Add filename with its extension to the destination url
     var fileDestination = destinationURL
     fileDestination.appendPathComponent(animationFileName)
     
@@ -89,7 +179,7 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
             txtData.append(data)
         }
         
-        // Write to disk
+        // Write the animation (entry) to disk
         if !fileManager.fileExists(atPath: "\(fileDestination)") {
             try txtData.write(to: fileDestination)
         }
@@ -99,14 +189,15 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
         // Deserialize JSON
         let decodedData = try JSONSerialization.jsonObject(with: v.data(using: .utf8)!, options: [.mutableContainers]) as? [String: Any]
         
-        // Loop over assets of the animation
+        // Loop over assets of the animation and write them to disk
+        // Assets will be placed next to the .json so ThorVG can find them
         if let assetsArray = decodedData?["assets"] as? NSArray {
-            //            Iterate over each asset in the array
+            // Iterate over each asset in the array
             for index in 0..<assetsArray.count {
                 if let asset = assetsArray[index] as? NSDictionary {
                     if let name = asset["p"] as? String {
                         
-                        // Write images to disk too
+                        // Check if the images are in the .lottie zip
                         guard let imageEntry = archive["images/\(name)"] else {
                             return nil
                         }
@@ -137,133 +228,75 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive) throws -> URL
     }
 }
 
-// Todo refactor and make async
-func fetchDotLottieAndUnzipAndWriteToDisk(url: URL, completion: @escaping (URL?) -> Void) {
-    let session = URLSession.shared
-    
-    do {
-        try verifyUrlType(url: url.absoluteString)
-    } catch {
-        print("URL is incorrect.")
-        completion(nil)
-        return
-    }
-    
-    let task = session.dataTask(with: url) { data, response, error in
-        if let error = error {
-            print("Error fetch data: \(error)")
 
-            completion(nil)
-            return
-        }
-        
-        if let data = data {
-            do {
-                let archive = try Archive(data: data, accessMode: .read)
-                
-                for entry in archive {
-                    if entry.path == "manifest.json" {
-                        var txtData = Data()
-                        _ = try archive.extract(entry) { data in
-                            txtData.append(data)
-                        }
-                        
-                        // The manifest
-                        _ = String(decoding: txtData, as: UTF8.self)
-                    }
-                    
-                    if entry.path.contains("animations") && entry.path.contains("json") {
-                        let path = try writeAnimationAndAssetsToDisk(entry: entry, archive: archive)
-                        
-                        completion(path)
-                        
-                        // For the moment we only support opening the first animation
-                        return
-                    }
-                }
-            } catch let error {
-                print("\(error)")
-                
-                completion(nil)
-                return
-            }
-        }
-    }
-    
-    task.resume()
-}
-
-func getAnimationDataFromFile(at url: URL) -> String? {
+/// Retrieve .json from a file written to disk.
+/// ⚠️: If the animation contained assets, they will not be inlined in the returned JSON.
+/// - Parameter url: Local URL on disk pointing to animation.
+/// - Throws: fileNotFound.
+/// - Returns: Stringified file data.
+func getAnimationDataFromFile(at url: URL) throws -> String {
     do {
         let filedata = try String(contentsOf: url)
         
         return filedata
     } catch {
-        print("Error reading file:", error)
+        throw FileErrors.fileNotFound(path: url.absoluteString)
     }
-    
-    return nil
 }
 
-func getAnimationWidthHeight(filePath: URL) throws -> (UInt32?, UInt32?) {
-    var aWidth: UInt32? = nil
-    var aHeight: UInt32? = nil
 
-    if let animationData = getAnimationDataFromFile(at: filePath) {
-        do {
-            if let data = animationData.data(using: .utf8) {
-                let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
-                
-                // Loop over assets of the animation
-                if let width = decodedData?["w"] {
-                    aWidth = width as? UInt32
-                    print("Parsed width: \(width)")
-                }
-                if let height = decodedData?["h"] {
-                    aHeight = height as? UInt32
-                    print("Parsed height: \(height)")
-                }
-            }
-        } catch let error {
-            throw error
-        }
-    } else {
-        throw FileErrors.fileNotFound(path: filePath.absoluteString)
+/// Returns a tuple containing the width, height of the animation at the filePath
+/// - Parameter filePath: Path on disk to animation data.
+/// - Throws: widthHeightNotFound
+/// - Returns: (width, height) of the animation.
+func getAnimationWidthHeight(filePath: URL) throws -> (UInt32, UInt32) {
+    do {
+        let animationData = try getAnimationDataFromFile(at: filePath)
+        
+        return try getAnimationWidthHeight(animationData: animationData)
+    } catch let error {
+        throw error
     }
-    
-    return (aWidth, aHeight)
 }
 
-/**
-    Returns a tuple containing the width, height of the animationData.
-    If width or height are unfindable, result will be nil.
- */
-func getAnimationWidthHeight(animationData: String) throws -> (UInt32?, UInt32?) {
-    var animWidth: UInt32? = nil
-    var animHeight: UInt32?  = nil
-    
+
+/// Returns a tuple containing the width, height of the animationData.
+/// If width or height are unfindable, result will be nil.
+/// - Parameter animationData: Animation data.
+/// - Throws: widthHeightNotFound.
+/// - Returns: (width, height) of the animation.
+func getAnimationWidthHeight(animationData: String) throws -> (UInt32, UInt32) {
     do {
         if let data = animationData.data(using: .utf8) {
-            let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
             
-            // Loop over assets of the animation
+            let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
+            var aWidth: UInt32? = 0
+            var aHeight: UInt32? = 0
+            
             if let width = decodedData?["w"] {
-                animWidth = width as? UInt32
+                aWidth = width as? UInt32
             }
             if let height = decodedData?["h"] {
-                animHeight = height as? UInt32
+                aHeight = height as? UInt32
             }
             
-            return (animWidth, animHeight)
+            // Check if we managed to get the width and height
+            if let aH = aHeight, let aW = aWidth {
+                return (aH, aW)
+            }
         }
     } catch let error {
         throw error
     }
-        
-    return (nil, nil)
+    
+    throw FileErrors.widthHeightNotFound
 }
 
-func verifyUrlType(url: String) throws -> Void {
+
+/// Verifies if the URL is valid.
+/// - Parameter url: Web URL.
+/// - Throws: invalidFileExtension
+func verifyUrlType(url: String) throws {
     let stringCheck: NSString = NSString(string: url)
     
     if stringCheck.pathExtension != "json" && stringCheck.pathExtension != "lottie" {

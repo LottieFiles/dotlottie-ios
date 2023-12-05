@@ -61,7 +61,7 @@ class Thorvg {
     
     private func executeThorvgOperation(_ operation: () -> Tvg_Result, description: String) throws {
         let result = operation()
-
+        
         guard result == TVG_RESULT_SUCCESS else {
             let errorDescription = "Thorvg operation failed: \(description). Error code: \(result)"
             throw ThorvgOperationFailure.operationFailed(description: errorDescription)
@@ -70,7 +70,7 @@ class Thorvg {
     
     func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
         print("TVG Background color")
-                tvg_shape_set_fill_color(self.bg, r, g, b, 0);
+        tvg_shape_set_fill_color(self.bg, r, g, b, 0);
         //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
     }
     
@@ -112,18 +112,6 @@ class Thorvg {
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
                 
-//                var outputString = ""
-//                print("Contents of bufferPointer:")
-//                        for i in 0..<self.animationData.utf8.count {
-//                            let char = bufferPointer[i]
-//                            outputString.append(String(UnicodeScalar(UInt8(char))))
-//                        }
-//                print(outputString)
-//
-//                print("----")
-//
-//                print(animationData)
-                                
                 load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", "", false)
             }
         }
@@ -143,7 +131,7 @@ class Thorvg {
             let scale = (Float32(width) / w.pointee)
             
             try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
-                        
+            
             try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
             
             try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
@@ -165,7 +153,7 @@ class Thorvg {
         self.WIDTH = width;
         self.HEIGHT = height;
         
-//        self.animationData = animationData
+        //        self.animationData = animationData
         
         self.buffer = [UInt32](repeating: 0, count: Int(width) * Int(height));
         
@@ -197,22 +185,6 @@ class Thorvg {
         
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
-                
-//                var outputString = ""
-//                print("Contents of bufferPointer:")
-//                        for i in 0..<self.animationData.utf8.count {
-//                            let char = bufferPointer[i]
-//                            outputString.append(String(UnicodeScalar(UInt8(char))))
-//                        }
-//                print(outputString)
-//
-//                print("----")
-//
-//                print(animationData)
-                
-//                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
-                print("THORVG: Loading from \(path)")
-                
                 load_result = tvg_picture_load(frame_image, path)
             }
         }
@@ -232,7 +204,7 @@ class Thorvg {
             let scale = (Float32(width) / w.pointee)
             
             try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
-                        
+            
             try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
             
             try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
@@ -263,7 +235,7 @@ class Thorvg {
     
     func frame(no: Float32) {
         do {
-            if no >= 0 && no <= totalFramesState.pointee - 1.0 {
+            if no >= 0.0 && no <= totalFramesState.pointee - 1.0 {
                 currentFrameState.pointee = no;
                 try self.clear()
                 tvg_animation_set_frame(animation, no);

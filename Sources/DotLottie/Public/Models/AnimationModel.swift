@@ -12,6 +12,7 @@ public enum PlayerState {
     case paused
     case stopped
     case frozen
+    case error
 }
 
 public enum Mode {

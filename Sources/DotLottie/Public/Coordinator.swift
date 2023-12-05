@@ -38,6 +38,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
         guard let drawable = view.currentDrawable else {
             return
         }
+
         if let frame = parent.dotLottieViewModel.render() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             

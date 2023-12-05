@@ -21,10 +21,10 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     let framerate: Int = 60
     
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
-
+    
     public init(dotLottie: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottie
-
+        
         self.opaqueBackground = CIImage.white
     }
     
@@ -47,17 +47,38 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.enableSetNeedsDisplay = true
         
-//        self.mtkView.isPaused = false
         self.mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
         
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
+        // Create a UILabel for the error emoji if needed
+//        let errorLabel = UILabel()
+//        errorLabel.font = UIFont.systemFont(ofSize: 40)
+//        errorLabel.textAlignment = .center
+//        errorLabel.text = "⚠️"
+//
+//        if self.dotLottieViewModel.playerState == .error {
+//            uiView.isPaused = true
+//            // Add the errorLabel as an overlay on top of the MTKView
+//            uiView.addSubview(errorLabel)
+//            errorLabel.translatesAutoresizingMaskIntoConstraints = false
+//            NSLayoutConstraint.activate([
+//                errorLabel.centerXAnchor.constraint(equalTo: uiView.centerXAnchor),
+//                errorLabel.centerYAnchor.constraint(equalTo: uiView.centerYAnchor)
+//            ])
+//        } else {
+//            uiView.willRemoveSubview(errorLabel)
+//        }
+        
         if self.dotLottieViewModel.isStopped() {
+            // Tell the coordinator to draw the last frame before pausing
             uiView.draw()
             uiView.isPaused = true
         } else if self.dotLottieViewModel.isPaused() {
+            // Tell the coordinator to draw the last frame before pausing
+            uiView.draw()
             uiView.isPaused = true
         } else if self.dotLottieViewModel.isPlaying() {
             uiView.isPaused = false
