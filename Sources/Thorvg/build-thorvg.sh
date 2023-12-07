@@ -228,7 +228,7 @@ if [ $# -gt 0 ]; then
         elif [ "$arg" = "macos_x86_64" ]; then
             $PLISTBUDDY_EXEC -c "Add :CFBundleSupportedPlatforms:1 string MacOSX" $FRAMEWORK_PATH/Info.plist
 
-#        install_name_tool -id @rpath/Thorvg.framework/Thorvg $FRAMEWORK_PATH/Thorvg
+        install_name_tool -id @rpath/Thorvg.framework/Thorvg $FRAMEWORK_PATH/Thorvg
 
         fi
     done
