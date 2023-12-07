@@ -69,7 +69,8 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         defaultActiveAnimation: Bool = false,
         width: Int = 512,
         height: Int = 512,
-        segments: (Float, Float)?) {
+        segments: (Float, Float)?,
+        backgroundColor: CIImage = CIImage.white) {
             thorvg = Thorvg()
             self.prevState = .paused
             self.playerState = self.animationModel.autoplay ? .playing : .paused
@@ -81,6 +82,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             animationModel.speed = speed
             animationModel.mode = mode
             animationModel.defaultActiveAnimation = defaultActiveAnimation
+            animationModel.backgroundColor = backgroundColor
             
             // Currently refactored methods
             if webURL != "" {

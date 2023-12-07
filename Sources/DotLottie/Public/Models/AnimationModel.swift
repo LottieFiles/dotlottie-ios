@@ -6,9 +6,7 @@
 //
 
 import Foundation
-#if os(iOS)
 import CoreImage
-#endif
 
 public enum PlayerState {
     case playing
