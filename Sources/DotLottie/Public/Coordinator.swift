@@ -31,16 +31,13 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        print("Resizing...")
     }
     
     public func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else {
             return
         }
-        
-        parent.dotLottieViewModel.tick()
-        
+
         if let frame = parent.dotLottieViewModel.render() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
@@ -66,7 +63,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
             // This is needed if the image is smaller than the view, or if it has transparent
             
             // Commented out for the moment due to memory errors
-            filteredImage = filteredImage.composited(over: parent.opaqueBackground)
+            filteredImage = filteredImage.composited(over: parent.dotLottieViewModel.backgroundColor())
             
             self.mtlTexture = drawable.texture
             
@@ -78,6 +75,9 @@ public class Coordinator : NSObject, MTKViewDelegate {
             
             commandBuffer?.present(drawable)
             commandBuffer?.commit()
+                        
+            parent.dotLottieViewModel.tick()
+
         } else {
             print("NIL frame")
             

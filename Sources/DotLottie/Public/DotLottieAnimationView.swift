@@ -19,10 +19,8 @@ public class DotLottieAnimationView: UIView, DotLottie {
     private var metalView: MTKView!
     private var coordinator: Coordinator!
 
-    var dotLottieViewModel = DotLottieAnimation()
+    var dotLottieViewModel = DotLottieAnimation(segments: nil)
     var cancellableBag = Set<AnyCancellable>()
-    
-    public var opaqueBackground: CIImage = CIImage.red
     
     let framerate: Int = 60
     
@@ -30,14 +28,14 @@ public class DotLottieAnimationView: UIView, DotLottie {
         self.dotLottieViewModel = dotLottieViewModel
         
         super.init(frame: .zero)
-                
-        // React to changes inside the DotLottieModels
-        dotLottieViewModel.$animationModel.sink { value in
+
+        dotLottieViewModel.$playerState.sink { value in
             if self.metalView != nil {
-                self.metalView.isPaused = !(value.playerState == PlayerState.playing)
+                self.metalView.draw()
+                self.metalView.isPaused = !(value == PlayerState.playing)
             }
         }.store(in: &cancellableBag)
-        
+
         setupMetalView()
     }
     

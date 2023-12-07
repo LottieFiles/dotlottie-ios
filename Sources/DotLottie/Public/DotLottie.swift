@@ -10,6 +10,5 @@ import CoreImage
 
 protocol DotLottie {
     var dotLottieViewModel: DotLottieAnimation { get set }
-    var opaqueBackground: CIImage { get set }
     func on(event: AnimationEvent, callback: @escaping () -> Void)
 }

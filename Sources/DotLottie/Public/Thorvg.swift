@@ -61,23 +61,17 @@ class Thorvg {
     
     private func executeThorvgOperation(_ operation: () -> Tvg_Result, description: String) throws {
         let result = operation()
-
+        
         guard result == TVG_RESULT_SUCCESS else {
             let errorDescription = "Thorvg operation failed: \(description). Error code: \(result)"
             throw ThorvgOperationFailure.operationFailed(description: errorDescription)
         }
     }
-    
-    func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
-        print("TVG Background color")
-                tvg_shape_set_fill_color(self.bg, r, g, b, 0);
-        //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
-    }
-    
+
     /// Loads the animation data passed as a string (JSON content of a Lottie animation) - Returns false on failure
-    func loadAnimation(animationData: String, width: UInt32, height: UInt32, direction: Int = 1) throws {
-        self.WIDTH = width;
-        self.HEIGHT = height;
+    func loadAnimation(animationData: String, width: Int, height: Int, direction: Int = 1) throws {
+        self.WIDTH = UInt32(width);
+        self.HEIGHT = UInt32(height);
         
         self.animationData = animationData
         
@@ -86,7 +80,7 @@ class Thorvg {
         self.direction = direction
         
         try self.buffer.withUnsafeMutableBufferPointer { bufferPointer in
-            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
+            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, self.WIDTH, self.WIDTH, self.HEIGHT, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
                 throw ThorvgOperationFailure.operationFailed(description: "Set Target")
             }
         }
@@ -112,18 +106,6 @@ class Thorvg {
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
                 
-//                var outputString = ""
-//                print("Contents of bufferPointer:")
-//                        for i in 0..<self.animationData.utf8.count {
-//                            let char = bufferPointer[i]
-//                            outputString.append(String(UnicodeScalar(UInt8(char))))
-//                        }
-//                print(outputString)
-//
-//                print("----")
-//
-//                print(animationData)
-                                
                 load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", "", false)
             }
         }
@@ -143,7 +125,7 @@ class Thorvg {
             let scale = (Float32(width) / w.pointee)
             
             try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
-                        
+            
             try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
             
             try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
@@ -163,7 +145,7 @@ class Thorvg {
         self.WIDTH = width;
         self.HEIGHT = height;
         
-//        self.animationData = animationData
+        //        self.animationData = animationData
         
         self.buffer = [UInt32](repeating: 0, count: Int(width) * Int(height));
         
@@ -195,22 +177,6 @@ class Thorvg {
         
         if let c_string = self.animationData.cString(using: .utf8) {
             c_string.withUnsafeBufferPointer{ bufferPointer in
-                
-//                var outputString = ""
-//                print("Contents of bufferPointer:")
-//                        for i in 0..<self.animationData.utf8.count {
-//                            let char = bufferPointer[i]
-//                            outputString.append(String(UnicodeScalar(UInt8(char))))
-//                        }
-//                print(outputString)
-//
-//                print("----")
-//
-//                print(animationData)
-                
-//                load_result = tvg_picture_load_data(frame_image, bufferPointer.baseAddress, numericCast(strlen(animationData)), "lottie", false);
-                print("THORVG: Loading from \(path)")
-                
                 load_result = tvg_picture_load(frame_image, path)
             }
         }
@@ -230,7 +196,7 @@ class Thorvg {
             let scale = (Float32(width) / w.pointee)
             
             try executeThorvgOperation( { tvg_picture_set_size(frame_image, w.pointee * scale, h.pointee * scale) }, description: "Aspect ratio Set size")
-                        
+            
             try executeThorvgOperation({ tvg_animation_get_total_frame(self.animation, self.totalFramesState) }, description: "Get Total Frame")
             
             try executeThorvgOperation({ tvg_animation_get_duration(self.animation, self.durationState) }, description: "Get Duration")
@@ -238,8 +204,6 @@ class Thorvg {
             try executeThorvgOperation({ tvg_canvas_push(self.canvas, frame_image) }, description: "Canvas Push")
             
             try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
-            
-            print("Drawing to canvas")
             
             try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
         } catch let error as ThorvgOperationFailure {
@@ -252,23 +216,16 @@ class Thorvg {
     }
     
     func clear() throws {
-        do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
-        } catch let error {
-            throw error
-        }
+        try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
     }
     
-    func frame(no: Float32) {
-        if no >= 0 && no <= totalFramesState.pointee - 1.0 {
+    func frame(no: Float32) throws {
+        if no >= 0.0 && no <= totalFramesState.pointee - 1.0 {
             currentFrameState.pointee = no;
-            tvg_animation_set_frame(animation, no);
-            
-            tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
-            tvg_canvas_draw(canvas);
-            tvg_canvas_sync(canvas);
+            try self.clear()
+            try self.draw()
         } else {
-            print("NOT Setting frame..")
+            print("Frame: \(no) is outside of frame limits for this animation.")
         }
     }
     

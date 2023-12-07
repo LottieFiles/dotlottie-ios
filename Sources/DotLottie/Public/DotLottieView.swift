@@ -15,17 +15,14 @@ import SwiftUI
 public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()
-    public var opaqueBackground: CIImage
     
     // Playback settings
     let framerate: Int = 60
     
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
-
+    
     public init(dotLottie: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottie
-
-        self.opaqueBackground = CIImage.white
     }
     
     public func makeCoordinator() -> Coordinator {
@@ -53,7 +50,19 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        uiView.isPaused = !self.dotLottieViewModel.isPlaying()
+        if self.dotLottieViewModel.isStopped() {
+            // Tell the coordinator to draw the last frame before pausing
+            uiView.draw()
+            uiView.isPaused = true
+        } else if self.dotLottieViewModel.isPaused() {
+            // Tell the coordinator to draw the last frame before pausing
+            uiView.draw()
+            uiView.isPaused = true
+        } else if self.dotLottieViewModel.isPlaying() {
+            uiView.isPaused = false
+        } else if self.dotLottieViewModel.isFrozen() {
+            uiView.isPaused = true
+        }
     }
     
     public func on(event: AnimationEvent, callback: @escaping () -> Void) {

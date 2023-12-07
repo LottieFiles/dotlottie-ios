@@ -614,18 +614,17 @@ TVG_DEPRECATED TVG_API Tvg_Result tvg_canvas_reserve(Tvg_Canvas* canvas, uint32_
 * all paints should be released manually in order to avoid memory leaks.
 *
 * \param[in] canvas The Tvg_Canvas object to be cleared.
-* \param[in] free If @c true the memory occupied by paints is deallocated, otherwise it is not.
+* \param[in] paints If @c true, The memory occupied by paints is deallocated; otherwise, the paints will be retained on the canvas.
+* \param[in] buffer If @c true the canvas target buffer is cleared with a zero value.
 *
 * \return Tvg_Result enumeration.
 * \retval TVG_RESULT_SUCCESS Succeed.
 * \retval TVG_RESULT_INVALID_ARGUMENT An invalid Tvg_Canvas pointer.
 * \retval TVG_RESULT_INSUFFICIENT_CONDITION An internal error.
 *
-* \warning Please use the @p free argument only when you know how it works, otherwise it's not recommended.
-*
 * \see tvg_canvas_destroy()
 */
-TVG_API Tvg_Result tvg_canvas_clear(Tvg_Canvas* canvas, bool free);
+TVG_API Tvg_Result tvg_canvas_clear(Tvg_Canvas* canvas, bool paints, bool buffer);
 
 
 /*!
@@ -1968,6 +1967,13 @@ TVG_API Tvg_Result tvg_picture_load(Tvg_Paint* paint, const char* path);
 /*!
 * \brief Loads a picture data from a memory block of a given size.
 *
+* \param[in] paint A Tvg_Paint pointer to the picture object.
+* \param[in] data A pointer to a memory location where the content of the picture raw data is stored.
+* \param[in] w The width of the image @p data in pixels.
+* \param[in] h The height of the image @p data in pixels.
+* \param[in] premultiplied If @c true, the given image data is alpha-premultiplied.
+* \param[in] copy If @c true the data are copied into the engine local buffer, otherwise they are not.
+*
 * \return Tvg_Result enumeration.
 * \retval TVG_RESULT_SUCCESS Succeed.
 * \retval TVG_RESULT_INVALID_ARGUMENT An invalid Tvg_Paint pointer or no data are provided or the @p width or @p height value is zero or less.
@@ -1987,6 +1993,7 @@ TVG_API Tvg_Result tvg_picture_load_raw(Tvg_Paint* paint, uint32_t *data, uint32
 * \param[in] size The size in bytes of the memory occupied by the @p data.
 * \param[in] mimetype Mimetype or extension of data such as "jpg", "jpeg", "svg", "svg+xml", "lottie", "png", etc. In case an empty string or an unknown type is provided, the loaders will be tried one by one.
 * \param[in] copy If @c true the data are copied into the engine local buffer, otherwise they are not.
+* \param[in] rpath A resource directory path, if the @p data needs to access any external resources.
 *
 * \return Tvg_Result enumeration.
 * \retval TVG_RESULT_SUCCESS Succeed.
@@ -1996,7 +2003,7 @@ TVG_API Tvg_Result tvg_picture_load_raw(Tvg_Paint* paint, uint32_t *data, uint32
 *
 * \warning: It's the user responsibility to release the @p data memory if the @p copy is @c true.
 */
-TVG_API Tvg_Result tvg_picture_load_data(Tvg_Paint* paint, const char *data, uint32_t size, const char *mimetype, bool copy);
+TVG_API Tvg_Result tvg_picture_load_data(Tvg_Paint* paint, const char *data, uint32_t size, const char *mimetype, const char* rpath, bool copy);
 
 
 /*!
