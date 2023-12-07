@@ -58,12 +58,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     
     private var directionState: Int = 1
     
-#if os(iOS)
-    private var bgColor: UIColor?
-#elseif os(macOS)
-    private var bgColor: NSColor?
-#endif
-    
     public init(
         animationData: String = "",
         fileName: String = "",
@@ -73,14 +67,12 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         speed: Int = 1,
         mode: Mode = .forward,
         defaultActiveAnimation: Bool = false,
-        width: UInt32 = 512,
-        height: UInt32 = 512,
-        segments: (Float32, Float32)?) {
+        width: Int = 512,
+        height: Int = 512,
+        segments: (Float, Float)?) {
             thorvg = Thorvg()
             self.prevState = .paused
             self.playerState = self.animationModel.autoplay ? .playing : .paused
-            
-            self.setBackgroundColor(bgColor: .orange)
             
             animationModel.width = width
             animationModel.height = height
@@ -127,7 +119,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     /// - Parameters:
     ///   - segments: Optional segments if passed when creating object.
     ///   - mode: Playmode.
-    private func initAnimation(segments: (Float32, Float32)?, mode: Mode) {
+    private func initAnimation(segments: (Float, Float)?, mode: Mode) {
         self.on(event: .onLoad) {
             DispatchQueue.main.async {
                 // Initialize segments
@@ -140,13 +132,13 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 // Initalize first frame depending on play mode
                 switch mode {
                 case .forward:
-                    self.frame(frameNo: self.animationModel.segments?.0 ?? 0.0)
+                    self.setFrame(frame: self.animationModel.segments?.0 ?? 0.0)
                 case .reverse:
-                    self.frame(frameNo: self.animationModel.segments?.1 ?? self.totalFrames())
+                    self.setFrame(frame: self.animationModel.segments?.1 ?? self.totalFrames())
                 case .bounce:
-                    self.frame(frameNo: self.animationModel.segments?.0 ?? 0.0)
+                    self.setFrame(frame: self.animationModel.segments?.0 ?? 0.0)
                 case .bounceReverse:
-                    self.frame(frameNo: self.animationModel.segments?.1 ?? self.totalFrames())
+                    self.setFrame(frame: self.animationModel.segments?.1 ?? self.totalFrames())
                 }
             }
         }
@@ -197,7 +189,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             self.prevState = self.playerState
             
-            thorvg.frame(no: newFrame)
+            self.setFrame(frame: newFrame)
             
             callCallbacks(event: .onFrame)
             return
@@ -211,7 +203,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 print("forward tick Going to frame \(newFrame)")
                 
                 // Todo: Doesnt go to first frame
-                thorvg.frame(no: newFrame)
+                self.setFrame(frame: newFrame)
                 
                 playerState = .paused
                 
@@ -223,7 +215,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         }
         
         callCallbacks(event: .onFrame)
-        thorvg.frame(no: newFrame)
+        self.setFrame(frame: newFrame)
     }
     
     
@@ -252,7 +244,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             self.prevState = self.playerState
             
-            thorvg.frame(no: newFrame)
+            self.setFrame(frame: newFrame)
             
             callCallbacks(event: .onFrame)
             return
@@ -263,7 +255,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             // If we're not looping - Set playing to false
             if (!animationModel.loop) {
-                thorvg.frame(no: newFrame)
+                self.setFrame(frame: newFrame)
                 
                 DispatchQueue.main.async {
                     self.playerState = .paused
@@ -277,7 +269,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         }
         
         callCallbacks(event: .onFrame)
-        thorvg.frame(no: newFrame)
+        self.setFrame(frame: newFrame)
     }
     
     
@@ -305,7 +297,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             self.prevState = self.playerState
             
-            thorvg.frame(no: newFrame)
+            self.setFrame(frame: newFrame)
             
             callCallbacks(event: .onFrame)
             return
@@ -317,7 +309,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             // If we're not looping - Set playing to false
             if (!animationModel.loop) {
-                thorvg.frame(no: newFrame)
+                self.setFrame(frame: newFrame)
                 
                 playerState = .paused
                 
@@ -333,7 +325,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         
         callCallbacks(event: .onFrame)
         
-        thorvg.frame(no: newFrame)
+        self.setFrame(frame: newFrame)
     }
     
     
@@ -361,7 +353,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             self.prevState = self.playerState
             
-            thorvg.frame(no: newFrame)
+            self.setFrame(frame: newFrame)
             
             callCallbacks(event: .onFrame)
             return
@@ -376,7 +368,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             // If we're not looping - Set playing to false
             if (!animationModel.loop) {
-                thorvg.frame(no: newFrame)
+                self.setFrame(frame: newFrame)
                 
                 playerState = .paused
                 
@@ -389,7 +381,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         
         callCallbacks(event: .onFrame)
         
-        thorvg.frame(no: newFrame)
+        self.setFrame(frame: newFrame)
     }
     
     
@@ -459,7 +451,9 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     /// - Parameter localPath: Path on disk to animation data.
     private func loadAnimation(localPath: String) {
         do {
-            try thorvg.loadAnimation(path: localPath, width: self.animationModel.width, height: self.animationModel.height)
+            try thorvg.loadAnimation(path: localPath,
+                                     width: UInt32(self.animationModel.width),
+                                     height: UInt32(self.animationModel.height))
             
             // Autoplay the animation if needed
             DispatchQueue.main.async {
@@ -501,8 +495,8 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                     // Parse width and height of animation
                     do {
                         let (animWidth, animHeight) = try getAnimationWidthHeight(filePath: filePath)
-                        self.animationModel.width = animWidth
-                        self.animationModel.height = animHeight
+                        self.animationModel.width = Int(animWidth)
+                        self.animationModel.height = Int(animHeight)
                     } catch {
                         // If for some reason width and height are missing, set to defaults
                         self.animationModel.width = 512
@@ -563,8 +557,8 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 // Parse width and height of animation
                 do {
                     let (animWidth, animHeight) = try getAnimationWidthHeight(filePath: filePath)
-                    self.animationModel.width = animWidth
-                    self.animationModel.height = animHeight
+                    self.animationModel.width = Int(animWidth)
+                    self.animationModel.height = Int(animHeight)
                 } catch {
                     // If for some reason width and height are missing, set to defaults
                     self.animationModel.width = 512
@@ -594,8 +588,8 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                     // Parse width and height of animation
                     do {
                         let (animWidth, animHeight) = try getAnimationWidthHeight(animationData: dataAsString)
-                        self.animationModel.width = animWidth
-                        self.animationModel.height = animHeight
+                        self.animationModel.width = Int(animWidth)
+                        self.animationModel.height = Int(animHeight)
                     } catch {
                         // If for some reason width and height are missing, set to defaults
                         self.animationModel.width = 512
@@ -641,42 +635,13 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         }
     }
     
-#if os(iOS)
-    public func setBackgroundColor(bgColor: UIColor) {
-        self.bgColor = bgColor
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        
-        bgColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        thorvg.setBackgroundColor(r: UInt8(red) * 255, g: UInt8(green)  * 255, b: UInt8(blue)  * 255, a: UInt8(alpha) * 255)
+    public func setBackgroundColor(bgColor: CIImage) {
+        self.animationModel.backgroundColor = bgColor
     }
     
-    public func backgroundColor() -> UIColor {
-        return self.bgColor ?? UIColor.clear
+    public func backgroundColor() -> CIImage {
+        return self.animationModel.backgroundColor
     }
-#endif
-    
-#if os(macOS)
-    public func setBackgroundColor(bgColor: NSColor) {
-        self.bgColor = bgColor
-        
-        var red: CGFloat = 0
-        var green: CGFloat = 0
-        var blue: CGFloat = 0
-        var alpha: CGFloat = 0
-        
-        bgColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        
-        thorvg.setBackgroundColor(r: UInt8(red), g: UInt8(green), b: UInt8(blue), a: UInt8(alpha))
-    }
-    
-    public func backgroundColor() -> NSColor {
-        return self.bgColor ?? NSColor.clear
-    }
-#endif
     
     // MARK: Playback setters / getters
     
@@ -709,9 +674,9 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
      */
     public func stop() {
         if mode() == .forward || mode() == .bounce {
-            self.thorvg.frame(no: self.animationModel.segments?.0 ?? 0.0)
+            self.setFrame(frame: self.animationModel.segments?.0 ?? 0.0)
         } else if mode() == .reverse || mode() == .bounceReverse {
-            self.thorvg.frame(no: animationModel.segments?.1 ?? self.totalFrames())
+            self.setFrame(frame: animationModel.segments?.1 ?? self.totalFrames())
         }
         
         DispatchQueue.main.async {
@@ -745,10 +710,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         return thorvg.totalFrames() - 1
     }
     
-    public func frame(frameNo: Float32) {
-        thorvg.frame(no: frameNo)
-    }
-    
     public func loop() -> Bool {
         return animationModel.loop
     }
@@ -762,7 +723,12 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     }
     
     public func setFrame(frame: Float32) {
-        self.thorvg.frame(no: frame)
+        do {
+            try thorvg.frame(no: frame)
+        } catch let error {
+            print(error)
+            self.animationModel.error = true
+        }
     }
     
     public func setSegments(segments: (Float32, Float32)) {

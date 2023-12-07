@@ -6,6 +6,9 @@
 //
 
 import Foundation
+#if os(iOS)
+import CoreImage
+#endif
 
 public enum PlayerState {
     case playing
@@ -36,10 +39,10 @@ public struct AnimationModel {
     var animationData: String?
     
     var url: String?
-
-    var width: UInt32 = 512
     
-    var height: UInt32 = 512
+    var width: Int = 512
+    
+    var height: Int = 512
     
     var id: String
     
@@ -49,11 +52,13 @@ public struct AnimationModel {
     
     var speed: Int = 1
     
-    var segments: (Float32, Float32)?
-
+    var segments: (Float, Float)?
+    
     var mode: Mode = .forward
-
+    
     var defaultActiveAnimation: Bool = false
     
     var error: Bool = false
+    
+    var backgroundColor: CIImage = CIImage.white
 }

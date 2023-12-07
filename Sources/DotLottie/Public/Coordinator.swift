@@ -63,7 +63,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
             // This is needed if the image is smaller than the view, or if it has transparent
             
             // Commented out for the moment due to memory errors
-            filteredImage = filteredImage.composited(over: parent.opaqueBackground)
+            filteredImage = filteredImage.composited(over: parent.dotLottieViewModel.backgroundColor())
             
             self.mtlTexture = drawable.texture
             

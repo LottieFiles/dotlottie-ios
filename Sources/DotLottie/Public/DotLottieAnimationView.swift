@@ -22,8 +22,6 @@ public class DotLottieAnimationView: UIView, DotLottie {
     var dotLottieViewModel = DotLottieAnimation(segments: nil)
     var cancellableBag = Set<AnyCancellable>()
     
-    public var opaqueBackground: CIImage = CIImage.red
-    
     let framerate: Int = 60
     
     public init(dotLottieViewModel: DotLottieAnimation) {

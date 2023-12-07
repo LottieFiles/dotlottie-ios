@@ -67,16 +67,11 @@ class Thorvg {
             throw ThorvgOperationFailure.operationFailed(description: errorDescription)
         }
     }
-    
-    func setBackgroundColor(r: UInt8, g: UInt8, b: UInt8, a: UInt8) {
-        tvg_shape_set_fill_color(self.bg, r, g, b, 0);
-        //        tvg_shape_set_fill_color(self.bg, 255, 0, 0, 0);
-    }
-    
+
     /// Loads the animation data passed as a string (JSON content of a Lottie animation) - Returns false on failure
-    func loadAnimation(animationData: String, width: UInt32, height: UInt32, direction: Int = 1) throws {
-        self.WIDTH = width;
-        self.HEIGHT = height;
+    func loadAnimation(animationData: String, width: Int, height: Int, direction: Int = 1) throws {
+        self.WIDTH = UInt32(width);
+        self.HEIGHT = UInt32(height);
         
         self.animationData = animationData
         
@@ -85,7 +80,7 @@ class Thorvg {
         self.direction = direction
         
         try self.buffer.withUnsafeMutableBufferPointer { bufferPointer in
-            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, width, width, height, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
+            if (tvg_swcanvas_set_target(self.canvas, bufferPointer.baseAddress, self.WIDTH, self.WIDTH, self.HEIGHT, TVG_COLORSPACE_ABGR8888) != TVG_RESULT_SUCCESS) {
                 throw ThorvgOperationFailure.operationFailed(description: "Set Target")
             }
         }
@@ -140,8 +135,6 @@ class Thorvg {
             try executeThorvgOperation({ tvg_canvas_draw(self.canvas) }, description: "Canvas Draw")
             
             try executeThorvgOperation({ tvg_canvas_sync(self.canvas) }, description: "Canvas Sync")
-            
-            print("Finished loading animation : \(self.currentFrame()) \(self.totalFrames())")
         } catch let error as ThorvgOperationFailure {
             throw error
         }
@@ -223,27 +216,16 @@ class Thorvg {
     }
     
     func clear() throws {
-        do {
-            try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
-        } catch let error {
-            throw error
-        }
+        try executeThorvgOperation( { tvg_canvas_clear(self.canvas, false, true) }, description: "Clear canvas" )
     }
     
-    func frame(no: Float32) {
-        do {
-            if no >= 0.0 && no <= totalFramesState.pointee - 1.0 {
-                currentFrameState.pointee = no;
-                try self.clear()
-                tvg_animation_set_frame(animation, no);
-                tvg_canvas_update_paint(canvas, tvg_animation_get_picture(animation));
-                tvg_canvas_draw(canvas);
-                tvg_canvas_sync(canvas);
-            } else {
-                print("NOT Setting frame..")
-            }
-        } catch let error {
-            print(error)
+    func frame(no: Float32) throws {
+        if no >= 0.0 && no <= totalFramesState.pointee - 1.0 {
+            currentFrameState.pointee = no;
+            try self.clear()
+            try self.draw()
+        } else {
+            print("Frame: \(no) is outside of frame limits for this animation.")
         }
     }
     
