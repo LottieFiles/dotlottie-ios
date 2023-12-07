@@ -1,0 +1,5 @@
+framework module Thorvg {
+  umbrella header "thorvg_capi.h"
+  export *
+  module * { export * }
+}
