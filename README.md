@@ -95,7 +95,7 @@ class AnimationViewController: UIViewController {
 | `isStopped()`       | Bool | Reflects whether the animation is stopped or not.                                                                     |
 | `isPlaying()`       | Bool | Reflects whether the animation is playing or not.                                                                     |
 | `segments()`        | (Float32, Float32)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
-| `backgroundColor()` | UIColor / NSColor  | Gets the background color of the canvas.                                                                              |
+| `backgroundColor()` | CIImage  | Gets the background color of the canvas.                                                                              |
 | `autoplay()`        | Bool | Indicates if the animation is set to auto play.                                                                       |
 | `isFrozen()`        | Bool | Reflects whether the animation loop is stopped or not.                                                                |
 
@@ -116,7 +116,7 @@ class AnimationViewController: UIViewController {
 | `setSegments(segments: (Float32, Float32))` | Sets the start and end frame of the animation. |
 | `freeze()` | Freezes the animation by stopping the animation loop. |
 | `unFreeze()` | Unfreezes the animation by resuming the animation loop. |
-| `setBackgroundColor(color: UIColor / NSColor)` | Sets the background color of the animation. |
+| `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
 
 ### Event callbacks
 
