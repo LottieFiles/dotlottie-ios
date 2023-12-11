@@ -233,54 +233,57 @@ if [ $# -gt 0 ]; then
         fi
     done
 
-INFO_PLIST=./artifacts/Thorvg.xcframework/Info.plist
-XCFRAMEWORK_DIR=./artifacts/Thorvg.xcframework
-FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework
-MACOS_OUTPUT_FILE=${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework/Thorvg
-MAC_LIB_IDENTIFIER="macos-x86_64_arm64"
+    old_arguments="$@"
+    
+    if [ "$old_arguments" = "all" ]; then
+        INFO_PLIST=./artifacts/Thorvg.xcframework/Info.plist
+        XCFRAMEWORK_DIR=./artifacts/Thorvg.xcframework
+        FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework
+        MACOS_OUTPUT_FILE=${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework/Thorvg
+        MAC_LIB_IDENTIFIER="macos-x86_64_arm64"
 
-mkdir -p ${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework/
+        mkdir -p ${XCFRAMEWORK_DIR}/macos-x86_64_arm64/Thorvg.framework/
 
-# THIS IF FOR THE PLIST FILE AT THE ROOT OF THE XCFRAMEWORK
-"$PLISTBUDDY_EXEC" -c "Add :CFBundlePackageType string XFWK" "${INFO_PLIST}"
-"$PLISTBUDDY_EXEC" -c "Add :XCFrameworkFormatVersion string 1.0" "${INFO_PLIST}"
-"$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries array" "${INFO_PLIST}"
+        # THIS IF FOR THE PLIST FILE AT THE ROOT OF THE XCFRAMEWORK
+        "$PLISTBUDDY_EXEC" -c "Add :CFBundlePackageType string XFWK" "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :XCFrameworkFormatVersion string 1.0" "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries array" "${INFO_PLIST}"
 
 
-# THIS IF FOR THE PLIST FILE AT THE ROOT OF THE XCFRAMEWORK
-plist_add_library() {
-    local index=$1
-    local identifier=$2
-    local platform=$3
-    local platform_variant=$4
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries: dict"  "${INFO_PLIST}"
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:LibraryIdentifier string ${identifier}"  "${INFO_PLIST}"
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:LibraryPath string Thorvg.framework"  "${INFO_PLIST}"
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedArchitectures array"  "${INFO_PLIST}"
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedPlatform string ${platform}"  "${INFO_PLIST}"
-    if [ ! -z "$platform_variant" ]; then
+        # THIS IF FOR THE PLIST FILE AT THE ROOT OF THE XCFRAMEWORK
+        plist_add_library() {
+        local index=$1
+        local identifier=$2
+        local platform=$3
+        local platform_variant=$4
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries: dict"  "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:LibraryIdentifier string ${identifier}"  "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:LibraryPath string Thorvg.framework"  "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedArchitectures array"  "${INFO_PLIST}"
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedPlatform string ${platform}"  "${INFO_PLIST}"
+        if [ ! -z "$platform_variant" ]; then
         "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedPlatformVariant string ${platform_variant}" "${INFO_PLIST}"
-    fi
-}
+        fi
+        }
 
-plist_add_architecture() {
-    local index=$1
-    local arch=$2
-    "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedArchitectures: string ${arch}"  "${INFO_PLIST}"
-}
+        plist_add_architecture() {
+        local index=$1
+        local arch=$2
+        "$PLISTBUDDY_EXEC" -c "Add :AvailableLibraries:${index}:SupportedArchitectures: string ${arch}"  "${INFO_PLIST}"
+        }
 
-# This script forcibly merges both Macos archs together to prevent a collision error
-# THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of macos-x86_64_arm64
-plist_add_library 0 "${MAC_LIB_IDENTIFIER}" "macos"
-plist_add_architecture 0 "x86_64"
-plist_add_architecture 0 "arm64"
+        # This script forcibly merges both Macos archs together to prevent a collision error
+        # THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of macos-x86_64_arm64
+        plist_add_library 0 "${MAC_LIB_IDENTIFIER}" "macos"
+        plist_add_architecture 0 "x86_64"
+        plist_add_architecture 0 "arm64"
 
-# merge BOTH macos architectures together in to the same file
-lipo -create -output $MACOS_OUTPUT_FILE ./artifacts/macos_aarch/Thorvg.framework/Thorvg ./artifacts/macos_x86_64/Thorvg.framework/Thorvg
+        # merge BOTH macos architectures together in to the same file
+        lipo -create -output $MACOS_OUTPUT_FILE ./artifacts/macos_aarch/Thorvg.framework/Thorvg ./artifacts/macos_x86_64/Thorvg.framework/Thorvg
 
 
-# THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of macos-x86_64_arm64
-$PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
+        # THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of macos-x86_64_arm64
+        $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleName string Thorvg" \
                 -c "Add :CFBundleDisplayName string Thorvg" \
                 -c "Add :CFBundleVersion string 1.0.0" \
@@ -292,29 +295,29 @@ $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleSupportedPlatforms:1 string MacOSX" \
                 $FRAMEWORK_DIR/Info.plist
                         
-mkdir -p $FRAMEWORK_DIR/Headers
-mkdir -p $FRAMEWORK_DIR/Modules
-cp $BINDINGS $FRAMEWORK_DIR/Headers/
-cp ./artifacts/include/module.modulemap $FRAMEWORK_DIR/Modules/
+        mkdir -p $FRAMEWORK_DIR/Headers
+        mkdir -p $FRAMEWORK_DIR/Modules
+        cp $BINDINGS $FRAMEWORK_DIR/Headers/
+        cp ./artifacts/include/module.modulemap $FRAMEWORK_DIR/Modules/
 
 
-#IOS SIMULATOR TIME
-IOS_SIM_FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/ios-x86_64_arm64-simulator/Thorvg.framework
-IOS_SIM_OUTPUT_FILE=${IOS_SIM_FRAMEWORK_DIR}/Thorvg
-IOS_SIM_LIB_IDENTIFIER="ios-x86_64_arm64-simulator"
+        #IOS SIMULATOR TIME
+        IOS_SIM_FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/ios-x86_64_arm64-simulator/Thorvg.framework
+        IOS_SIM_OUTPUT_FILE=${IOS_SIM_FRAMEWORK_DIR}/Thorvg
+        IOS_SIM_LIB_IDENTIFIER="ios-x86_64_arm64-simulator"
 
-mkdir -p $IOS_SIM_FRAMEWORK_DIR
+        mkdir -p $IOS_SIM_FRAMEWORK_DIR
 
-# The 1 is an index
-plist_add_library 1 "${IOS_SIM_LIB_IDENTIFIER}" "ios" "simulator"
-plist_add_architecture 1 "x86_64"
-plist_add_architecture 1 "arm64"
+        # The 1 is an index
+        plist_add_library 1 "${IOS_SIM_LIB_IDENTIFIER}" "ios" "simulator"
+        plist_add_architecture 1 "x86_64"
+        plist_add_architecture 1 "arm64"
 
-# merge BOTH iOS-sim architectures together in to the same file
-lipo -create -output $IOS_SIM_OUTPUT_FILE ./artifacts/iphone_sim_aarch/Thorvg.framework/Thorvg ./artifacts/iphone_sim_x86_64/Thorvg.framework/Thorvg
+        # merge BOTH iOS-sim architectures together in to the same file
+        lipo -create -output $IOS_SIM_OUTPUT_FILE ./artifacts/iphone_sim_aarch/Thorvg.framework/Thorvg ./artifacts/iphone_sim_x86_64/Thorvg.framework/Thorvg
 
-# THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of ios-x86_64_arm64-simulator
-$PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
+        # THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of ios-x86_64_arm64-simulator
+        $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleName string Thorvg" \
                 -c "Add :CFBundleDisplayName string Thorvg" \
                 -c "Add :CFBundleVersion string 1.0.0" \
@@ -326,28 +329,28 @@ $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleSupportedPlatforms:1 string iPhoneSimulator" \
                 $IOS_SIM_FRAMEWORK_DIR/Info.plist
                         
-mkdir -p $IOS_SIM_FRAMEWORK_DIR/Headers
-mkdir -p $IOS_SIM_FRAMEWORK_DIR/Modules
-cp $BINDINGS $IOS_SIM_FRAMEWORK_DIR/Headers/
-cp ./artifacts/include/module.modulemap $IOS_SIM_FRAMEWORK_DIR/Modules/
+        mkdir -p $IOS_SIM_FRAMEWORK_DIR/Headers
+        mkdir -p $IOS_SIM_FRAMEWORK_DIR/Modules
+        cp $BINDINGS $IOS_SIM_FRAMEWORK_DIR/Headers/
+        cp ./artifacts/include/module.modulemap $IOS_SIM_FRAMEWORK_DIR/Modules/
 
 
-#IOS REAL IPHONE TIME
-IOS_FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/ios-arm64/Thorvg.framework
-IOS_OUTPUT_FILE=${IOS_FRAMEWORK_DIR}/Thorvg
-IOS_LIB_IDENTIFIER="ios-arm64"
+        #IOS REAL IPHONE TIME
+        IOS_FRAMEWORK_DIR=${XCFRAMEWORK_DIR}/ios-arm64/Thorvg.framework
+        IOS_OUTPUT_FILE=${IOS_FRAMEWORK_DIR}/Thorvg
+        IOS_LIB_IDENTIFIER="ios-arm64"
 
-mkdir -p $IOS_FRAMEWORK_DIR
+        mkdir -p $IOS_FRAMEWORK_DIR
 
-# The 2 is an index
-plist_add_library 2 "${IOS_LIB_IDENTIFIER}" "ios"
-plist_add_architecture 2 "arm64"
+        # The 2 is an index
+        plist_add_library 2 "${IOS_LIB_IDENTIFIER}" "ios"
+        plist_add_architecture 2 "arm64"
 
-# Device iOS is only arm64, we already have the lipo'ed file so just move it
-mv ./artifacts/iphone_aarch/Thorvg.framework/Thorvg ${IOS_FRAMEWORK_DIR}
+        # Device iOS is only arm64, we already have the lipo'ed file so just move it
+        mv ./artifacts/iphone_aarch/Thorvg.framework/Thorvg ${IOS_FRAMEWORK_DIR}
 
-# THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of ios-arm64
-$PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
+        # THIS IF FOR THE PLIST FILE AT THE .framework LEVEL of ios-arm64
+        $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleName string Thorvg" \
                 -c "Add :CFBundleDisplayName string Thorvg" \
                 -c "Add :CFBundleVersion string 1.0.0" \
@@ -359,21 +362,19 @@ $PLISTBUDDY_EXEC -c "Add :CFBundleIdentifier string com.thorvg.Thorvg" \
                 -c "Add :CFBundleSupportedPlatforms:1 string iPhone" \
                 $IOS_FRAMEWORK_DIR/Info.plist
                         
-mkdir -p $IOS_FRAMEWORK_DIR/Headers
-mkdir -p $IOS_FRAMEWORK_DIR/Modules
-cp $BINDINGS $IOS_FRAMEWORK_DIR/Headers/
-cp ./artifacts/include/module.modulemap $IOS_FRAMEWORK_DIR/Modules/
+        mkdir -p $IOS_FRAMEWORK_DIR/Headers
+        mkdir -p $IOS_FRAMEWORK_DIR/Modules
+        cp $BINDINGS $IOS_FRAMEWORK_DIR/Headers/
+        cp ./artifacts/include/module.modulemap $IOS_FRAMEWORK_DIR/Modules/
 
-# END OF SCRIPT MOVE TO FINAL FOLDER
+        # END OF SCRIPT MOVE TO FINAL FOLDER
+        mkdir -p ../exports/framework/
+        mv $XCFRAMEWORK_DIR ../exports/framework/
+        
+        exit 0
+    fi
 
-mkdir -p ../exports/framework/
-mv $XCFRAMEWORK_DIR ../exports/framework/
-
-# SCRIPT ENDS HERE!!
-exit 0
-
-
-#    execute_and_check xcodebuild -create-xcframework ${frameworks} -output "./artifacts/Thorvg.xcframework"
+    execute_and_check xcodebuild -create-xcframework ${frameworks} -output "./artifacts/Thorvg.xcframework"
 
     # Creating Framework folder
     mkdir -p $BASE_DIR/Framework
