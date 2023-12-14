@@ -11,12 +11,11 @@ let package = Package(
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
             name: "DotLottie",
-            targets: ["DotLottie", "Thorvg"]),
+            targets: ["DotLottie", "DotLottiePlayer"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
-//        .package(path: "./Sources/DotLottie/Thorvg")
         .package(url: "https://github.com/weichsel/ZIPFoundation.git", .upToNextMajor(from: "0.9.0"))
     ],
     targets: [
@@ -24,15 +23,18 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "DotLottie",
-            dependencies: ["Thorvg", "ZIPFoundation"],
+            dependencies: ["DotLottiePlayer", "ZIPFoundation"],
             path: "Sources/DotLottie/"),
         .testTarget(
             name: "DotLottieTests",
             dependencies: ["DotLottie"]),
         .binaryTarget(
-            name: "Thorvg",
-            path: "./Sources/Thorvg/exports/Framework/Thorvg.xcframework"
-//            path: "./Sources/DotLottie/Backup/Thorvg/Thorvg.xcframework.zip"
+            name: "DotLottiePlayer",
+            path: "./Sources/Thorvg-rust/DotLottiePlayer.xcframework"
         ),
+//        .binaryTarget(
+//            name: "Thorvg",
+//            path: "./Sources/Thorvg/exports/framework/Thorvg.xcframework"
+//        ),
     ]
 )

@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ManifestModel {
+struct ManifestModel: Decodable {
     var activeAnimationId: String?
     
     var animations: [ManifestAnimationModel]

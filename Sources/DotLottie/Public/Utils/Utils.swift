@@ -34,13 +34,14 @@ enum WriteErrors: Error {
 
 enum DotLottieErrors: Error {
     case missingAnimations
+    case missingManifest
 }
 
 /// Fetches the .lottie from the URL and attempts to write the file contents to disk.
 /// - Parameter url: Web URL to the animation
 /// - Throws: failedToWriteToDisk, missingAnimations
 /// - Returns: URL pointing to the location on disk the animation was written to.
-func fetchDotLottieAndWriteToDisk(url: URL) async throws -> URL {
+func fetchDotLottieAndWriteToDisk(url: URL) async throws -> (URL, ManifestModel) {
     // Verify if the URL is valid
     do {
         try verifyUrlType(url: url.absoluteString)
@@ -53,19 +54,19 @@ func fetchDotLottieAndWriteToDisk(url: URL) async throws -> URL {
     do {
         let data = try await fetchFileFromURL(url: url)
         
-        return try writeDotLottieToDisk(dotLottie: data)
+        let (filePath, manifestData) = try writeDotLottieToDisk(dotLottie: data)
+        
+        return (filePath, manifestData)
     } catch let error {
         throw error
     }
 }
 
-
-/// Attempts to write doLottie contents to disk.
+/// Extracts manifest file from data and builds the ManifestModel object from it.
 /// - Parameter dotLottie: Data of the .lottie file.
-/// - Throws: failedToWriteToDisk, missingAnimations
-/// - Returns: URL pointing to the location on disk to where the animation was written to.
-func writeDotLottieToDisk(dotLottie: Data) throws -> URL {
-    // Fetch data
+/// - Throws: missingManifest
+/// - Returns: ManifestModel object.
+func extractManifest(dotLottie: Data) throws -> ManifestModel {
     do {
         // Attempt to read .lottie file
         let archive = try Archive(data: dotLottie, accessMode: .read)
@@ -73,21 +74,43 @@ func writeDotLottieToDisk(dotLottie: Data) throws -> URL {
         for entry in archive {
             if entry.path == "manifest.json" {
                 var txtData = Data()
+                
                 _ = try archive.extract(entry) { data in
                     txtData.append(data)
                 }
+
+                let decoder = JSONDecoder()
+                let jsonData = try decoder.decode(ManifestModel.self, from: txtData)
                 
-                // The manifest
-                _ = String(decoding: txtData, as: UTF8.self)
+                return jsonData
             }
-            
+        }
+    } catch let error {
+        throw error
+    }
+    
+    throw DotLottieErrors.missingManifest
+}
+
+/// Attempts to write doLottie contents to disk.
+/// - Parameter dotLottie: Data of the .lottie file.
+/// - Throws: failedToWriteToDisk, missingAnimations
+/// - Returns: URL pointing to the location on disk to where the animation was written to.
+func writeDotLottieToDisk(dotLottie: Data) throws -> (URL, ManifestModel) {
+    do {
+        // Attempt to read .lottie file
+        let archive = try Archive(data: dotLottie, accessMode: .read)
+        
+        let manifestData = try extractManifest(dotLottie: dotLottie)
+
+        for entry in archive {
             if entry.path.contains("animations") && entry.path.contains("json") {
                 guard let path = try writeAnimationAndAssetsToDisk(entry: entry, archive: archive) else {
                     throw WriteErrors.failedToWriteToDisk
                 }
                 
-                // For the moment we return straight away as we only support one animaion
-                return path
+                // For the moment we return straight away as we only support one animation
+                return (path, manifestData)
             }
         }
 
@@ -301,5 +324,17 @@ func verifyUrlType(url: String) throws {
     
     if stringCheck.pathExtension != "json" && stringCheck.pathExtension != "lottie" {
         throw FileErrors.invalidFileExtension
+    }
+}
+
+/// Writes data to filePath
+/// - Parameter: dataToWrite: Data
+/// - Parameter: filePath: URL to write to
+/// - Throws:
+func writeDataToFile(dataToWrite: Data, filePath: URL) throws {
+    do {
+        try dataToWrite.write(to: filePath)
+    } catch {
+        throw WriteToFileError.writeFailure(description: error.localizedDescription)
     }
 }

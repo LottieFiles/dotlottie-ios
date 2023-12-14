@@ -16,7 +16,7 @@ public enum PlayerState {
     case error
 }
 
-public enum Mode {
+public enum Mode: Decodable {
     // From start to end
     case forward
 
