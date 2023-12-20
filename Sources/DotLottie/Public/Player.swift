@@ -89,4 +89,8 @@ class Player {
     func duration() -> Float32 {
         return dotLottiePlayer.getDuration()
     }
+    
+    func clear() {
+        dotLottiePlayer.clear()
+    }
 }

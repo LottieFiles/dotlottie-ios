@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ManifestAnimationModel: Decodable {
+struct ManifestAnimationModel: Codable {
     var autoplay: Bool?
     
     var defaultTheme: String?

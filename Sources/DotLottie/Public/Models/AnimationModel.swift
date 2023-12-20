@@ -30,19 +30,12 @@ public enum Mode: Decodable {
     case bounceReverse
 }
 
-/**
-    Settings for a single animation
- */
+
+/// <#Description#>
 public struct AnimationModel {
-    var animationData: String?
-    
-    var url: String?
-    
     var width: Int = 512
     
     var height: Int = 512
-    
-    var id: String
     
     var loop: Bool = false
     
@@ -54,9 +47,27 @@ public struct AnimationModel {
     
     var mode: Mode = .forward
     
-    var defaultActiveAnimation: Bool = false
-    
     var error: Bool = false
+    
+    var errorMessage: String = ""
+    
+    var backgroundColor: CIImage = CIImage.white
+}
+
+public struct PlaybackConfig {
+    var width: Int = 512
+    
+    var height: Int = 512
+    
+    var loop: Bool = false
+    
+    var autoplay: Bool = false
+    
+    var speed: Int = 1
+    
+    var segments: (Float, Float) = (-1,-1)
+    
+    var mode: Mode = .forward
     
     var backgroundColor: CIImage = CIImage.white
 }
