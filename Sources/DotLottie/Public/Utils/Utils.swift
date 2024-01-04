@@ -207,22 +207,11 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive, destinationUR
     let fileManager = FileManager.default
     
     var txtData = Data()
-//    var destinationURL = documentsDirectory
-    
-//    var animationName = "dotLottie"
     var animationFileName = "dotLottie.json"
-    
-    // Get filename without extension
-//    if let url = URL(string: entry.path) {
-//        animationName = url.deletingPathExtension().lastPathComponent
-//    }
     
     // Get filename with extension
     animationFileName = entry.path.components(separatedBy: "/").last ?? "dotLottie.json"
-    
-    // Add the animation name to the directory path under the animation directory
-//    destinationURL.appendPathComponent("animations/\(animationName)/")
-    
+        
     // Add filename with its extension to the destination url
     var fileDestination = destinationURL
     fileDestination.appendPathComponent(animationFileName)

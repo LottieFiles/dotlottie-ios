@@ -12,7 +12,6 @@
 
 - iPhone, iPhone Simulator (x86), MacOS (x86, ARM)
 
-
 Note: This is due to the compilation of Thorvg. We're working on supporting more platforms!
 
 ## Usage
@@ -40,7 +39,7 @@ Set up DotLottieAnimation inside a View. Optionally pass playback settings.
 ```swift
 struct AnimationView: View {
     var body: some View {
-        DotLottieAnimation(fileName: "cool_animation", autoplay: true, loop: true).view()
+        DotLottieAnimation(fileName: "cool_animation", playbackConfig: PlaybackConfig(autoplay: true, loop: true)).view()
     }
 }
 ```
@@ -66,7 +65,7 @@ Coming soon!
 
 ```swift
 class AnimationViewController: UIViewController {
-    var simpleVM = DotLottieAnimation(webURL: "https://lottie.host/link.lottie", autoplay: true, loop: false)
+    var simpleVM = DotLottieAnimation(webURL: "https://lottie.host/link.lottie", playbackConfig: PlaybackConfig(autoplay: true, loop: false))
     
     override func viewWillAppear(_ animated: Bool) {
         let dotLottieView = simpleVM.createDotLottieView()

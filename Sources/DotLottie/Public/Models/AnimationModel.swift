@@ -70,4 +70,15 @@ public struct PlaybackConfig {
     var mode: Mode = .forward
     
     var backgroundColor: CIImage = CIImage.white
+    
+    public init(width: Int = 512, height: Int = 512, loop: Bool = false, autoplay: Bool = false, speed: Int = 1, segments: (Float, Float) = (-1,-1), mode: Mode = .forward, backgroundColor: CIImage = .white) {
+        self.width = width
+        self.height = height
+        self.loop = loop
+        self.autoplay = autoplay
+        self.speed = speed
+        self.segments = segments
+        self.mode = mode
+        self.backgroundColor = backgroundColor
+    }
 }

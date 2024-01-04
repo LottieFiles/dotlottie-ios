@@ -45,10 +45,10 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     private var animationModel: AnimationModel = AnimationModel()
     
     internal var dotLottieManager: DotLottieManager = DotLottieManager()
+    
+    internal var callbacks: [AnimationEvent: [() -> Void]] = [:]
 
     private var manifestModel: ManifestModel?
-
-    internal var callbacks: [AnimationEvent: [() -> Void]] = [:]
     
     private var loopCounter: Int = 0
     
@@ -66,71 +66,63 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
         animationData: String = "",
         fileName: String = "",
         webURL: String = "",
-        loop: Bool = false,
-        autoplay: Bool = false,
-        speed: Int = 1,
-        mode: Mode = .forward,
-        width: Int = 512,
-        height: Int = 512,
-        segments: (Float, Float)? = (-1,-1),
-        backgroundColor: CIImage = CIImage.white
+        playbackConfig: PlaybackConfig
     ) {
-            thorvg = Player()
-            self.prevState = .paused
-                        
-            if webURL != "" {
-                if webURL.contains(".lottie") {
-                    Task {
-                        do {
-                            _ = try await loadDotLottieFromURL(url: webURL)
-                        } catch let error {
-                            print("Failed to load dotLottie. Failed with error: \(error)")
-                            animationModel.error = true
-                            callCallbacks(event: .onLoadError)
-                        }
-                    }
-                } else {
-                    Task {
-                        do {
-                            try await loadAnimationFromURL(url: webURL)
-                        } catch let error {
-                            print("Failed to load dotLottie. Failed with error: \(error)")
-                            animationModel.error = true
-                            callCallbacks(event: .onLoadError)
-                        }
+        thorvg = Player()
+        self.prevState = .paused
+        
+        if webURL != "" {
+            if webURL.contains(".lottie") {
+                Task {
+                    do {
+                        _ = try await loadDotLottieFromURL(url: webURL)
+                    } catch let error {
+                        print("Failed to load dotLottie. Failed with error: \(error)")
+                        animationModel.error = true
+                        callCallbacks(event: .onLoadError)
                     }
                 }
-            } else if animationData != "" {
-                do {
-                    try thorvg.loadAnimation(animationData: animationData,
-                                             width: animationModel.width,
-                                             height: animationModel.height)
-                } catch {
-                    animationModel.error = true
-                    callCallbacks(event: .onLoadError)
-                }
-            } else if fileName != "" {
-                do {
-                    try loadAnimationFromBundle(animationName: fileName)
-                } catch let error {
-                    print("Loading from bundle failed for both .json and .lottie versions of your animation: \(error)")
-                    animationModel.error = true
-                    callCallbacks(event: .onLoadError)
+            } else {
+                Task {
+                    do {
+                        try await loadAnimationFromURL(url: webURL)
+                    } catch let error {
+                        print("Failed to load dotLottie. Failed with error: \(error)")
+                        animationModel.error = true
+                        callCallbacks(event: .onLoadError)
+                    }
                 }
             }
-            
-            self.initAnimation(segments: segments, mode: mode)
-            
-            // Override manifest values loaded from loadAnimation
-            animationModel.width = width
-            animationModel.height = height
-            animationModel.loop = loop
-            animationModel.autoplay = autoplay
-            animationModel.speed = speed
-            animationModel.mode = mode
-            animationModel.backgroundColor = backgroundColor
+        } else if animationData != "" {
+            do {
+                try thorvg.loadAnimation(animationData: animationData,
+                                         width: animationModel.width,
+                                         height: animationModel.height)
+            } catch {
+                animationModel.error = true
+                callCallbacks(event: .onLoadError)
+            }
+        } else if fileName != "" {
+            do {
+                try loadAnimationFromBundle(animationName: fileName)
+            } catch let error {
+                print("Loading from bundle failed for both .json and .lottie versions of your animation: \(error)")
+                animationModel.error = true
+                callCallbacks(event: .onLoadError)
+            }
         }
-    
+        
+        self.initAnimation(segments: playbackConfig.segments, mode: playbackConfig.mode)
+        
+        // Override manifest values loaded from loadAnimation
+        animationModel.width = playbackConfig.width
+        animationModel.height = playbackConfig.height
+        animationModel.loop = playbackConfig.loop
+        animationModel.autoplay = playbackConfig.autoplay
+        animationModel.speed = playbackConfig.speed
+        animationModel.mode = playbackConfig.mode
+        animationModel.backgroundColor = playbackConfig.backgroundColor
+    }
     
     /// Init the segments and starting frame.
     /// - Parameters:
@@ -216,9 +208,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             // If we're not looping - Set playing to false
             if (!animationModel.loop) {
-                print("forward tick Going to frame \(newFrame)")
-                
-                // Todo: Doesnt go to first frame
                 self.setFrame(frame: newFrame)
                 
                 playerState = .paused
@@ -437,7 +426,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             } catch {
                 self.framerate = 30
             }
-
+            
             try thorvg.loadAnimation(animationData: animationData, width: self.animationModel.width, height: self.animationModel.height)
             
             // Store the current loaded data for optional retrieval
@@ -475,7 +464,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                     self.framerate = 30
                 }
             }
-
+            
             try thorvg.loadAnimationFromPath(animationPath: localPath.path,
                                              width: (self.animationModel.width),
                                              height: (self.animationModel.height))
@@ -544,23 +533,23 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     
     
     /// Load the next animation of the dotLottie.
-    public func nextAnimation() {
+    public func nextAnimation(playbackConfig: PlaybackConfig?) {
         do {
             let m = try self.dotLottieManager.nextAnimation()
             
-            loadFromId(animationId: m.id)
+            loadFromId(animationId: m.id, playbackConfig: playbackConfig)
         } catch {
             self.animationModel.error = true
             self.animationModel.errorMessage = "prevAnimation: Error loading next animation."
         }
     }
-
+    
     /// Load the previous animation of the dotLottie.
-    public func prevAnimation() {
+    public func prevAnimation(playbackConfig: PlaybackConfig?) {
         do {
             let m = try self.dotLottieManager.prevAnimation()
             
-            loadFromId(animationId: m.id)
+            loadFromId(animationId: m.id, playbackConfig: playbackConfig)
         } catch {
             self.animationModel.error = true
             self.animationModel.errorMessage = "prevAnimation: Error loading previous animation."
@@ -569,7 +558,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     
     /// Load an animation via it's id.
     /// - Parameter animationId: Id of the animation.
-    public func loadFromId(animationId: String) {
+    public func loadFromId(animationId: String, playbackConfig: PlaybackConfig?) {
         self.stop()
         
         self.thorvg = Player()
@@ -595,7 +584,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             
             // Get the path on disk to the animation
             let filePath = try self.dotLottieManager.getAnimationPath(currId)
-        
+            
             self.manifestModel = self.dotLottieManager.getManifest()
             
             // Load the manifest settings in to the AnimationModel
@@ -616,7 +605,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     /// to disk then passes the file path to loadAnimation.
     /// - Parameter url: Web URL pointing to a .lottie file.
     /// - Returns: Path on disk to animation.
-    public func loadDotLottieFromURL(url: String) async throws {
+    private func loadDotLottieFromURL(url: String) async throws {
         if let url = URL(string: url) {
             do {
                 try await self.dotLottieManager.initFromWebUrl(url: url)
@@ -624,11 +613,11 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 let currId = self.dotLottieManager.getCurrentAnimationId()
                 
                 let filePath = try self.dotLottieManager.getAnimationPath(currId)
-            
+                
                 self.manifestModel = self.dotLottieManager.getManifest()
                 
                 self.initWidthHeight(animationData: nil, animationFilePath: filePath)
-                                
+                
                 // Load the manifest settings in to the AnimationModel
                 if let m = self.manifestModel {
                     self.loadManifestSettings(manifest: m)
@@ -688,24 +677,23 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     }
     
     private func initWidthHeight(animationData: String?, animationFilePath: URL?) {
-//        if self.animationModel.width == self.defaultWidthHeight || self.animationModel.height == self.defaultWidthHeight {
-            // Parse width and height of animation
-            do {
-                if let aData = animationData {
-                    let (animWidth, animHeight) = try getAnimationWidthHeight(animationData: aData)
-                    self.animationModel.width = Int(animWidth)
-                    self.animationModel.height = Int(animHeight)
-                } else if let aFP = animationFilePath {
-                    let (animWidth, animHeight) = try getAnimationWidthHeight(filePath: aFP)
-                    self.animationModel.width = Int(animWidth)
-                    self.animationModel.height = Int(animHeight)
-                }
-            } catch {
-                // If for some reason width and height are missing, set to defaults
-                self.animationModel.width = self.defaultWidthHeight
-                self.animationModel.height = self.defaultWidthHeight
+        // Parse width and height of animation
+        do {
+            if let aData = animationData {
+                let (animWidth, animHeight) = try getAnimationWidthHeight(animationData: aData)
+                self.animationModel.width = Int(animWidth)
+                self.animationModel.height = Int(animHeight)
+            } else if let aFP = animationFilePath {
+                let (animWidth, animHeight) = try getAnimationWidthHeight(filePath: aFP)
+                self.animationModel.width = Int(animWidth)
+                self.animationModel.height = Int(animHeight)
             }
-//        }
+        } catch {
+            // If for some reason width and height are missing, set to defaults
+            self.animationModel.width = self.defaultWidthHeight
+            self.animationModel.height = self.defaultWidthHeight
+        }
+        //        }
     }
     
     // MARK: Callbacks
@@ -796,7 +784,6 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     }
     
     public func currentFrame() -> Float32 {
-        //        print("Returning current frame: \(thorvg.currentFrame())")
         return thorvg.currentFrame()
     }
     

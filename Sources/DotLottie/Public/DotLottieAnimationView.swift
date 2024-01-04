@@ -19,7 +19,7 @@ public class DotLottieAnimationView: UIView, DotLottie {
     private var metalView: MTKView!
     private var coordinator: Coordinator!
 
-    var dotLottieViewModel = DotLottieAnimation()
+    var dotLottieViewModel = DotLottieAnimation(playbackConfig: PlaybackConfig())
     var cancellableBag = Set<AnyCancellable>()
     
     public init(dotLottieViewModel: DotLottieAnimation) {
