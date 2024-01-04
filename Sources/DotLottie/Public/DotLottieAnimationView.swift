@@ -19,10 +19,8 @@ public class DotLottieAnimationView: UIView, DotLottie {
     private var metalView: MTKView!
     private var coordinator: Coordinator!
 
-    var dotLottieViewModel = DotLottieAnimation(segments: nil)
+    var dotLottieViewModel = DotLottieAnimation(playbackConfig: PlaybackConfig())
     var cancellableBag = Set<AnyCancellable>()
-    
-    let framerate: Int = 60
     
     public init(dotLottieViewModel: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottieViewModel
@@ -35,6 +33,13 @@ public class DotLottieAnimationView: UIView, DotLottie {
                 self.metalView.isPaused = !(value == PlayerState.playing)
             }
         }.store(in: &cancellableBag)
+
+        dotLottieViewModel.$framerate.sink { value in
+            if self.metalView != nil {
+                self.metalView.preferredFramesPerSecond = dotLottieViewModel.framerate
+            }
+        }.store(in: &cancellableBag)
+
 
         setupMetalView()
     }
@@ -61,7 +66,7 @@ public class DotLottieAnimationView: UIView, DotLottie {
         
         metalView.delegate = self.coordinator
         
-        metalView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.speed()
+        metalView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         
         metalView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
