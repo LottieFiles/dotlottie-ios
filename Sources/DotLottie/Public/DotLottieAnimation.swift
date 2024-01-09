@@ -579,7 +579,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             // Initialize the manager with the animation from the main asset bundle.
             try dotLottieManager.initFromBundle(assetName: animationName)
             
-            let currId = self.dotLottieManager.getCurrentAnimationId()
+            let currId = self.dotLottieManager.currentAnimationId
             
             // Get the path on disk to the animation
             let filePath = try self.dotLottieManager.getAnimationPath(currId)
@@ -609,7 +609,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             do {
                 try await self.dotLottieManager.initFromWebUrl(url: url)
                 
-                let currId = self.dotLottieManager.getCurrentAnimationId()
+                let currId = self.dotLottieManager.currentAnimationId
                 
                 let filePath = try self.dotLottieManager.getAnimationPath(currId)
                 

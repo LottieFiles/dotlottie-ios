@@ -178,11 +178,4 @@ class DotLottieManager {
 
         return filePaths[animationId]!
     }
-    
-    
-    /// Get the current active animation id.
-    /// - Returns: Id of the animation.
-    public func getCurrentAnimationId() -> String {
-        return currentAnimationId
-    }
 }
