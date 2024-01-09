@@ -99,6 +99,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                                          width: animationModel.width,
                                          height: animationModel.height)
             } catch {
+                print("Thorvg failed to load.")
                 animationModel.error = true
                 callCallbacks(event: .onLoadError)
             }
@@ -167,12 +168,10 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             return image
         }
         
-        self.callCallbacks(event: .onLoadError)
         return nil
     }
     
     // MARK: Tick functions
-    
     
     /// Forward tick behaviour:
     /// - Use the current frame
@@ -585,7 +584,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
             // Get the path on disk to the animation
             let filePath = try self.dotLottieManager.getAnimationPath(currId)
             
-            self.manifestModel = self.dotLottieManager.getManifest()
+            self.manifestModel = self.dotLottieManager.manifest
             
             // Load the manifest settings in to the AnimationModel
             if let m = self.manifestModel {
@@ -614,7 +613,7 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
                 
                 let filePath = try self.dotLottieManager.getAnimationPath(currId)
                 
-                self.manifestModel = self.dotLottieManager.getManifest()
+                self.manifestModel = self.dotLottieManager.manifest
                 
                 self.initWidthHeight(animationData: nil, animationFilePath: filePath)
                 

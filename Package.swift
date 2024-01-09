@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "DotLottie",
     // Todo - When Thorvg can build for arm, add more platforms here!
-    platforms: [.iOS(.v16), .macOS(.v11)],
+    platforms: [.iOS(.v14), .macOS(.v11)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(

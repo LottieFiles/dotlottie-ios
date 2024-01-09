@@ -54,16 +54,14 @@ func fetchDotLottieAndWriteToDisk(url: URL) async throws -> [String:URL] {
     // Fetch data
     do {
         let data = try await fetchFileFromURL(url: url)
-
-        if let fileNameSubstring = url.lastPathComponent.split(separator: ".lottie").first {
-            let fileName = String(fileNameSubstring)
-            let urlBook = try writeDotLottieToDisk(dotLottie: data, fileName: fileName)
         
-            return urlBook
+        let fileExtension = ".lottie"
+        if let range = url.lastPathComponent.range(of: fileExtension) {
+            let fileNameSubstring = url.lastPathComponent[..<range.lowerBound]
+            let fileName = String(fileNameSubstring)
+            return try writeDotLottieToDisk(dotLottie: data, fileName: fileName)
         } else {
-            let urlBook = try writeDotLottieToDisk(dotLottie: data, fileName: UUID().uuidString)
-            
-            return urlBook
+            return try writeDotLottieToDisk(dotLottie: data, fileName: UUID().uuidString)
         }
         
     } catch let error {
@@ -89,11 +87,9 @@ func extractManifest(dotLottie: Data) throws -> ManifestModel {
                 _ = try archive.extract(entry) { data in
                     txtData.append(data)
                 }
-
-                let decoder = JSONDecoder()
-                let jsonData = try decoder.decode(ManifestModel.self, from: txtData)
                 
-                return jsonData
+                let decoder = JSONDecoder()
+                return try decoder.decode(ManifestModel.self, from: txtData)
             }
         }
     } catch let error {
@@ -127,14 +123,14 @@ func writeDotLottieToDisk(dotLottie: Data, fileName: String) throws -> [String:U
                                                      create: false)
         let destinationURL = documentsDirectory
         let endPath = destinationURL.appendingPathComponent("animations/\(fileName)")
-
+        
         var animationName = "dotLottie"
         
         // Attempt to read .lottie file
         let archive = try Archive(data: dotLottie, accessMode: .read)
         
         let manifestData = try extractManifest(dotLottie: dotLottie)
-
+        
         try writeDataToFile(dataToWrite: JSONEncoder().encode(manifestData), filePath: endPath, fileName: "manifest.json")
         
         // Add the manifest to the url book
@@ -146,16 +142,16 @@ func writeDotLottieToDisk(dotLottie: Data, fileName: String) throws -> [String:U
                 if let url = URL(string: entry.path) {
                     animationName = url.deletingPathExtension().lastPathComponent
                 }
-                                
+                
                 // Add the animation name to the directory path under the animation directory
                 var writeToURL = destinationURL
                 writeToURL.appendPathComponent("animations/\(fileName)/\(animationName)/")
-
+                
                 // Add the animation to the url book
                 urlBook[animationName] = try writeAnimationAndAssetsToDisk(entry: entry, archive: archive, destinationURL: writeToURL)
             }
         }
-
+        
         return (urlBook)
     } catch let error {
         throw error
@@ -174,9 +170,9 @@ func fetchFileFromURL(url: URL) async throws -> Data {
     let (data, response) = try await session.data(from: url)
     
     guard let httpResponse = response as? HTTPURLResponse,
-            httpResponse.statusCode == 200 else {
+          httpResponse.statusCode == 200 else {
         throw NetworkingErrors.invalidServerResponse
-      }
+    }
     
     return data
 }
@@ -211,7 +207,7 @@ func writeAnimationAndAssetsToDisk(entry: Entry, archive: Archive, destinationUR
     
     // Get filename with extension
     animationFileName = entry.path.components(separatedBy: "/").last ?? "dotLottie.json"
-        
+    
     // Add filename with its extension to the destination url
     var fileDestination = destinationURL
     fileDestination.appendPathComponent(animationFileName)
@@ -389,11 +385,11 @@ func verifyUrlType(url: String) throws {
 func writeDataToFile(dataToWrite: Data, filePath: URL, fileName: String) throws {
     let fileManager = FileManager.default
     let fileDestination = filePath.appendingPathComponent(fileName)
-
+    
     do {
         if !fileManager.fileExists(atPath: fileDestination.path) {
             try fileManager.createDirectory(at: filePath, withIntermediateDirectories: true, attributes: nil)
-
+            
             // Check if file exists at filePath
             if !fileManager.fileExists(atPath: fileDestination.path) {
                 // If the file doesn't exist, create an empty file at that path

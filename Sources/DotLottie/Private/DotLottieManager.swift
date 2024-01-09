@@ -21,9 +21,9 @@ class DotLottieManager {
     private var manifestFilePath: URL?
 
     // Object representation of manifest
-    private var manifest: ManifestModel?
+    public private(set) var manifest: ManifestModel?
 
-    private var currentAnimationId: String = ""
+    public private(set) var currentAnimationId: String = ""
     
     // If an error occurs whilst loading
     private var errorMessage: String?
@@ -72,19 +72,13 @@ class DotLottieManager {
     
     /// Check if an animation is inside the loaded dotLottie.
     /// - Parameter animationId: Id of the animation, available from the manifest.json file of the dotLottie.
-    /// - Returns: <#description#>
+    /// - Returns: True if contains the animation, otherwise false
     public func containsAnimation(animationId: String) -> Bool {
         if filePaths[animationId] != nil {
             return true
         }
         
         return false
-    }
-    
-    /// Returns the ManifestModel of the manifest file.
-    /// - Returns: ManifestModel object of the manifest file.
-    public func getManifest() -> ManifestModel? {
-        return self.manifest
     }
     
     /// Get the playback settings of a specific animation.
