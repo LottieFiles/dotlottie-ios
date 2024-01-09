@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ManifestModel {
+struct ManifestModel: Codable {
     var activeAnimationId: String?
     
     var animations: [ManifestAnimationModel]

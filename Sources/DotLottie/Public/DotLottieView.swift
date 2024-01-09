@@ -16,9 +16,6 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()
     
-    // Playback settings
-    let framerate: Int = 60
-    
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
     
     public init(dotLottie: DotLottieAnimation) {
@@ -38,7 +35,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.delegate = context.coordinator
         
-        self.mtkView.preferredFramesPerSecond = self.framerate * self.dotLottieViewModel.speed()
+        self.mtkView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
@@ -62,6 +59,10 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
             uiView.isPaused = false
         } else if self.dotLottieViewModel.isFrozen() {
             uiView.isPaused = true
+        }
+        
+        if self.dotLottieViewModel.framerate != 30 {
+            uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
     }
     

@@ -50,19 +50,11 @@ public class Coordinator : NSObject, MTKViewDelegate {
             var filteredImage = inputImage.transformed(by: CGAffineTransform(
                 scaleX: size.size.width / inputImage.extent.size.width,
                 y: size.size.height / inputImage.extent.size.height))
-            
-#if targetEnvironment(simulator)
-//            filteredImage = filteredImage.transformed(by: CGAffineTransform(scaleX: 1, y: -1))
-//                .transformed(by: CGAffineTransform(translationX: 0, y: filteredImage.extent.height))
-#endif
-            
             let x = -size.origin.x
             let y = -size.origin.y
             
             // Blend the image over an opaque background image.
             // This is needed if the image is smaller than the view, or if it has transparent
-            
-            // Commented out for the moment due to memory errors
             filteredImage = filteredImage.composited(over: parent.dotLottieViewModel.backgroundColor())
             
             self.mtlTexture = drawable.texture
@@ -79,9 +71,6 @@ public class Coordinator : NSObject, MTKViewDelegate {
             parent.dotLottieViewModel.tick()
 
         } else {
-            print("NIL frame")
-            
-            parent.dotLottieViewModel.pause()
             return ;
         }
     }

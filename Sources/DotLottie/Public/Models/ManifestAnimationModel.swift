@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct ManifestAnimationModel {
+struct ManifestAnimationModel: Codable {
     var autoplay: Bool?
     
     var defaultTheme: String?
@@ -18,21 +18,16 @@ struct ManifestAnimationModel {
     
     var id: String
     
-//    var intermission: Double?
+    var intermission: Double?
     
-    var loop: Loop?
+    var loop: Bool?
     
-    var playMode: Mode = Mode.forward
+    var playMode: String?
     
-    var speed: Double?
+    var speed: Int?
     
     /// Deprecated - Use backgroundColor
     var themeColor: String?
     
     var backgroundColor: String?
-}
-
-enum Loop {
-    case boolean(Bool)
-    case number(Int)
 }
