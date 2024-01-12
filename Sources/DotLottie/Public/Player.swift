@@ -40,6 +40,44 @@ class Player {
         self.isLoaded = true
     }
     
+    public func loadDotLottie(dotLottieData: Data, width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
+        let ret = dotLottiePlayer
+            .loadDotlottie(fileData: dotLottieData, width: self.WIDTH, height: self.HEIGHT)
+        
+        if (!ret) {
+            throw AnimationLoadErrors.loadAnimationDataError
+        }
+
+        self.isLoaded = true
+    }
+    
+    public func nextAnimation(width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
+        let ret = dotLottiePlayer
+            .nextAnimation(width: self.WIDTH, height: self.HEIGHT)
+        
+        if (!ret) {
+            throw AnimationLoadErrors.loadAnimationDataError
+        }
+    }
+    
+    public func previousAnimation(width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
+        let ret = dotLottiePlayer
+            .previousAnimation(width: self.WIDTH, height: self.HEIGHT)
+        
+        if (!ret) {
+            throw AnimationLoadErrors.loadAnimationDataError
+        }
+    }
+    
     public func loadAnimationFromPath(animationPath: String, width: Int, height: Int) throws {
         self.WIDTH = UInt32(width)
         self.HEIGHT = UInt32(height)

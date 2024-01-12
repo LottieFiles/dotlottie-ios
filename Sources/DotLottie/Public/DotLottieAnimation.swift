@@ -534,6 +534,23 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     /// Load the next animation of the dotLottie.
     public func nextAnimation(playbackConfig: PlaybackConfig?) {
         do {
+            /// Test block
+            
+//            let dotLottieFileData = try await fetchFileFromURL(url: url);
+            
+            try thorvg.nextAnimation(width: 512, height: 512)
+            
+            // Autoplay the animation if needed
+            DispatchQueue.main.async {
+                self.prevState = self.playerState
+                self.playerState = self.animationModel.autoplay ? .playing : .paused
+            }
+            
+            return ;
+
+            
+            /// End of test block
+            ///
             let m = try self.dotLottieManager.nextAnimation()
             
             loadFromId(animationId: m.id, playbackConfig: playbackConfig)
@@ -546,6 +563,25 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     /// Load the previous animation of the dotLottie.
     public func prevAnimation(playbackConfig: PlaybackConfig?) {
         do {
+            
+            /// Test block
+            
+//            let dotLottieFileData = try await fetchFileFromURL(url: url);
+            
+            try thorvg.previousAnimation(width: 512, height: 512)
+            
+            // Autoplay the animation if needed
+            DispatchQueue.main.async {
+                self.prevState = self.playerState
+                self.playerState = self.animationModel.autoplay ? .playing : .paused
+            }
+            
+            return ;
+
+            
+            /// End of test block
+            ///
+            
             let m = try self.dotLottieManager.prevAnimation()
             
             loadFromId(animationId: m.id, playbackConfig: playbackConfig)
@@ -607,6 +643,23 @@ public class DotLottieAnimation: ObservableObject, PlayerEvents {
     private func loadDotLottieFromURL(url: String) async throws {
         if let url = URL(string: url) {
             do {
+                /// Test block
+                
+                let dotLottieFileData = try await fetchFileFromURL(url: url);
+                
+                try thorvg.loadDotLottie(dotLottieData: dotLottieFileData, width: 1024, height: 1024)
+                
+                // Autoplay the animation if needed
+                DispatchQueue.main.async {
+                    self.prevState = self.playerState
+                    self.playerState = self.animationModel.autoplay ? .playing : .paused
+                }
+                
+                return ;
+
+                
+                /// End of test block
+                
                 try await self.dotLottieManager.initFromWebUrl(url: url)
                 
                 let currId = self.dotLottieManager.currentAnimationId

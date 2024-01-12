@@ -224,6 +224,7 @@ private enum UniffiInternalError: LocalizedError {
 private let CALL_SUCCESS: Int8 = 0
 private let CALL_ERROR: Int8 = 1
 private let CALL_PANIC: Int8 = 2
+private let CALL_CANCELLED: Int8 = 3
 
 private extension RustCallStatus {
     init() {
@@ -286,6 +287,9 @@ private func uniffiCheckCallStatus(
             callStatus.errorBuf.deallocate()
             throw UniffiInternalError.rustPanic("Rust panic")
         }
+
+    case CALL_CANCELLED:
+        throw CancellationError()
 
     default:
         throw UniffiInternalError.unexpectedRustCallStatusCode
@@ -392,16 +396,34 @@ private struct FfiConverterString: FfiConverter {
     }
 }
 
+private struct FfiConverterData: FfiConverterRustBuffer {
+    typealias SwiftType = Data
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
+        let len: Int32 = try readInt(&buf)
+        return try Data(readBytes(&buf, count: Int(len)))
+    }
+
+    public static func write(_ value: Data, into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        writeBytes(&buf, value)
+    }
+}
+
 public protocol DotLottiePlayerProtocol {
-    func frame(no: Float)
-    func loadAnimation(animationData: String, width: UInt32, height: UInt32) -> Bool
-    func loadAnimationFromPath(path: String, width: UInt32, height: UInt32) -> Bool
     func clear()
+    func frame(no: Float)
     func getBuffer() -> Int64
     func getBufferSize() -> Int64
-    func getTotalFrame() -> Float
-    func getDuration() -> Float
     func getCurrentFrame() -> Float
+    func getDuration() -> Float
+    func getTotalFrame() -> Float
+    func loadAnimation(animationData: String, width: UInt32, height: UInt32) -> Bool
+    func loadAnimationFromPath(path: String, width: UInt32, height: UInt32) -> Bool
+    func loadDotlottie(fileData: Data, width: UInt32, height: UInt32) -> Bool
+    func nextAnimation(width: UInt32, height: UInt32) -> Bool
+    func previousAnimation(width: UInt32, height: UInt32) -> Bool
 }
 
 public class DotLottiePlayer: DotLottiePlayerProtocol {
@@ -424,12 +446,64 @@ public class DotLottiePlayer: DotLottiePlayerProtocol {
         try! rustCall { uniffi_dotlottie_player_fn_free_dotlottieplayer(pointer, $0) }
     }
 
+    public func clear() {
+        try!
+            rustCall {
+                uniffi_dotlottie_player_fn_method_dotlottieplayer_clear(self.pointer, $0)
+            }
+    }
+
     public func frame(no: Float) {
         try!
             rustCall {
                 uniffi_dotlottie_player_fn_method_dotlottieplayer_frame(self.pointer,
                                                                         FfiConverterFloat.lower(no), $0)
             }
+    }
+
+    public func getBuffer() -> Int64 {
+        return try! FfiConverterInt64.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_buffer(self.pointer, $0)
+                }
+        )
+    }
+
+    public func getBufferSize() -> Int64 {
+        return try! FfiConverterInt64.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_buffer_size(self.pointer, $0)
+                }
+        )
+    }
+
+    public func getCurrentFrame() -> Float {
+        return try! FfiConverterFloat.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_current_frame(self.pointer, $0)
+                }
+        )
+    }
+
+    public func getDuration() -> Float {
+        return try! FfiConverterFloat.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_duration(self.pointer, $0)
+                }
+        )
+    }
+
+    public func getTotalFrame() -> Float {
+        return try! FfiConverterFloat.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_total_frame(self.pointer, $0)
+                }
+        )
     }
 
     public func loadAnimation(animationData: String, width: UInt32, height: UInt32) -> Bool {
@@ -456,54 +530,36 @@ public class DotLottiePlayer: DotLottiePlayerProtocol {
         )
     }
 
-    public func clear() {
-        try!
-            rustCall {
-                uniffi_dotlottie_player_fn_method_dotlottieplayer_clear(self.pointer, $0)
-            }
-    }
-
-    public func getBuffer() -> Int64 {
-        return try! FfiConverterInt64.lift(
+    public func loadDotlottie(fileData: Data, width: UInt32, height: UInt32) -> Bool {
+        return try! FfiConverterBool.lift(
             try!
                 rustCall {
-                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_buffer(self.pointer, $0)
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_load_dotlottie(self.pointer,
+                                                                                     FfiConverterData.lower(fileData),
+                                                                                     FfiConverterUInt32.lower(width),
+                                                                                     FfiConverterUInt32.lower(height), $0)
                 }
         )
     }
 
-    public func getBufferSize() -> Int64 {
-        return try! FfiConverterInt64.lift(
+    public func nextAnimation(width: UInt32, height: UInt32) -> Bool {
+        return try! FfiConverterBool.lift(
             try!
                 rustCall {
-                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_buffer_size(self.pointer, $0)
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_next_animation(self.pointer,
+                                                                                     FfiConverterUInt32.lower(width),
+                                                                                     FfiConverterUInt32.lower(height), $0)
                 }
         )
     }
 
-    public func getTotalFrame() -> Float {
-        return try! FfiConverterFloat.lift(
+    public func previousAnimation(width: UInt32, height: UInt32) -> Bool {
+        return try! FfiConverterBool.lift(
             try!
                 rustCall {
-                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_total_frame(self.pointer, $0)
-                }
-        )
-    }
-
-    public func getDuration() -> Float {
-        return try! FfiConverterFloat.lift(
-            try!
-                rustCall {
-                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_duration(self.pointer, $0)
-                }
-        )
-    }
-
-    public func getCurrentFrame() -> Float {
-        return try! FfiConverterFloat.lift(
-            try!
-                rustCall {
-                    uniffi_dotlottie_player_fn_method_dotlottieplayer_get_current_frame(self.pointer, $0)
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_previous_animation(self.pointer,
+                                                                                         FfiConverterUInt32.lower(width),
+                                                                                         FfiConverterUInt32.lower(height), $0)
                 }
         )
     }
@@ -557,40 +613,49 @@ private enum InitializationResult {
 // the code inside is only computed once.
 private var initializationResult: InitializationResult {
     // Get the bindings contract version from our ComponentInterface
-    let bindings_contract_version = 22
+    let bindings_contract_version = 24
     // Get the scaffolding contract version by calling the into the dylib
     let scaffolding_contract_version = ffi_dotlottie_player_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_frame() != 20381 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_clear() != 26373 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation() != 44295 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_frame() != 26468 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation_from_path() != 43545 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_buffer() != 44916 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_clear() != 64359 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_buffer_size() != 10605 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_buffer() != 6455 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_current_frame() != 43667 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_buffer_size() != 42380 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_duration() != 14656 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_total_frame() != 30128 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_total_frame() != 25849 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_duration() != 6541 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation() != 17422 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_current_frame() != 49082 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation_from_path() != 19745 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new() != 37937 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie() != 10899 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_next_animation() != 25408 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_previous_animation() != 27988 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new() != 9069 {
         return InitializationResult.apiChecksumMismatch
     }
 
