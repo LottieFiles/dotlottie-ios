@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Coordinator.swift
 //
 //
 //  Created by Sam on 03/11/2023.
@@ -31,14 +31,17 @@ public class Coordinator : NSObject, MTKViewDelegate {
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        if (!self.parent.dotLottieViewModel.sizeOverrideActive) {
+            self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
+        }
     }
     
     public func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else {
             return
         }
-
-        if let frame = parent.dotLottieViewModel.render() {
+        
+        if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
             let inputImage = CIImage(cgImage: frame)
@@ -67,9 +70,6 @@ public class Coordinator : NSObject, MTKViewDelegate {
             
             commandBuffer?.present(drawable)
             commandBuffer?.commit()
-                        
-            parent.dotLottieViewModel.tick()
-
         } else {
             return ;
         }
