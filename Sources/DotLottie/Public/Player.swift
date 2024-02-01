@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Player.swift
 //
 //
 //  Created by Sam on 11/12/2023.
@@ -9,60 +9,60 @@ import Foundation
 import CoreImage
 import DotLottiePlayer
 
-enum AnimationLoadErrors: Error {
-    case loadAnimationDataError
-    case loadFromPathError
-}
-
-class Player {
+class Player: ObservableObject, Observer {
+    @Published public var playerState: PlayerState = .initial
+    
     private let dotLottiePlayer: DotLottiePlayer
     private var WIDTH: UInt32 = 512
     private var HEIGHT: UInt32 = 512
-    private var isLoaded = false
     
-    init() {
-        dotLottiePlayer = DotLottiePlayer()
+    init(config: Config) {
+        dotLottiePlayer = DotLottiePlayer(config: config)
+        
+        dotLottiePlayer.subscribe(observer: self)
     }
     
-    public func loadAnimation(animationData: String, width: Int, height: Int) throws {
+    public func loadAnimationData(animationData: String, width: Int, height: Int) throws {
         self.WIDTH = UInt32(width)
         self.HEIGHT = UInt32(height)
         
-        let ret = dotLottiePlayer
-            .loadAnimation(animationData: animationData,
-                           width: self.WIDTH,
-                           height: self.HEIGHT)
-        
-        if (!ret) {
+        if (!dotLottiePlayer
+            .loadAnimationData(animationData: animationData,
+                               width: self.WIDTH,
+                               height: self.HEIGHT)) {
+            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
-
-        self.isLoaded = true
     }
     
-    public func loadAnimationFromPath(animationPath: String, width: Int, height: Int) throws {
+    func loadDotlottieData(data: Data) throws {
+        if (!dotLottiePlayer.loadDotlottieData(fileData: data, width: self.WIDTH, height: self.HEIGHT)) {
+            self.setPlayerState(state: .error)
+            throw AnimationLoadErrors.loadAnimationDataError
+        }
+    }
+    
+    public func loadAnimationPath(animationPath: String, width: Int, height: Int) throws {
         self.WIDTH = UInt32(width)
         self.HEIGHT = UInt32(height)
-
-        let ret = dotLottiePlayer.loadAnimationFromPath(path: animationPath, width: self.WIDTH, height: self.HEIGHT)
-
-        if (!ret) {
+        
+        if (!dotLottiePlayer.loadAnimationPath(animationPath: animationPath,
+                                                    width: self.WIDTH,
+                                               height: self.HEIGHT)) {
+            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
-
-        self.isLoaded = true
     }
     
     public func render() -> CGImage? {
-        // Only render images when we've loaded animation data
-        if (!isLoaded) {
+        if (!self.isLoaded() || !dotLottiePlayer.render()) {
             return nil
         }
         
         let bitsPerComponent = 8
         let bytesPerRow = 4 * self.WIDTH
         let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let pixelData = UnsafeMutablePointer<UInt8>(bitPattern: UInt(dotLottiePlayer.getBuffer()))
+        let pixelData = UnsafeMutablePointer<UInt8>(bitPattern: UInt(dotLottiePlayer.bufferPtr()))
         
         if (pixelData != nil) {
             if let context = CGContext(data: pixelData, width: Int(self.WIDTH), height: Int(self.HEIGHT), bitsPerComponent: bitsPerComponent, bytesPerRow: Int(bytesPerRow), space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) {
@@ -74,23 +74,143 @@ class Player {
         return nil
     }
     
-    func totalFrames() -> Float {
-        return dotLottiePlayer.getTotalFrame()
+    public func subscribe(observer: Observer) {
+        dotLottiePlayer.subscribe(observer: observer)
     }
 
-    func frame(no: Float32) {
-        dotLottiePlayer.frame(no: no)
+    public func unsubscribe(observer: Observer) {
+        dotLottiePlayer.unsubscribe(observer: observer)
+    }
+
+    public func manifest() -> Manifest? {
+        return dotLottiePlayer.manifest()
     }
     
-    func currentFrame() -> Float32 {
-        return dotLottiePlayer.getCurrentFrame()
+    public func bufferPointer() -> UInt64{
+        return dotLottiePlayer.bufferPtr()
     }
     
-    func duration() -> Float32 {
-        return dotLottiePlayer.getDuration()
+    public func bufferLen() -> UInt64{
+        return dotLottiePlayer.bufferLen()
     }
     
-    func clear() {
+    public func setConfig(config: Config) {
+        dotLottiePlayer.setConfig(config: config)
+    }
+    
+    public func config() -> Config {
+        return dotLottiePlayer.config()
+    }
+    
+    public func totalFrames() -> Float {
+        return dotLottiePlayer.totalFrames()
+    }
+    
+    public func setFrame(no: Float32) -> Bool {
+        return dotLottiePlayer.setFrame(no: no)
+    }
+    
+    public func currentFrame() -> Float {
+        return dotLottiePlayer.currentFrame()
+    }
+    
+    public func loopCount() -> Int {
+        return Int(dotLottiePlayer.loopCount())
+    }
+    
+    public func isLoaded() -> Bool {
+        return dotLottiePlayer.isLoaded()
+    }
+    
+    public func isPlaying() -> Bool {
+        return dotLottiePlayer.isPlaying()
+    }
+    
+    public func isPaused() -> Bool {
+        return dotLottiePlayer.isPaused()
+    }
+    
+    public func isStopped() -> Bool {
+        return dotLottiePlayer.isStopped()
+    }
+    
+    public func isComplete() -> Bool {
+        return self.dotLottiePlayer.isComplete()
+    }
+    
+    public func play() {
+        let _ = dotLottiePlayer.play()
+        
+        self.setPlayerState(state: .playing)
+    }
+    
+    public func pause() {
+        let _ = dotLottiePlayer.pause()
+
+        self.setPlayerState(state: .paused)
+    }
+    
+    public func stop() {
+        let _ = dotLottiePlayer.stop()
+        
+        self.setPlayerState(state: .stopped)
+    }
+    
+    public func resize(width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
+        if (!dotLottiePlayer.resize(width: self.WIDTH, height: self.HEIGHT)) {
+            throw PlayerErrors.resizeError
+        }
+    }
+    
+    public func requestFrame() -> Bool {
+        let frame = dotLottiePlayer.requestFrame()
+
+        return self.setFrame(no: frame)
+    }
+       
+    public func duration() -> Float32 {
+        return dotLottiePlayer.duration()
+    }
+    
+    public func clear() {
         dotLottiePlayer.clear()
+    }
+    
+    private func setPlayerState(state: PlayerState) {
+        DispatchQueue.main.async {
+            self.playerState = state
+        }
+    }
+    
+    func onLoad() {
+        self.setPlayerState(state: .loaded)
+    }
+    
+    func onLoop(loopCount: UInt32) {
+    }
+
+    func onComplete() {
+        self.setPlayerState(state: .paused)
+    }
+    
+    func onFrame(frameNo: Float) {
+    }
+
+    func onPause() {
+        self.setPlayerState(state: .paused)
+    }
+    
+    func onPlay() {
+        self.setPlayerState(state: .playing)
+    }
+    
+    func onRender(frameNo: Float) {
+    }
+    
+    func onStop() {
+        self.setPlayerState(state: .stopped)
     }
 }

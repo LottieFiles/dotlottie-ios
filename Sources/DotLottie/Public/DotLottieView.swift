@@ -17,10 +17,13 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     private var mtkView: MTKView = MTKView()
     
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
+    @ObservedObject internal var playerState: Player
     
     public init(dotLottie: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottie
+        self.playerState = dotLottie.player
     }
+    
     
     public func makeCoordinator() -> Coordinator {
         Coordinator(self, mtkView: self.mtkView)
@@ -41,32 +44,28 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.enableSetNeedsDisplay = true
         
-        self.mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
-        
+        self.mtkView.isPaused = !self.playerState.isPlaying()
+                
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        if self.dotLottieViewModel.isStopped() {
+        if self.playerState.isStopped() || self.playerState.isPaused() || self.playerState.isComplete() {
             // Tell the coordinator to draw the last frame before pausing
             uiView.draw()
-            uiView.isPaused = true
-        } else if self.dotLottieViewModel.isPaused() {
-            // Tell the coordinator to draw the last frame before pausing
-            uiView.draw()
-            uiView.isPaused = true
-        } else if self.dotLottieViewModel.isPlaying() {
-            uiView.isPaused = false
-        } else if self.dotLottieViewModel.isFrozen() {
             uiView.isPaused = true
         }
-        
+
+        if self.playerState.isPlaying() {
+            uiView.isPaused = false
+        }
+
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
     }
     
-    public func on(event: AnimationEvent, callback: @escaping () -> Void) {
-        self.dotLottieViewModel.on(event: event, callback: callback)
+    public func subscribe(observer: Observer) {
+        self.dotLottieViewModel.subscribe(observer: observer)
     }
 }

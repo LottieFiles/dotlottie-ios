@@ -8,11 +8,10 @@
 
 > 🚧 **Beta Alert:** We're still refining! The APIs in this package may undergo changes.
 
-## ⚠️ Currently supported platforms ⚠️
+## Supported Devices
 
-- iPhone, iPhone Simulator (x86), MacOS (x86, ARM)
-
-Note: This is due to the compilation of Thorvg. We're working on supporting more platforms!
+Currently this package supports a mimimum iOS version of 13.0+ for iPhone and iPad.
+MacOS is supported for versions 11.0 and upwards.
 
 ## Usage
 
@@ -36,22 +35,35 @@ The ```DotLottieAnimation``` class will store the playback settings of your anim
 
 Set up DotLottieAnimation inside a View. Optionally pass playback settings.
 
+#### Load from an animation (.lottie / .json) from the main asset bundle.
+
 ```swift
 struct AnimationView: View {
     var body: some View {
-        DotLottieAnimation(fileName: "cool_animation", playbackConfig: PlaybackConfig(autoplay: true, loop: true)).view()
+        DotLottieAnimation(fileName: "cool_animation", config: AnimationConfig(autoplay: true, loop: true)).view()
     }
 }
 ```
 
-
-In the above example, you reference the name of a .lottie asset bundled inside your application, but you can also load in a .lottie file hosted on a web URL:
+#### Load an animation (.lottie / .json) from the web.
 
 ```swift
 struct AnimationView: View {
     var body: some View {
         DotLottieAnimation(
             webURL: "https://lottie.host/link.lottie"
+        ).view()
+    }
+}
+```
+
+#### Load directly from a String (.json).
+
+```swift
+struct AnimationView: View {
+    var body: some View {
+        DotLottieAnimation(
+            animationData: "{"v":"4.8.0","meta":{"g":"LottieFiles AE..."
         ).view()
     }
 }
@@ -65,7 +77,7 @@ Coming soon!
 
 ```swift
 class AnimationViewController: UIViewController {
-    var simpleVM = DotLottieAnimation(webURL: "https://lottie.host/link.lottie", playbackConfig: PlaybackConfig(autoplay: true, loop: false))
+    var simpleVM = DotLottieAnimation(webURL: "https://lottie.host/link.lottie", config: AnimationConfig(autoplay: true, loop: false))
     
     override func viewWillAppear(_ animated: Bool) {
         let dotLottieView = simpleVM.createDotLottieView()
@@ -82,21 +94,20 @@ class AnimationViewController: UIViewController {
 
 | Property          | Type    | Description                                                                                                           |
 | ----------------- | ------- | --------------------------------------------------------------------------------------------------------------------- |
-| `currentFrame()`    | Float32  | Represents the animation's currently displayed frame number.                                                          |
-| `duration()`        | Float32  | Specifies the animation's total playback time in milliseconds.                                                        |
-| `totalFrames()`     | Float32  | Denotes the total count of individual frames within the animation.                                                    |
+| `currentFrame()`    | Float  | Represents the animation's currently displayed frame number.                                                          |
+| `duration()`        | Float  | Specifies the animation's total playback time in milliseconds.                                                        |
+| `totalFrames()`     | Float  | Denotes the total count of individual frames within the animation.                                                    |
 | `loop()`            | Bool | Indicates if the animation is set to play in a continuous loop.                                                       |
-| `speed()`           | Float32  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
-| `loopCount()`       | Float32  | Tracks how many times the animation has completed its loop.                                                           |
-| `direction()`       | Int  | Reflects the current playback direction; e.g., 1 would mean forward, -1 would mean reverse.                           |
+| `speed()`           | Float  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
+| `loopCount()`       | Int  | Tracks how many times the animation has completed its loop.                                                           |
 | `mode()`            | Mode  | Reflects the current playback mode.                                                                                   |
 | `isPaused()`        | Bool | Reflects whether the animation is paused or not.                                                                      |
 | `isStopped()`       | Bool | Reflects whether the animation is stopped or not.                                                                     |
 | `isPlaying()`       | Bool | Reflects whether the animation is playing or not.                                                                     |
-| `segments()`        | (Float32, Float32)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| `segments()`        | (Float, Float)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 | `backgroundColor()` | CIImage  | Gets the background color of the canvas.                                                                              |
 | `autoplay()`        | Bool | Indicates if the animation is set to auto play.                                                                       |
-| `isFrozen()`        | Bool | Reflects whether the animation loop is stopped or not.                                                                |
+| `useFrameInterpolation()`        | Bool | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh with intermediate values. The default setting is true.                          |
 
 ### Methods
 
@@ -109,71 +120,63 @@ class AnimationViewController: UIViewController {
 | `stop()` | Halts playback and returns the animation to its initial frame. |
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
-| `setFrame(frame: Float32)` | Directly navigates the animation to a specified frame. |
+| `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
 | `load(config: Config)` | Loads a new configuration or a new animation. |
 | `setMode(mode: Mode)` | Sets the animation play mode. |
-| `setSegments(segments: (Float32, Float32))` | Sets the start and end frame of the animation. |
-| `freeze()` | Freezes the animation by stopping the animation loop. |
-| `unFreeze()` | Unfreezes the animation by resuming the animation loop. |
+| `setSegments(segments: (Float, Float))` | Sets the start and end frame of the animation. |
 | `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
+| `setFrameInterpolation(useFrameInterpolation: Bool)` | Use frame interpolation or not. |
+| `resize(width: Int, height: Int)` | Manually resize the animation. |
 
 ### Event callbacks
 
-The `DotLottieAnimation` instance emits the following events that can be listened to via the `on` method:
+The `DotLottieAnimation` instance emits the following events that can be listened to via a class implementing the `Observer` protocol:
+
+```
+class YourDotLottieObserver: Observer {
+    func onComplete() {
+    }
+    
+    func onFrame(frameNo: Float) {
+    }
+    
+    func onLoad() {
+    }
+    
+    func onLoop(loopCount: UInt32) {
+    }
+    
+    func onPause() {
+    }
+    
+    func onPlay() {
+    }
+    
+    func onRender(frameNo: Float) {
+    }
+    
+    func onStop() {
+    }
+}
+
+// In your view code
+
+var animation = DotLottieAnimation(...)
+var animationView = DotLottieView(dotLottie: animation)
+var myObserver = YourDotLottieObserver()
+
+animationView.subscribe(observer: myObserver)
+
+```
+
 
 | Event       | Description                                                             | 
 | ----------- | ----------------------------------------------------------------------- | 
-| `load`      | Emitted when the animation is loaded.                                   |
-| `loadError` | Emitted when there's an error loading the animation.                    |
-| `play`      | Emitted when the animation starts playing.                              |
-| `pause`     | Emitted when the animation is paused.                                   |
-| `stop`      | Emitted when the animation is stopped.                                  |
-| `loop`      | Emitted when the animation completes a loop.                            |
-| `complete`  | Emitted when the animation completes.                                   |
-| `frame`     | Emitted when the animation reaches a new frame.                         |
-| `freeze`    | Emitted when the animation is freezed and the animation loop stops.     |
-| `unfreeze`  | Emitted when the animation is unfreezed and the animation loop resumes. |
-
-## Development
-
-### How to build thorvg.xcframework
-
-(Only for maintainers of the repository)
-
-- Pull the Thorvg submodule:
-
-```bash
-git submodule update --init --recursive
-```
-
-- Go in to the Thorvg folder:
-
-```bash
-cd Sources/Thorvg/
-```
-
-- Run the ```build_thorvg.sh``` script:
-
-```bash
-sh build_thorvg.sh -h
-```
-
-- How to cross compile for your architecture:
-
-For example if you're on a x86 based CPU:
-
-```bash
-sh build_thorvg.sh iphone_sim_x86_64 macos_x86_64 
-```
-
-For example if you're on a ARM basd CPU:
-
-```bash
-sh build_thorvg.sh iphone_sim_aarch macos_aarch 
-```
-
-Build for real iPhone device:
-
-```bash
-sh build_thorvg.sh iphone_aarch
-```
+| `onComplete`  | Emitted when the animation completes.                                   |
+| `onFrame(frameNo: Float)`     | Emitted when the animation reaches a new frame.         |
+| `onLoad`      | Emitted when the animation is loaded.                                   |
+| `onLoop(loopCount: UIint32)`      | Emitted when the animation completes a loop.        |
+| `onPause`     | Emitted when the animation is paused.                                   |
+| `onPlay`      | Emitted when the animation starts playing.                              |
+| `onRender(frameNo: Float)`     | Emitted when the frame is rendered.                    |
+| `onStop`      | Emitted when the animation is stopped.                                  |

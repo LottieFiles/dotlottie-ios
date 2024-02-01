@@ -16,27 +16,35 @@ import AVFoundation
 import Combine
 
 public class DotLottieAnimationView: UIView, DotLottie {
-    private var metalView: MTKView!
+    private var mtkView: MTKView!
     private var coordinator: Coordinator!
+    private var cancellableBag = Set<AnyCancellable>()
 
-    var dotLottieViewModel = DotLottieAnimation(playbackConfig: PlaybackConfig())
-    var cancellableBag = Set<AnyCancellable>()
+    public var dotLottieViewModel: DotLottieAnimation
     
     public init(dotLottieViewModel: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottieViewModel
         
         super.init(frame: .zero)
 
-        dotLottieViewModel.$playerState.sink { value in
-            if self.metalView != nil {
-                self.metalView.draw()
-                self.metalView.isPaused = !(value == PlayerState.playing)
+        dotLottieViewModel.player.$playerState.sink { value in
+            if self.mtkView != nil {
+                self.mtkView.draw()
+
+                if self.dotLottieViewModel.isStopped() || self.dotLottieViewModel.isPaused() {
+                    // Tell the coordinator to draw the last frame before pausing
+                    self.mtkView.isPaused = true
+                }
+
+                if self.dotLottieViewModel.isPlaying() {
+                    self.mtkView.isPaused = false
+                }
             }
         }.store(in: &cancellableBag)
 
         dotLottieViewModel.$framerate.sink { value in
-            if self.metalView != nil {
-                self.metalView.preferredFramesPerSecond = dotLottieViewModel.framerate
+            if self.mtkView != nil {
+                self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
             }
         }.store(in: &cancellableBag)
 
@@ -49,41 +57,41 @@ public class DotLottieAnimationView: UIView, DotLottie {
     }
     
     private func setupMetalView() {
-        metalView = MTKView(frame: bounds)
+        mtkView = MTKView(frame: bounds)
         
-        self.coordinator = Coordinator(self, mtkView: metalView)
+        self.coordinator = Coordinator(self, mtkView: mtkView)
         
         if let metalDevice = MTLCreateSystemDefaultDevice() {
-            metalView.device = metalDevice
+            mtkView.device = metalDevice
         }
         
         // Set up Metal-related configurations for your MTKView
-        metalView.device = MTLCreateSystemDefaultDevice()
+        mtkView.device = MTLCreateSystemDefaultDevice()
         
-        metalView.isOpaque = false
+        mtkView.isOpaque = false
         
-        metalView.framebufferOnly = false
+        mtkView.framebufferOnly = false
         
-        metalView.delegate = self.coordinator
+        mtkView.delegate = self.coordinator
         
-        metalView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
+        mtkView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         
-        metalView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
+        mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
-        metalView.enableSetNeedsDisplay = true
+        mtkView.enableSetNeedsDisplay = true
         
-        metalView.isPaused = !self.dotLottieViewModel.isPlaying()
+        mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
         
-        addSubview(metalView)
+        addSubview(mtkView)
     }
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        metalView.frame = bounds
+        mtkView.frame = bounds
     }
     
-    public func on(event: AnimationEvent, callback: @escaping () -> Void) {
-        self.dotLottieViewModel.on(event: event, callback: callback)
+    public func subscribe(observer: Observer) {
+        self.dotLottieViewModel.subscribe(observer: observer)
     }
 }
 
