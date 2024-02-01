@@ -10,7 +10,7 @@ import Foundation
 
 public struct AnimationConfig {
     public var autoplay: Bool? = false
-    public var loopAnimation: Bool? = false
+    public var loop: Bool? = false
     public var mode: Mode? = .forward
     public var speed: Float? = 1
     public var useFrameInterpolation: Bool? = false
@@ -21,7 +21,7 @@ public struct AnimationConfig {
     
     public init(
         autoplay: Bool? = false,
-        loopAnimation: Bool? = false,
+        loop: Bool? = false,
         mode: Mode? = .forward,
         speed: Float? = 1,
         useFrameInterpolation: Bool? = true,
@@ -31,7 +31,7 @@ public struct AnimationConfig {
         height: Int? = nil
     ) {
         self.autoplay = autoplay
-        self.loopAnimation = loopAnimation
+        self.loop = loop
         self.mode = mode
         self.speed = speed
         self.useFrameInterpolation = useFrameInterpolation

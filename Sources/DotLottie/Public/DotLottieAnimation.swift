@@ -29,7 +29,7 @@ public class DotLottieAnimation: ObservableObject {
         config: AnimationConfig
     ) {
         self.config = Config(autoplay: config.autoplay ?? false,
-                             loopAnimation: config.loopAnimation ?? false,
+                             loopAnimation: config.loop ?? false,
                              mode: config.mode ?? Mode.forward,
                              speed: config.speed ?? 1.0,
                              useFrameInterpolation: config.useFrameInterpolation ?? false,
@@ -278,11 +278,11 @@ public class DotLottieAnimation: ObservableObject {
         player.stop()
     }
     
-    public func currentFrame() -> Float32 {
+    public func currentFrame() -> Float {
         return player.currentFrame()
     }
     
-    public func totalFrames() -> Float32 {
+    public func totalFrames() -> Float {
         return player.totalFrames()
     }
     
@@ -298,18 +298,26 @@ public class DotLottieAnimation: ObservableObject {
         player.setConfig(config: config)
     }
     
-    public func segments() -> (Float32, Float32) {
+    public func segments() -> (Float, Float) {
         return (player.config().segments[0], player.config().segments[1])
     }
         
     /// Set the current frame.
     /// Can return false if the frame is invalid or equal to the current frame.
-    public func setFrame(frame: Float32) -> Bool {
+    public func setFrame(frame: Float) -> Bool {
         return player.setFrame(no: frame)
     }
     
+    public func setFrameInterpolation(_ useFrameInterpolation: Bool) {
+        var config = player.config()
+        
+        config.useFrameInterpolation = useFrameInterpolation
+        
+        player.setConfig(config: config)
+    }
+    
     /// Define two frames to define a segment for the player to play in-between.
-    public func setSegments(segments: (Float32, Float32)) {
+    public func setSegments(segments: (Float, Float)) {
         var config = player.config()
         
         config.segments = [segments.0, segments.1]
@@ -345,6 +353,10 @@ public class DotLottieAnimation: ObservableObject {
         return player.isLoaded()
     }
     
+    public func useFrameInterpolation() -> Bool {
+        return player.config().useFrameInterpolation
+    }
+    
     public func setAutoplay(autoplay: Bool) {
         var config = player.config()
         
@@ -365,7 +377,7 @@ public class DotLottieAnimation: ObservableObject {
         player.setConfig(config: config)
     }
     
-    public func duration() -> Float32 {
+    public func duration() -> Float {
         return player.duration()
     }
     
