@@ -104,7 +104,7 @@ class AnimationViewController: UIViewController {
 | `isPaused()`        | Bool | Reflects whether the animation is paused or not.                                                                      |
 | `isStopped()`       | Bool | Reflects whether the animation is stopped or not.                                                                     |
 | `isPlaying()`       | Bool | Reflects whether the animation is playing or not.                                                                     |
-| `segments()`        | (Float32, Float32)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
+| `segments()`        | (Float, Float)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 | `backgroundColor()` | CIImage  | Gets the background color of the canvas.                                                                              |
 | `autoplay()`        | Bool | Indicates if the animation is set to auto play.                                                                       |
 | `useFrameInterpolation()`        | Bool | Determines if the animation should update on subframes. If set to false, the original AE frame rate will be maintained. If set to true, it will refresh with intermediate values. The default setting is true.                          |
