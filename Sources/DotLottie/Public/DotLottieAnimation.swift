@@ -218,7 +218,7 @@ public class DotLottieAnimation: ObservableObject {
         }
     }
     
-    /// Loads animation from the animation data.
+    /// Loads animation with the id passed as argument.
     /// - Parameter animationData: Animation data (.json).
     public func loadAnimationById(_ animationId: String) throws {
         do {
