@@ -104,6 +104,7 @@ class AnimationViewController: UIViewController {
 | `isPaused()`        | Bool | Reflects whether the animation is paused or not.                                                                      |
 | `isStopped()`       | Bool | Reflects whether the animation is stopped or not.                                                                     |
 | `isPlaying()`       | Bool | Reflects whether the animation is playing or not.                                                                     |
+| `manifest()`       | Manifst | Returns the .lottie's manifest file.                                                                     |
 | `segments()`        | (Float, Float)  | Reflects the frames range of the animations. where segments\[0] is the start frame and segments\[1] is the end frame. |
 | `backgroundColor()` | CIImage  | Gets the background color of the canvas.                                                                              |
 | `autoplay()`        | Bool | Indicates if the animation is set to auto play.                                                                       |
@@ -122,6 +123,7 @@ class AnimationViewController: UIViewController {
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
 | `load(config: Config)` | Loads a new configuration or a new animation. |
+| `loadAnimation(animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |
 | `setMode(mode: Mode)` | Sets the animation play mode. |
 | `setSegments(segments: (Float, Float))` | Sets the start and end frame of the animation. |
 | `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
@@ -141,6 +143,9 @@ class YourDotLottieObserver: Observer {
     }
     
     func onLoad() {
+    }
+    
+    func onLoadError() {
     }
     
     func onLoop(loopCount: UInt32) {
@@ -175,6 +180,7 @@ animationView.subscribe(observer: myObserver)
 | `onComplete`  | Emitted when the animation completes.                                   |
 | `onFrame(frameNo: Float)`     | Emitted when the animation reaches a new frame.         |
 | `onLoad`      | Emitted when the animation is loaded.                                   |
+| `onLoadError` | Emitted when the animation failed to load.                         |
 | `onLoop(loopCount: UIint32)`      | Emitted when the animation completes a loop.        |
 | `onPause`     | Emitted when the animation is paused.                                   |
 | `onPlay`      | Emitted when the animation starts playing.                              |

@@ -103,6 +103,8 @@ float uniffi_dotlottie_player_fn_method_dotlottieplayer_request_frame(void*_Nonn
 );
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_resize(void*_Nonnull ptr, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_seek(void*_Nonnull ptr, float no, RustCallStatus *_Nonnull out_status
+);
 void uniffi_dotlottie_player_fn_method_dotlottieplayer_set_config(void*_Nonnull ptr, RustBuffer config, RustCallStatus *_Nonnull out_status
 );
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_set_frame(void*_Nonnull ptr, float no, RustCallStatus *_Nonnull out_status
@@ -126,6 +128,8 @@ void uniffi_dotlottie_player_fn_method_observer_on_complete(void*_Nonnull ptr, R
 void uniffi_dotlottie_player_fn_method_observer_on_frame(void*_Nonnull ptr, float frame_no, RustCallStatus *_Nonnull out_status
 );
 void uniffi_dotlottie_player_fn_method_observer_on_load(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+void uniffi_dotlottie_player_fn_method_observer_on_load_error(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 void uniffi_dotlottie_player_fn_method_observer_on_loop(void*_Nonnull ptr, uint32_t loop_count, RustCallStatus *_Nonnull out_status
 );
@@ -318,6 +322,9 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_request_frame(v
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_resize(void
     
 );
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_seek(void
+    
+);
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_config(void
     
 );
@@ -343,6 +350,9 @@ uint16_t uniffi_dotlottie_player_checksum_method_observer_on_frame(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_load(void
+    
+);
+uint16_t uniffi_dotlottie_player_checksum_method_observer_on_load_error(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_loop(void

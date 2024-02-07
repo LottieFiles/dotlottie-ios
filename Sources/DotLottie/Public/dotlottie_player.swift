@@ -471,6 +471,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func resize(width: UInt32, height: UInt32) -> Bool
 
+    func seek(no: Float) -> Bool
+
     func setConfig(config: Config)
 
     func setFrame(no: Float) -> Bool
@@ -731,6 +733,16 @@ public class DotLottiePlayer:
         )
     }
 
+    public func seek(no: Float) -> Bool {
+        return try! FfiConverterBool.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_seek(self.uniffiClonePointer(),
+                                                                           FfiConverterFloat.lower(no), $0)
+                }
+        )
+    }
+
     public func setConfig(config: Config) {
         try!
             rustCall {
@@ -829,6 +841,8 @@ public protocol Observer: AnyObject {
 
     func onLoad()
 
+    func onLoadError()
+
     func onLoop(loopCount: UInt32)
 
     func onPause()
@@ -879,6 +893,13 @@ public class ObserverImpl:
         try!
             rustCall {
                 uniffi_dotlottie_player_fn_method_observer_on_load(self.uniffiClonePointer(), $0)
+            }
+    }
+
+    public func onLoadError() {
+        try!
+            rustCall {
+                uniffi_dotlottie_player_fn_method_observer_on_load_error(self.uniffiClonePointer(), $0)
             }
     }
 
@@ -1018,6 +1039,15 @@ private let uniffiCallbackInterfaceObserver: ForeignCallback = { (handle: UniFFI
         return try makeCall()
     }
 
+    func invokeOnLoadError(_ swiftCallbackInterface: Observer, _: UnsafePointer<UInt8>, _: Int32, _: UnsafeMutablePointer<RustBuffer>) throws -> Int32 {
+        func makeCall() throws -> Int32 {
+            swiftCallbackInterface.onLoadError(
+            )
+            return UNIFFI_CALLBACK_SUCCESS
+        }
+        return try makeCall()
+    }
+
     func invokeOnLoop(_ swiftCallbackInterface: Observer, _ argsData: UnsafePointer<UInt8>, _ argsLen: Int32, _: UnsafeMutablePointer<RustBuffer>) throws -> Int32 {
         var reader = createReader(data: Data(bytes: argsData, count: Int(argsLen)))
         func makeCall() throws -> Int32 {
@@ -1112,7 +1142,7 @@ private let uniffiCallbackInterfaceObserver: ForeignCallback = { (handle: UniFFI
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
         }
         do {
-            return try invokeOnLoop(cb, argsData, argsLen, out_buf)
+            return try invokeOnLoadError(cb, argsData, argsLen, out_buf)
         } catch {
             out_buf.pointee = FfiConverterString.lower(String(describing: error))
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
@@ -1123,7 +1153,7 @@ private let uniffiCallbackInterfaceObserver: ForeignCallback = { (handle: UniFFI
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
         }
         do {
-            return try invokeOnPause(cb, argsData, argsLen, out_buf)
+            return try invokeOnLoop(cb, argsData, argsLen, out_buf)
         } catch {
             out_buf.pointee = FfiConverterString.lower(String(describing: error))
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
@@ -1134,7 +1164,7 @@ private let uniffiCallbackInterfaceObserver: ForeignCallback = { (handle: UniFFI
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
         }
         do {
-            return try invokeOnPlay(cb, argsData, argsLen, out_buf)
+            return try invokeOnPause(cb, argsData, argsLen, out_buf)
         } catch {
             out_buf.pointee = FfiConverterString.lower(String(describing: error))
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
@@ -1145,12 +1175,23 @@ private let uniffiCallbackInterfaceObserver: ForeignCallback = { (handle: UniFFI
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
         }
         do {
-            return try invokeOnRender(cb, argsData, argsLen, out_buf)
+            return try invokeOnPlay(cb, argsData, argsLen, out_buf)
         } catch {
             out_buf.pointee = FfiConverterString.lower(String(describing: error))
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
         }
     case 8:
+        guard let cb = FfiConverterTypeObserver.handleMap.get(handle: handle) else {
+            out_buf.pointee = FfiConverterString.lower("No callback in handlemap; this is a Uniffi bug")
+            return UNIFFI_CALLBACK_UNEXPECTED_ERROR
+        }
+        do {
+            return try invokeOnRender(cb, argsData, argsLen, out_buf)
+        } catch {
+            out_buf.pointee = FfiConverterString.lower(String(describing: error))
+            return UNIFFI_CALLBACK_UNEXPECTED_ERROR
+        }
+    case 9:
         guard let cb = FfiConverterTypeObserver.handleMap.get(handle: handle) else {
             out_buf.pointee = FfiConverterString.lower("No callback in handlemap; this is a Uniffi bug")
             return UNIFFI_CALLBACK_UNEXPECTED_ERROR
@@ -2078,6 +2119,9 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_resize() != 16787 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_seek() != 60656 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_config() != 39472 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2103,6 +2147,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_observer_on_load() != 56735 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_observer_on_load_error() != 51239 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_observer_on_loop() != 7035 {
