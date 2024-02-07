@@ -54,6 +54,18 @@ class Player: ObservableObject, Observer {
         }
     }
     
+    public func loadAnimation(animationId: String, width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+
+        if (!dotLottiePlayer.loadAnimation(animationId: animationId,
+                                                    width: self.WIDTH,
+                                               height: self.HEIGHT)) {
+            self.setPlayerState(state: .error)
+            throw AnimationLoadErrors.loadFromPathError
+        }
+    }
+    
     public func render() -> CGImage? {
         if (!self.isLoaded() || !dotLottiePlayer.render()) {
             return nil
@@ -212,5 +224,9 @@ class Player: ObservableObject, Observer {
     
     func onStop() {
         self.setPlayerState(state: .stopped)
+    }
+    
+    func onLoadError() {
+        self.setPlayerState(state: .error)
     }
 }

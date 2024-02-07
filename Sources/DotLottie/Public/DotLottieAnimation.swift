@@ -218,6 +218,19 @@ public class DotLottieAnimation: ObservableObject {
         }
     }
     
+    /// Loads animation with the id passed as argument.
+    /// - Parameter animationData: Animation data (.json).
+    public func loadAnimationById(_ animationId: String) throws {
+        do {
+            try player.loadAnimation(animationId: animationId, width: self.animationModel.width, height: self.animationModel.height)
+        } catch let error {
+            animationModel.error = true
+            animationModel.errorMessage = error.localizedDescription
+            
+            throw error
+        }
+    }
+    
     private func initWidthHeight(animationData: String?, animationFilePath: URL?) {
         // Parse width and height of animation
         do {
@@ -387,6 +400,10 @@ public class DotLottieAnimation: ObservableObject {
     
     public func mode() -> Mode {
         return player.config().mode
+    }
+    
+    public func manifest() -> Manifest? {
+        return player.manifest()
     }
     
     public func resize(width: Int, height: Int) {
