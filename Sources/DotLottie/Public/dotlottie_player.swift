@@ -1368,7 +1368,7 @@ public struct Manifest {
     public var generator: String?
     public var keywords: String?
     public var revision: UInt32?
-    public var themes: ManifestThemes?
+    public var themes: [ManifestTheme]?
     public var states: [String]?
     public var version: String?
 
@@ -1382,7 +1382,7 @@ public struct Manifest {
         generator: String?,
         keywords: String?,
         revision: UInt32?,
-        themes: ManifestThemes?,
+        themes: [ManifestTheme]?,
         states: [String]?,
         version: String?
     ) {
@@ -1459,7 +1459,7 @@ public struct FfiConverterTypeManifest: FfiConverterRustBuffer {
                 generator: FfiConverterOptionString.read(from: &buf),
                 keywords: FfiConverterOptionString.read(from: &buf),
                 revision: FfiConverterOptionUInt32.read(from: &buf),
-                themes: FfiConverterOptionTypeManifestThemes.read(from: &buf),
+                themes: FfiConverterOptionSequenceTypeManifestTheme.read(from: &buf),
                 states: FfiConverterOptionSequenceString.read(from: &buf),
                 version: FfiConverterOptionString.read(from: &buf)
             )
@@ -1473,7 +1473,7 @@ public struct FfiConverterTypeManifest: FfiConverterRustBuffer {
         FfiConverterOptionString.write(value.generator, into: &buf)
         FfiConverterOptionString.write(value.keywords, into: &buf)
         FfiConverterOptionUInt32.write(value.revision, into: &buf)
-        FfiConverterOptionTypeManifestThemes.write(value.themes, into: &buf)
+        FfiConverterOptionSequenceTypeManifestTheme.write(value.themes, into: &buf)
         FfiConverterOptionSequenceString.write(value.states, into: &buf)
         FfiConverterOptionString.write(value.version, into: &buf)
     }
@@ -1625,16 +1625,16 @@ public func FfiConverterTypeManifestAnimation_lower(_ value: ManifestAnimation) 
 
 public struct ManifestTheme {
     public var id: String
-    public var values: [String]
+    public var animations: [String]
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
     public init(
         id: String,
-        values: [String]
+        animations: [String]
     ) {
         self.id = id
-        self.values = values
+        self.animations = animations
     }
 }
 
@@ -1643,7 +1643,7 @@ extension ManifestTheme: Equatable, Hashable {
         if lhs.id != rhs.id {
             return false
         }
-        if lhs.values != rhs.values {
+        if lhs.animations != rhs.animations {
             return false
         }
         return true
@@ -1651,7 +1651,7 @@ extension ManifestTheme: Equatable, Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
-        hasher.combine(values)
+        hasher.combine(animations)
     }
 }
 
@@ -1660,13 +1660,13 @@ public struct FfiConverterTypeManifestTheme: FfiConverterRustBuffer {
         return
             try ManifestTheme(
                 id: FfiConverterString.read(from: &buf),
-                values: FfiConverterSequenceString.read(from: &buf)
+                animations: FfiConverterSequenceString.read(from: &buf)
             )
     }
 
     public static func write(_ value: ManifestTheme, into buf: inout [UInt8]) {
         FfiConverterString.write(value.id, into: &buf)
-        FfiConverterSequenceString.write(value.values, into: &buf)
+        FfiConverterSequenceString.write(value.animations, into: &buf)
     }
 }
 
@@ -1676,52 +1676,6 @@ public func FfiConverterTypeManifestTheme_lift(_ buf: RustBuffer) throws -> Mani
 
 public func FfiConverterTypeManifestTheme_lower(_ value: ManifestTheme) -> RustBuffer {
     return FfiConverterTypeManifestTheme.lower(value)
-}
-
-public struct ManifestThemes {
-    public var value: [ManifestTheme]?
-
-    // Default memberwise initializers are never public by default, so we
-    // declare one manually.
-    public init(
-        value: [ManifestTheme]?)
-    {
-        self.value = value
-    }
-}
-
-extension ManifestThemes: Equatable, Hashable {
-    public static func == (lhs: ManifestThemes, rhs: ManifestThemes) -> Bool {
-        if lhs.value != rhs.value {
-            return false
-        }
-        return true
-    }
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(value)
-    }
-}
-
-public struct FfiConverterTypeManifestThemes: FfiConverterRustBuffer {
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ManifestThemes {
-        return
-            try ManifestThemes(
-                value: FfiConverterOptionSequenceTypeManifestTheme.read(from: &buf)
-            )
-    }
-
-    public static func write(_ value: ManifestThemes, into buf: inout [UInt8]) {
-        FfiConverterOptionSequenceTypeManifestTheme.write(value.value, into: &buf)
-    }
-}
-
-public func FfiConverterTypeManifestThemes_lift(_ buf: RustBuffer) throws -> ManifestThemes {
-    return try FfiConverterTypeManifestThemes.lift(buf)
-}
-
-public func FfiConverterTypeManifestThemes_lower(_ value: ManifestThemes) -> RustBuffer {
-    return FfiConverterTypeManifestThemes.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -1878,27 +1832,6 @@ private struct FfiConverterOptionTypeManifest: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeManifest.read(from: &buf)
-        default: throw UniffiInternalError.unexpectedOptionalTag
-        }
-    }
-}
-
-private struct FfiConverterOptionTypeManifestThemes: FfiConverterRustBuffer {
-    typealias SwiftType = ManifestThemes?
-
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
-        guard let value = value else {
-            writeInt(&buf, Int8(0))
-            return
-        }
-        writeInt(&buf, Int8(1))
-        FfiConverterTypeManifestThemes.write(value, into: &buf)
-    }
-
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
-        switch try readInt(&buf) as Int8 {
-        case 0: return nil
-        case 1: return try FfiConverterTypeManifestThemes.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
