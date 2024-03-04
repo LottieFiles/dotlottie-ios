@@ -9,17 +9,28 @@ import Foundation
 import CoreImage
 import DotLottiePlayer
 
-class Player: ObservableObject, Observer {
+class Player: ObservableObject {
     @Published public var playerState: PlayerState = .initial
-    
+
+    internal lazy var dotLottieObserver: DotLottieObserver? = DotLottieObserver(self)
+
     private let dotLottiePlayer: DotLottiePlayer
     private var WIDTH: UInt32 = 512
     private var HEIGHT: UInt32 = 512
     
     init(config: Config) {
-        dotLottiePlayer = DotLottiePlayer(config: config)
-        
-        dotLottiePlayer.subscribe(observer: self)
+        self.dotLottiePlayer = DotLottiePlayer(config: config)
+    }
+    
+    deinit {
+        self.destroy()
+    }
+    
+    public func destroy() {
+        if let ob = self.dotLottieObserver {
+            self.dotLottiePlayer.unsubscribe(observer: ob)
+            self.dotLottieObserver = nil
+        }
     }
     
     public func loadAnimationData(animationData: String, width: Int, height: Int) throws {
@@ -47,7 +58,7 @@ class Player: ObservableObject, Observer {
         self.HEIGHT = UInt32(height)
         
         if (!dotLottiePlayer.loadAnimationPath(animationPath: animationPath,
-                                                    width: self.WIDTH,
+                                               width: self.WIDTH,
                                                height: self.HEIGHT)) {
             self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
@@ -57,10 +68,10 @@ class Player: ObservableObject, Observer {
     public func loadAnimation(animationId: String, width: Int, height: Int) throws {
         self.WIDTH = UInt32(width)
         self.HEIGHT = UInt32(height)
-
+        
         if (!dotLottiePlayer.loadAnimation(animationId: animationId,
-                                                    width: self.WIDTH,
-                                               height: self.HEIGHT)) {
+                                           width: self.WIDTH,
+                                           height: self.HEIGHT)) {
             self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
@@ -191,42 +202,9 @@ class Player: ObservableObject, Observer {
         dotLottiePlayer.clear()
     }
     
-    private func setPlayerState(state: PlayerState) {
+    public func setPlayerState(state: PlayerState) {
         DispatchQueue.main.async {
             self.playerState = state
         }
-    }
-    
-    func onLoad() {
-        self.setPlayerState(state: .loaded)
-    }
-    
-    func onLoop(loopCount: UInt32) {
-    }
-
-    func onComplete() {
-        self.setPlayerState(state: .paused)
-    }
-    
-    func onFrame(frameNo: Float) {
-    }
-
-    func onPause() {
-        self.setPlayerState(state: .paused)
-    }
-    
-    func onPlay() {
-        self.setPlayerState(state: .playing)
-    }
-    
-    func onRender(frameNo: Float) {
-    }
-    
-    func onStop() {
-        self.setPlayerState(state: .stopped)
-    }
-    
-    func onLoadError() {
-        self.setPlayerState(state: .error)
     }
 }
