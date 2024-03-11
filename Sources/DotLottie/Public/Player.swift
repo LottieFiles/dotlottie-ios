@@ -129,6 +129,14 @@ class Player: ObservableObject {
         return dotLottiePlayer.totalFrames()
     }
     
+    public func loadTheme(themeId: String) -> Bool {
+        return dotLottiePlayer.loadTheme(themeId: themeId)
+    }
+
+    public func loadThemeData(themeData: String) -> Bool {
+        return dotLottiePlayer.loadThemeData(themeData: themeData)
+    }
+    
     public func setFrame(no: Float32) -> Bool {
         return dotLottiePlayer.setFrame(no: no)
     }

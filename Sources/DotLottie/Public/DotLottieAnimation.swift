@@ -394,6 +394,10 @@ public class DotLottieAnimation: ObservableObject {
         return player.duration()
     }
     
+    public func error() -> Bool {
+        return self.animationModel.error
+    }
+    
     public func errorMessage() -> String {
         return self.animationModel.errorMessage
     }
@@ -408,6 +412,14 @@ public class DotLottieAnimation: ObservableObject {
     
     public func markers() -> [Marker] {
         return player.markers()
+    }
+    
+    public func loadTheme(themeId: String) -> Bool {
+        return player.loadTheme(themeId: themeId)
+    }
+
+    public func loadThemeData(themeData: String) -> Bool {
+        return player.loadThemeData(themeData: themeData)
     }
 
     public func resize(width: Int, height: Int) {
