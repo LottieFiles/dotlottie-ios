@@ -34,7 +34,7 @@ public class DotLottieAnimation: ObservableObject {
                              speed: config.speed ?? 1.0,
                              useFrameInterpolation: config.useFrameInterpolation ?? false,
                              segments: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
-                             backgroundColor: 0)
+                             backgroundColor: 0, marker: config.marker ?? "")
         
         self.player = Player(config: self.config)
         
@@ -406,6 +406,10 @@ public class DotLottieAnimation: ObservableObject {
         return player.manifest()
     }
     
+    public func markers() -> [Marker] {
+        return player.markers()
+    }
+
     public func resize(width: Int, height: Int) {
         self.animationModel.width = width
         self.animationModel.height = height
@@ -417,7 +421,7 @@ public class DotLottieAnimation: ObservableObject {
             self.animationModel.errorMessage = error.localizedDescription
         }
     }
-    
+
     public func loopCount() -> Int {
         return player.loopCount()
     }

@@ -93,6 +93,8 @@ RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest(void*_Nonn
 );
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest_string(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_markers(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_pause(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_play(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
@@ -305,6 +307,9 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest_string(void
+    
+);
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_markers(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_pause(void

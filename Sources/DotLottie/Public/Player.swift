@@ -161,6 +161,10 @@ class Player: ObservableObject {
         return self.dotLottiePlayer.isComplete()
     }
     
+    public func markers() -> [Marker] {
+        return self.dotLottiePlayer.markers()
+    }
+    
     public func play() {
         let _ = dotLottiePlayer.play()
         
