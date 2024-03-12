@@ -41,9 +41,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
             return
         }
         
-        if (parent.dotLottieViewModel.error()) {
-            return
-        }
+        guard !parent.dotLottieViewModel.error() else { return }
         
         if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()

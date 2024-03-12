@@ -122,61 +122,61 @@ class Player: ObservableObject {
     }
     
     public func config() -> Config {
-        return dotLottiePlayer.config()
+        dotLottiePlayer.config()
     }
     
     public func totalFrames() -> Float {
-        return dotLottiePlayer.totalFrames()
+        dotLottiePlayer.totalFrames()
     }
     
     public func loadTheme(themeId: String) -> Bool {
-        return dotLottiePlayer.loadTheme(themeId: themeId)
+        dotLottiePlayer.loadTheme(themeId: themeId)
     }
 
     public func loadThemeData(themeData: String) -> Bool {
-        return dotLottiePlayer.loadThemeData(themeData: themeData)
+        dotLottiePlayer.loadThemeData(themeData: themeData)
     }
     
     public func setFrame(no: Float32) -> Bool {
-        return dotLottiePlayer.setFrame(no: no)
+        dotLottiePlayer.setFrame(no: no)
     }
     
     public func currentFrame() -> Float {
-        return dotLottiePlayer.currentFrame()
+        dotLottiePlayer.currentFrame()
     }
     
     public func loopCount() -> Int {
-        return Int(dotLottiePlayer.loopCount())
+        Int(dotLottiePlayer.loopCount())
     }
     
     public func isLoaded() -> Bool {
-        return dotLottiePlayer.isLoaded()
+        dotLottiePlayer.isLoaded()
     }
     
     public func isPlaying() -> Bool {
-        return dotLottiePlayer.isPlaying()
+        dotLottiePlayer.isPlaying()
     }
     
     public func isPaused() -> Bool {
-        return dotLottiePlayer.isPaused()
+        dotLottiePlayer.isPaused()
     }
     
     public func isStopped() -> Bool {
-        return dotLottiePlayer.isStopped()
+        dotLottiePlayer.isStopped()
     }
     
     public func isComplete() -> Bool {
-        return self.dotLottiePlayer.isComplete()
+        dotLottiePlayer.isComplete()
     }
     
     public func markers() -> [Marker] {
-        return self.dotLottiePlayer.markers()
+        dotLottiePlayer.markers()
     }
     
     public func play() {
         let _ = dotLottiePlayer.play()
         
-        self.setPlayerState(state: .playing)
+        setPlayerState(state: .playing)
     }
     
     public func pause() {
