@@ -34,7 +34,9 @@ public class DotLottieAnimation: ObservableObject {
                              speed: config.speed ?? 1.0,
                              useFrameInterpolation: config.useFrameInterpolation ?? false,
                              segments: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
-                             backgroundColor: 0)
+                             backgroundColor: 0,
+                             layout: config.layout ?? Layout(fit: Fit.contain, align: [0.0, 0.0]),
+                             marker: "")
         
         self.player = Player(config: self.config)
         
