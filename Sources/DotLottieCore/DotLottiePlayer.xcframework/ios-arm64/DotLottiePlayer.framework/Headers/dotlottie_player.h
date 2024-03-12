@@ -87,11 +87,17 @@ int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_animation_path(voi
 );
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_dotlottie_data(void*_Nonnull ptr, RustBuffer file_data, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(void*_Nonnull ptr, RustBuffer theme_id, RustCallStatus *_Nonnull out_status
+);
+int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme_data(void*_Nonnull ptr, RustBuffer theme_data, RustCallStatus *_Nonnull out_status
+);
 uint32_t uniffi_dotlottie_player_fn_method_dotlottieplayer_loop_count(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest_string(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_markers(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_pause(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
@@ -298,6 +304,12 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation_
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie_data(void
     
 );
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme(void
+    
+);
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme_data(void
+    
+);
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_loop_count(void
     
 );
@@ -305,6 +317,9 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest_string(void
+    
+);
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_markers(void
     
 );
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_pause(void

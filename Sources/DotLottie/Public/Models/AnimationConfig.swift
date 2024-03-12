@@ -18,6 +18,7 @@ public struct AnimationConfig {
     public var backgroundColor: CIImage? = .clear
     public var width: Int? = 512
     public var height: Int? = 512
+    public var marker: String? = ""
     
     public init(
         autoplay: Bool? = false,
@@ -28,7 +29,8 @@ public struct AnimationConfig {
         segments: (Float, Float)? = nil,
         backgroundColor: CIImage? = .clear,
         width: Int? = nil,
-        height: Int? = nil
+        height: Int? = nil,
+        marker: String? = nil
     ) {
         self.autoplay = autoplay
         self.loop = loop
@@ -39,5 +41,6 @@ public struct AnimationConfig {
         self.backgroundColor = backgroundColor
         self.width = width
         self.height = height
+        self.marker = marker
     }
 }

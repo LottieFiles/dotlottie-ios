@@ -455,11 +455,17 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func loadDotlottieData(fileData: Data, width: UInt32, height: UInt32) -> Bool
 
+    func loadTheme(themeId: String) -> Bool
+
+    func loadThemeData(themeData: String) -> Bool
+
     func loopCount() -> UInt32
 
     func manifest() -> Manifest?
 
     func manifestString() -> String
+
+    func markers() -> [Marker]
 
     func pause() -> Bool
 
@@ -659,6 +665,26 @@ public class DotLottiePlayer:
         )
     }
 
+    public func loadTheme(themeId: String) -> Bool {
+        return try! FfiConverterBool.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(self.uniffiClonePointer(),
+                                                                                 FfiConverterString.lower(themeId), $0)
+                }
+        )
+    }
+
+    public func loadThemeData(themeData: String) -> Bool {
+        return try! FfiConverterBool.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme_data(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(themeData), $0)
+                }
+        )
+    }
+
     public func loopCount() -> UInt32 {
         return try! FfiConverterUInt32.lift(
             try!
@@ -682,6 +708,15 @@ public class DotLottiePlayer:
             try!
                 rustCall {
                     uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest_string(self.uniffiClonePointer(), $0)
+                }
+        )
+    }
+
+    public func markers() -> [Marker] {
+        return try! FfiConverterSequenceTypeMarker.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_markers(self.uniffiClonePointer(), $0)
                 }
         )
     }
@@ -1268,6 +1303,7 @@ public struct Config {
     public var useFrameInterpolation: Bool
     public var segments: [Float]
     public var backgroundColor: UInt32
+    public var marker: String
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
@@ -1278,7 +1314,8 @@ public struct Config {
         speed: Float,
         useFrameInterpolation: Bool,
         segments: [Float],
-        backgroundColor: UInt32
+        backgroundColor: UInt32,
+        marker: String
     ) {
         self.autoplay = autoplay
         self.loopAnimation = loopAnimation
@@ -1287,6 +1324,7 @@ public struct Config {
         self.useFrameInterpolation = useFrameInterpolation
         self.segments = segments
         self.backgroundColor = backgroundColor
+        self.marker = marker
     }
 }
 
@@ -1313,6 +1351,9 @@ extension Config: Equatable, Hashable {
         if lhs.backgroundColor != rhs.backgroundColor {
             return false
         }
+        if lhs.marker != rhs.marker {
+            return false
+        }
         return true
     }
 
@@ -1324,6 +1365,7 @@ extension Config: Equatable, Hashable {
         hasher.combine(useFrameInterpolation)
         hasher.combine(segments)
         hasher.combine(backgroundColor)
+        hasher.combine(marker)
     }
 }
 
@@ -1337,7 +1379,8 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
                 speed: FfiConverterFloat.read(from: &buf),
                 useFrameInterpolation: FfiConverterBool.read(from: &buf),
                 segments: FfiConverterSequenceFloat.read(from: &buf),
-                backgroundColor: FfiConverterUInt32.read(from: &buf)
+                backgroundColor: FfiConverterUInt32.read(from: &buf),
+                marker: FfiConverterString.read(from: &buf)
             )
     }
 
@@ -1349,6 +1392,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
         FfiConverterBool.write(value.useFrameInterpolation, into: &buf)
         FfiConverterSequenceFloat.write(value.segments, into: &buf)
         FfiConverterUInt32.write(value.backgroundColor, into: &buf)
+        FfiConverterString.write(value.marker, into: &buf)
     }
 }
 
@@ -1678,6 +1722,70 @@ public func FfiConverterTypeManifestTheme_lower(_ value: ManifestTheme) -> RustB
     return FfiConverterTypeManifestTheme.lower(value)
 }
 
+public struct Marker {
+    public var name: String
+    public var time: Float
+    public var duration: Float
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        name: String,
+        time: Float,
+        duration: Float
+    ) {
+        self.name = name
+        self.time = time
+        self.duration = duration
+    }
+}
+
+extension Marker: Equatable, Hashable {
+    public static func == (lhs: Marker, rhs: Marker) -> Bool {
+        if lhs.name != rhs.name {
+            return false
+        }
+        if lhs.time != rhs.time {
+            return false
+        }
+        if lhs.duration != rhs.duration {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(name)
+        hasher.combine(time)
+        hasher.combine(duration)
+    }
+}
+
+public struct FfiConverterTypeMarker: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Marker {
+        return
+            try Marker(
+                name: FfiConverterString.read(from: &buf),
+                time: FfiConverterFloat.read(from: &buf),
+                duration: FfiConverterFloat.read(from: &buf)
+            )
+    }
+
+    public static func write(_ value: Marker, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.name, into: &buf)
+        FfiConverterFloat.write(value.time, into: &buf)
+        FfiConverterFloat.write(value.duration, into: &buf)
+    }
+}
+
+public func FfiConverterTypeMarker_lift(_ buf: RustBuffer) throws -> Marker {
+    return try FfiConverterTypeMarker.lift(buf)
+}
+
+public func FfiConverterTypeMarker_lower(_ value: Marker) -> RustBuffer {
+    return FfiConverterTypeMarker.lower(value)
+}
+
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 public enum Mode {
@@ -1967,6 +2075,28 @@ private struct FfiConverterSequenceTypeManifestTheme: FfiConverterRustBuffer {
     }
 }
 
+private struct FfiConverterSequenceTypeMarker: FfiConverterRustBuffer {
+    typealias SwiftType = [Marker]
+
+    public static func write(_ value: [Marker], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeMarker.write(item, into: &buf)
+        }
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Marker] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [Marker]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            try seq.append(FfiConverterTypeMarker.read(from: &buf))
+        }
+        return seq
+    }
+}
+
 private enum InitializationResult {
     case ok
     case contractVersionMismatch
@@ -2028,6 +2158,12 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie_data() != 3402 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme() != 58256 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme_data() != 49777 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_loop_count() != 14780 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2035,6 +2171,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest_string() != 60193 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_markers() != 29800 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_pause() != 16452 {
