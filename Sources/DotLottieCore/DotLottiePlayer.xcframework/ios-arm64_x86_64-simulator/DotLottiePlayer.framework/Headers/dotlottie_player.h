@@ -147,6 +147,9 @@ void uniffi_dotlottie_player_fn_method_observer_on_render(void*_Nonnull ptr, flo
 );
 void uniffi_dotlottie_player_fn_method_observer_on_stop(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+RustBuffer uniffi_dotlottie_player_fn_func_create_default_layout(RustCallStatus *_Nonnull out_status
+    
+);
 RustBuffer ffi_dotlottie_player_rustbuffer_alloc(int32_t size, RustCallStatus *_Nonnull out_status
 );
 RustBuffer ffi_dotlottie_player_rustbuffer_from_bytes(ForeignBytes bytes, RustCallStatus *_Nonnull out_status
@@ -258,6 +261,9 @@ void ffi_dotlottie_player_rust_future_cancel_void(void* _Nonnull handle
 void ffi_dotlottie_player_rust_future_free_void(void* _Nonnull handle
 );
 void ffi_dotlottie_player_rust_future_complete_void(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+);
+uint16_t uniffi_dotlottie_player_checksum_func_create_default_layout(void
+    
 );
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_buffer_len(void
     

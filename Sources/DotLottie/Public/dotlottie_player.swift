@@ -1303,6 +1303,7 @@ public struct Config {
     public var useFrameInterpolation: Bool
     public var segments: [Float]
     public var backgroundColor: UInt32
+    public var layout: Layout
     public var marker: String
 
     // Default memberwise initializers are never public by default, so we
@@ -1315,6 +1316,7 @@ public struct Config {
         useFrameInterpolation: Bool,
         segments: [Float],
         backgroundColor: UInt32,
+        layout: Layout,
         marker: String
     ) {
         self.autoplay = autoplay
@@ -1324,6 +1326,7 @@ public struct Config {
         self.useFrameInterpolation = useFrameInterpolation
         self.segments = segments
         self.backgroundColor = backgroundColor
+        self.layout = layout
         self.marker = marker
     }
 }
@@ -1351,6 +1354,9 @@ extension Config: Equatable, Hashable {
         if lhs.backgroundColor != rhs.backgroundColor {
             return false
         }
+        if lhs.layout != rhs.layout {
+            return false
+        }
         if lhs.marker != rhs.marker {
             return false
         }
@@ -1365,6 +1371,7 @@ extension Config: Equatable, Hashable {
         hasher.combine(useFrameInterpolation)
         hasher.combine(segments)
         hasher.combine(backgroundColor)
+        hasher.combine(layout)
         hasher.combine(marker)
     }
 }
@@ -1380,6 +1387,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
                 useFrameInterpolation: FfiConverterBool.read(from: &buf),
                 segments: FfiConverterSequenceFloat.read(from: &buf),
                 backgroundColor: FfiConverterUInt32.read(from: &buf),
+                layout: FfiConverterTypeLayout.read(from: &buf),
                 marker: FfiConverterString.read(from: &buf)
             )
     }
@@ -1392,6 +1400,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
         FfiConverterBool.write(value.useFrameInterpolation, into: &buf)
         FfiConverterSequenceFloat.write(value.segments, into: &buf)
         FfiConverterUInt32.write(value.backgroundColor, into: &buf)
+        FfiConverterTypeLayout.write(value.layout, into: &buf)
         FfiConverterString.write(value.marker, into: &buf)
     }
 }
@@ -1402,6 +1411,61 @@ public func FfiConverterTypeConfig_lift(_ buf: RustBuffer) throws -> Config {
 
 public func FfiConverterTypeConfig_lower(_ value: Config) -> RustBuffer {
     return FfiConverterTypeConfig.lower(value)
+}
+
+public struct Layout {
+    public var fit: Fit
+    public var align: [Float]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(
+        fit: Fit,
+        align: [Float]
+    ) {
+        self.fit = fit
+        self.align = align
+    }
+}
+
+extension Layout: Equatable, Hashable {
+    public static func == (lhs: Layout, rhs: Layout) -> Bool {
+        if lhs.fit != rhs.fit {
+            return false
+        }
+        if lhs.align != rhs.align {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(fit)
+        hasher.combine(align)
+    }
+}
+
+public struct FfiConverterTypeLayout: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Layout {
+        return
+            try Layout(
+                fit: FfiConverterTypeFit.read(from: &buf),
+                align: FfiConverterSequenceFloat.read(from: &buf)
+            )
+    }
+
+    public static func write(_ value: Layout, into buf: inout [UInt8]) {
+        FfiConverterTypeFit.write(value.fit, into: &buf)
+        FfiConverterSequenceFloat.write(value.align, into: &buf)
+    }
+}
+
+public func FfiConverterTypeLayout_lift(_ buf: RustBuffer) throws -> Layout {
+    return try FfiConverterTypeLayout.lift(buf)
+}
+
+public func FfiConverterTypeLayout_lower(_ value: Layout) -> RustBuffer {
+    return FfiConverterTypeLayout.lower(value)
 }
 
 public struct Manifest {
@@ -1788,6 +1852,72 @@ public func FfiConverterTypeMarker_lower(_ value: Marker) -> RustBuffer {
 
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+public enum Fit {
+    case contain
+    case fill
+    case cover
+    case fitWidth
+    case fitHeight
+    case none
+}
+
+public struct FfiConverterTypeFit: FfiConverterRustBuffer {
+    typealias SwiftType = Fit
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Fit {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        case 1: return .contain
+
+        case 2: return .fill
+
+        case 3: return .cover
+
+        case 4: return .fitWidth
+
+        case 5: return .fitHeight
+
+        case 6: return .none
+
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: Fit, into buf: inout [UInt8]) {
+        switch value {
+        case .contain:
+            writeInt(&buf, Int32(1))
+
+        case .fill:
+            writeInt(&buf, Int32(2))
+
+        case .cover:
+            writeInt(&buf, Int32(3))
+
+        case .fitWidth:
+            writeInt(&buf, Int32(4))
+
+        case .fitHeight:
+            writeInt(&buf, Int32(5))
+
+        case .none:
+            writeInt(&buf, Int32(6))
+        }
+    }
+}
+
+public func FfiConverterTypeFit_lift(_ buf: RustBuffer) throws -> Fit {
+    return try FfiConverterTypeFit.lift(buf)
+}
+
+public func FfiConverterTypeFit_lower(_ value: Fit) -> RustBuffer {
+    return FfiConverterTypeFit.lower(value)
+}
+
+extension Fit: Equatable, Hashable {}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 public enum Mode {
     case forward
     case reverse
@@ -2097,6 +2227,14 @@ private struct FfiConverterSequenceTypeMarker: FfiConverterRustBuffer {
     }
 }
 
+public func createDefaultLayout() -> Layout {
+    return try! FfiConverterTypeLayout.lift(
+        try! rustCall {
+            uniffi_dotlottie_player_fn_func_create_default_layout($0)
+        }
+    )
+}
+
 private enum InitializationResult {
     case ok
     case contractVersionMismatch
@@ -2112,6 +2250,9 @@ private var initializationResult: InitializationResult {
     let scaffolding_contract_version = ffi_dotlottie_player_uniffi_contract_version()
     if bindings_contract_version != scaffolding_contract_version {
         return InitializationResult.contractVersionMismatch
+    }
+    if uniffi_dotlottie_player_checksum_func_create_default_layout() != 41529 {
+        return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_buffer_len() != 33793 {
         return InitializationResult.apiChecksumMismatch
