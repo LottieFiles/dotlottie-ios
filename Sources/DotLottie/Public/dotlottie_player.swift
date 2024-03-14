@@ -455,6 +455,10 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func loadDotlottieData(fileData: Data, width: UInt32, height: UInt32) -> Bool
 
+    func loadTheme(themeId: String) -> Bool
+
+    func loadThemeData(themeData: String) -> Bool
+
     func loopCount() -> UInt32
 
     func manifest() -> Manifest?
@@ -657,6 +661,26 @@ public class DotLottiePlayer:
                                                                                           FfiConverterData.lower(fileData),
                                                                                           FfiConverterUInt32.lower(width),
                                                                                           FfiConverterUInt32.lower(height), $0)
+                }
+        )
+    }
+
+    public func loadTheme(themeId: String) -> Bool {
+        return try! FfiConverterBool.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(self.uniffiClonePointer(),
+                                                                                 FfiConverterString.lower(themeId), $0)
+                }
+        )
+    }
+
+    public func loadThemeData(themeData: String) -> Bool {
+        return try! FfiConverterBool.lift(
+            try!
+                rustCall {
+                    uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme_data(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(themeData), $0)
                 }
         )
     }
@@ -2273,6 +2297,12 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie_data() != 3402 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme() != 58256 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme_data() != 49777 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_loop_count() != 14780 {

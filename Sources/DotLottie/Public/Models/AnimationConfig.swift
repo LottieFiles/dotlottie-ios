@@ -18,7 +18,7 @@ public struct AnimationConfig {
     public var backgroundColor: CIImage? = .clear
     public var width: Int? = 512
     public var height: Int? = 512
-    public var layout: Layout? = Layout(fit: Fit.contain, align: [0.0, 0.0])
+    public var layout: Layout? = createDefaultLayout()
     
     public init(
         autoplay: Bool? = false,
@@ -30,7 +30,7 @@ public struct AnimationConfig {
         backgroundColor: CIImage? = .clear,
         width: Int? = nil,
         height: Int? = nil,
-        layout: Layout? = Layout(fit: Fit.contain, align: [0.0, 0.0])
+        layout: Layout? = createDefaultLayout()
     ) {
         self.autoplay = autoplay
         self.loop = loop
