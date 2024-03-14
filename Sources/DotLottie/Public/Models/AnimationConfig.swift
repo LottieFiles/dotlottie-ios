@@ -19,6 +19,7 @@ public struct AnimationConfig {
     public var width: Int? = 512
     public var height: Int? = 512
     public var layout: Layout? = createDefaultLayout()
+    public var marker: String? = ""
     
     public init(
         autoplay: Bool? = false,
@@ -30,7 +31,8 @@ public struct AnimationConfig {
         backgroundColor: CIImage? = .clear,
         width: Int? = nil,
         height: Int? = nil,
-        layout: Layout? = createDefaultLayout()
+        layout: Layout? = createDefaultLayout(),
+        marker: String? = nil
     ) {
         self.autoplay = autoplay
         self.loop = loop
@@ -42,5 +44,6 @@ public struct AnimationConfig {
         self.width = width
         self.height = height
         self.layout = layout
+        self.marker = marker
     }
 }

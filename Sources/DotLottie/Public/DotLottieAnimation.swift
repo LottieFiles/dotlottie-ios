@@ -35,8 +35,8 @@ public class DotLottieAnimation: ObservableObject {
                              useFrameInterpolation: config.useFrameInterpolation ?? false,
                              segments: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
                              backgroundColor: 0,
-                             layout: config.layout ?? Layout(fit: Fit.contain, align: [0.0, 0.0]),
-                             marker: "")
+                             layout: config.layout ?? createDefaultLayout(),
+                             marker: config.marker ?? "")
         
         self.player = Player(config: self.config)
         
@@ -396,6 +396,10 @@ public class DotLottieAnimation: ObservableObject {
         return player.duration()
     }
     
+    public func error() -> Bool {
+        return self.animationModel.error
+    }
+    
     public func errorMessage() -> String {
         return self.animationModel.errorMessage
     }
@@ -408,6 +412,18 @@ public class DotLottieAnimation: ObservableObject {
         return player.manifest()
     }
     
+    public func markers() -> [Marker] {
+        return player.markers()
+    }
+    
+    public func loadTheme(themeId: String) -> Bool {
+        return player.loadTheme(themeId: themeId)
+    }
+
+    public func loadThemeData(themeData: String) -> Bool {
+        return player.loadThemeData(themeData: themeData)
+    }
+
     public func resize(width: Int, height: Int) {
         self.animationModel.width = width
         self.animationModel.height = height
@@ -419,7 +435,7 @@ public class DotLottieAnimation: ObservableObject {
             self.animationModel.errorMessage = error.localizedDescription
         }
     }
-    
+
     public func loopCount() -> Int {
         return player.loopCount()
     }
