@@ -26,11 +26,14 @@ func fetchFileFromURL(url: URL) async throws -> Data {
 
 
 /// Attempts to retrieve animation from the main bundle.
-/// - Parameter animationName: Name of the animation asset.
+/// - Parameters:
+///   - animationName: Name of the animation asset.
+///   - extensionName: Extension of the animation asset.
+///   - bundle: Bundle of the animation asset.
 /// - Throws: couldNotExportFromBundle, fileNotFound.
 /// - Returns: The data.
-func fetchFileFromBundle(animationName: String, extensionName: String) throws -> Data {
-    if let fileURL = Bundle.main.url(forResource: animationName, withExtension: extensionName) {
+func fetchFileFromBundle(animationName: String, extensionName: String, bundle: Bundle) throws -> Data {
+    if let fileURL = bundle.url(forResource: animationName, withExtension: extensionName) {
         guard let fileContents = try? Data(contentsOf: fileURL) else {
             throw FetchErrors.couldNotExportFromBundle(animationName: animationName)
         }

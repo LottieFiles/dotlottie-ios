@@ -9,7 +9,7 @@ import Foundation
 import CoreImage
 
 // MARK: DotLottieAnimation
-public class DotLottieAnimation: ObservableObject {
+public final class DotLottieAnimation: ObservableObject {
     @Published public var framerate: Int = 30
     
     @Published private(set) var player: Player
@@ -21,12 +21,92 @@ public class DotLottieAnimation: ObservableObject {
     private var defaultWidthHeight = 512
     
     internal var config: Config
-    
-    public init(
+
+    /// Load directly from a String (.json).
+    public convenience init(
+        animationData: String,
+        config: AnimationConfig
+    ) {
+        self.init(config: config) {
+            try $0.player.loadAnimationData(animationData: animationData,
+                                            width: $0.animationModel.width,
+                                            height: $0.animationModel.height)
+        } errorMessage: { _ in
+            "player failed to load."
+        }
+    }
+
+    /// Load from an animation (.lottie / .json) from the asset bundle.
+    public convenience init(
+        fileName: String,
+        bundle: Bundle = .main,
+        config: AnimationConfig
+    ) {
+        self.init(config: config) {
+            try $0.loadAnimationFromBundle(animationName: fileName, bundle: bundle)
+        } errorMessage: { error in
+            "Loading from bundle failed for both .json and .lottie versions of your animation: \(error)"
+        }
+    }
+
+    /// Load an animation (.lottie / .json) from the web.
+    public convenience init(
+        webURL: String,
+        config: AnimationConfig
+    ) {
+        self.init(config: config) {
+            if webURL.contains(".lottie") {
+                try await $0.loadDotLottieFromURL(url: webURL)
+            } else {
+                try await $0.loadAnimationFromURL(url: webURL)
+            }
+        } errorMessage: { error in
+            "Failed to load dotLottie. Failed with error: \(error)"
+        }
+    }
+
+    @_disfavoredOverload
+    @available(*, deprecated)
+    public convenience init(
         animationData: String = "",
         fileName: String = "",
         webURL: String = "",
         config: AnimationConfig
+    ) {
+        if webURL != "" {
+            self.init(webURL: webURL, config: config)
+        } else if animationData != "" {
+            self.init(animationData: animationData, config: config)
+        } else if fileName != "" {
+            self.init(fileName: fileName, config: config)
+        } else {
+            self.init(config: config, task: { _ in }, errorMessage: { _ in "" })
+        }
+    }
+
+    private convenience init(
+        config: AnimationConfig,
+        load: @escaping @Sendable (DotLottieAnimation) async throws -> Void,
+        errorMessage: @escaping @Sendable (Error) -> String
+    ) {
+        self.init(config: config) { `self` in
+            Task {
+                do {
+                    try await load(self)
+                } catch {
+                    print(errorMessage(error))
+                    self.animationModel.error = true
+                }
+            }
+        } errorMessage: {
+            errorMessage($0)
+        }
+    }
+
+    private init(
+        config: AnimationConfig,
+        task: (DotLottieAnimation) throws -> Void,
+        errorMessage: @escaping @Sendable (Error) -> String
     ) {
         self.config = Config(autoplay: config.autoplay ?? false,
                              loopAnimation: config.loop ?? false,
@@ -43,48 +123,16 @@ public class DotLottieAnimation: ObservableObject {
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
         }
-
+        
         self.animationModel.width = config.width ?? defaultWidthHeight
         self.animationModel.height = config.height ?? defaultWidthHeight
         
-        if webURL != "" {
-            if webURL.contains(".lottie") {
-                Task {
-                    do {
-                        try await loadDotLottieFromURL(url: webURL)
-                    } catch let error {
-                        print("Failed to load dotLottie. Failed with error: \(error)")
-                        animationModel.error = true
-                    }
-                }
-            } else {
-                Task {
-                    do {
-                        try await loadAnimationFromURL(url: webURL)
-                    } catch let error {
-                        print("Failed to load dotLottie. Failed with error: \(error)")
-                        animationModel.error = true
-                    }
-                }
-            }
-        } else if animationData != "" {
-            do {
-                try player.loadAnimationData(animationData: animationData,
-                                             width: animationModel.width,
-                                             height: animationModel.height)
-            } catch {
-                print("player failed to load.")
-                animationModel.error = true
-            }
-        } else if fileName != "" {
-            do {
-                try loadAnimationFromBundle(animationName: fileName)
-            } catch let error {
-                print("Loading from bundle failed for both .json and .lottie versions of your animation: \(error)")
-                animationModel.error = true
-            }
+        do {
+            try task(self)
+        } catch {
+            print(errorMessage(error))
+            animationModel.error = true
         }
-        
         animationModel.backgroundColor = config.backgroundColor ?? .clear
     }
     
@@ -140,11 +188,14 @@ public class DotLottieAnimation: ObservableObject {
     }
     
     /// Loads a .lottie animation from the main bundle.
-    /// - Parameter animationName: File name inside the bundle to use.
-    private func loadDotLottieFromBundle(animationName: String) throws {
+    /// - Parameters:
+    ///   - animationName: File name inside the bundle to use.
+    ///   - bundle: Bundle to use.
+    private func loadDotLottieFromBundle(animationName: String, bundle: Bundle) throws {
         do {
             let fileData = try fetchFileFromBundle(animationName: animationName,
-                                                   extensionName: "lottie")
+                                                   extensionName: "lottie",
+                                                   bundle: bundle)
             try self.loadDotLottie(data: fileData)
         } catch let error {
             self.animationModel.errorMessage = error.localizedDescription
@@ -174,18 +225,21 @@ public class DotLottieAnimation: ObservableObject {
     }
     
     /// Loads animations (.json + .lottie) from the main bundle.
-    /// - Parameter animationName: Name of the animation inside the bundle.
-    private func loadAnimationFromBundle(animationName: String) throws {
+    /// - Parameters:
+    ///   - animationName: Name of the animation inside the bundle.
+    ///   - bundle: Bundle to use.
+    private func loadAnimationFromBundle(animationName: String, bundle: Bundle) throws {
         do {
             let animationData = try fetchFileFromBundle(animationName: animationName,
-                                                        extensionName: "json")
+                                                        extensionName: "json",
+                                                        bundle: bundle)
             
             let stringData = String(decoding: animationData, as: UTF8.self)
             
             try self.loadAnimation(animationData: stringData)
         } catch {
             do {
-                try loadDotLottieFromBundle(animationName: animationName)
+                try loadDotLottieFromBundle(animationName: animationName, bundle: bundle)
             } catch let error {
                 self.animationModel.errorMessage = error.localizedDescription
                 self.animationModel.error = true
