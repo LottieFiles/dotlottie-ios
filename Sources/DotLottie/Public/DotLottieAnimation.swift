@@ -275,7 +275,7 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     /// Loads animation with the id passed as argument.
-    /// - Parameter animationData: Animation data (.json).
+    /// - Parameter animationId: The id of the animation to play.
     public func loadAnimationById(_ animationId: String) throws {
         do {
             try player.loadAnimation(animationId: animationId, width: self.animationModel.width, height: self.animationModel.height)
@@ -468,6 +468,14 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func markers() -> [Marker] {
         return player.markers()
+    }
+    
+    public func setMarker(marker: String) {
+        var config = player.config()
+        
+        config.marker = marker
+        
+        player.setConfig(config: config)
     }
     
     public func loadTheme(themeId: String) -> Bool {
