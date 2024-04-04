@@ -13,6 +13,8 @@ MacOS is supported for versions 11.0 and upwards.
 
 ## Usage
 
+> Full documentation available [on the developer portal](https://developers.lottiefiles.com/docs/dotlottie-ios/).
+
 1. Install the dependancy
 
 Via the Swift Package Manager
