@@ -8,8 +8,8 @@
 
 ## Supported Devices
 
-Currently this package supports a mimimum iOS version of 13.0+ for iPhone and iPad.
-MacOS is supported for versions 11.0 and upwards.
+Currently this package supports a mimimum iOS version of 15.0+ for iPhone and iPad.
+MacOS is supported for versions 12.0 and upwards.
 
 ## Usage
 

@@ -24,12 +24,10 @@
 
 typedef struct RustBuffer
 {
-    int32_t capacity;
-    int32_t len;
+    uint64_t capacity;
+    uint64_t len;
     uint8_t *_Nullable data;
 } RustBuffer;
-
-typedef int32_t (*ForeignCallback)(uint64_t, int32_t, const uint8_t *_Nonnull, int32_t, RustBuffer *_Nonnull);
 
 typedef struct ForeignBytes
 {
@@ -46,355 +44,1120 @@ typedef struct RustCallStatus {
 // ⚠️ Attention: If you change this #else block (ending in `#endif // def UNIFFI_SHARED_H`) you *must* ⚠️
 // ⚠️ increment the version suffix in all instances of UNIFFI_SHARED_HEADER_V4 in this file.           ⚠️
 #endif // def UNIFFI_SHARED_H
+#ifndef UNIFFI_FFIDEF_RUST_FUTURE_CONTINUATION_CALLBACK
+#define UNIFFI_FFIDEF_RUST_FUTURE_CONTINUATION_CALLBACK
+typedef void (*UniffiRustFutureContinuationCallback)(uint64_t, int8_t
+    );
 
-// Continuation callback for UniFFI Futures
-typedef void (*UniFfiRustFutureContinuation)(void * _Nonnull, int8_t);
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_FREE
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_FREE
+typedef void (*UniffiForeignFutureFree)(uint64_t
+    );
 
-// Scaffolding functions
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_FREE
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_FREE
+typedef void (*UniffiCallbackInterfaceFree)(uint64_t
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE
+typedef struct UniffiForeignFuture {
+    uint64_t handle;
+    UniffiForeignFutureFree _Nonnull free;
+} UniffiForeignFuture;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U8
+typedef struct UniffiForeignFutureStructU8 {
+    uint8_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructU8;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U8
+typedef void (*UniffiForeignFutureCompleteU8)(uint64_t, UniffiForeignFutureStructU8
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I8
+typedef struct UniffiForeignFutureStructI8 {
+    int8_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructI8;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I8
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I8
+typedef void (*UniffiForeignFutureCompleteI8)(uint64_t, UniffiForeignFutureStructI8
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U16
+typedef struct UniffiForeignFutureStructU16 {
+    uint16_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructU16;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U16
+typedef void (*UniffiForeignFutureCompleteU16)(uint64_t, UniffiForeignFutureStructU16
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I16
+typedef struct UniffiForeignFutureStructI16 {
+    int16_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructI16;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I16
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I16
+typedef void (*UniffiForeignFutureCompleteI16)(uint64_t, UniffiForeignFutureStructI16
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U32
+typedef struct UniffiForeignFutureStructU32 {
+    uint32_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructU32;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U32
+typedef void (*UniffiForeignFutureCompleteU32)(uint64_t, UniffiForeignFutureStructU32
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I32
+typedef struct UniffiForeignFutureStructI32 {
+    int32_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructI32;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I32
+typedef void (*UniffiForeignFutureCompleteI32)(uint64_t, UniffiForeignFutureStructI32
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_U64
+typedef struct UniffiForeignFutureStructU64 {
+    uint64_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructU64;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_U64
+typedef void (*UniffiForeignFutureCompleteU64)(uint64_t, UniffiForeignFutureStructU64
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_I64
+typedef struct UniffiForeignFutureStructI64 {
+    int64_t returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructI64;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_I64
+typedef void (*UniffiForeignFutureCompleteI64)(uint64_t, UniffiForeignFutureStructI64
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F32
+typedef struct UniffiForeignFutureStructF32 {
+    float returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructF32;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F32
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F32
+typedef void (*UniffiForeignFutureCompleteF32)(uint64_t, UniffiForeignFutureStructF32
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_F64
+typedef struct UniffiForeignFutureStructF64 {
+    double returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructF64;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F64
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_F64
+typedef void (*UniffiForeignFutureCompleteF64)(uint64_t, UniffiForeignFutureStructF64
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_POINTER
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_POINTER
+typedef struct UniffiForeignFutureStructPointer {
+    void*_Nonnull returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructPointer;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_POINTER
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_POINTER
+typedef void (*UniffiForeignFutureCompletePointer)(uint64_t, UniffiForeignFutureStructPointer
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_RUST_BUFFER
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_RUST_BUFFER
+typedef struct UniffiForeignFutureStructRustBuffer {
+    RustBuffer returnValue;
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructRustBuffer;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_RUST_BUFFER
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_RUST_BUFFER
+typedef void (*UniffiForeignFutureCompleteRustBuffer)(uint64_t, UniffiForeignFutureStructRustBuffer
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_VOID
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_STRUCT_VOID
+typedef struct UniffiForeignFutureStructVoid {
+    RustCallStatus callStatus;
+} UniffiForeignFutureStructVoid;
+
+#endif
+#ifndef UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_VOID
+#define UNIFFI_FFIDEF_FOREIGN_FUTURE_COMPLETE_VOID
+typedef void (*UniffiForeignFutureCompleteVoid)(uint64_t, UniffiForeignFutureStructVoid
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD0
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD0
+typedef void (*UniffiCallbackInterfaceObserverMethod0)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD1
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD1
+typedef void (*UniffiCallbackInterfaceObserverMethod1)(uint64_t, float, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD2
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD2
+typedef void (*UniffiCallbackInterfaceObserverMethod2)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD3
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD3
+typedef void (*UniffiCallbackInterfaceObserverMethod3)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD4
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD4
+typedef void (*UniffiCallbackInterfaceObserverMethod4)(uint64_t, uint32_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD5
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD5
+typedef void (*UniffiCallbackInterfaceObserverMethod5)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD6
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD6
+typedef void (*UniffiCallbackInterfaceObserverMethod6)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD7
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD7
+typedef void (*UniffiCallbackInterfaceObserverMethod7)(uint64_t, float, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD8
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_OBSERVER_METHOD8
+typedef void (*UniffiCallbackInterfaceObserverMethod8)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_OBSERVER
+#define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_OBSERVER
+typedef struct UniffiVTableCallbackInterfaceObserver {
+    UniffiCallbackInterfaceObserverMethod0 _Nonnull onComplete;
+    UniffiCallbackInterfaceObserverMethod1 _Nonnull onFrame;
+    UniffiCallbackInterfaceObserverMethod2 _Nonnull onLoad;
+    UniffiCallbackInterfaceObserverMethod3 _Nonnull onLoadError;
+    UniffiCallbackInterfaceObserverMethod4 _Nonnull onLoop;
+    UniffiCallbackInterfaceObserverMethod5 _Nonnull onPause;
+    UniffiCallbackInterfaceObserverMethod6 _Nonnull onPlay;
+    UniffiCallbackInterfaceObserverMethod7 _Nonnull onRender;
+    UniffiCallbackInterfaceObserverMethod8 _Nonnull onStop;
+    UniffiCallbackInterfaceFree _Nonnull uniffiFree;
+} UniffiVTableCallbackInterfaceObserver;
+
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CLONE_DOTLOTTIEPLAYER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CLONE_DOTLOTTIEPLAYER
 void*_Nonnull uniffi_dotlottie_player_fn_clone_dotlottieplayer(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FREE_DOTLOTTIEPLAYER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FREE_DOTLOTTIEPLAYER
 void uniffi_dotlottie_player_fn_free_dotlottieplayer(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CONSTRUCTOR_DOTLOTTIEPLAYER_NEW
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CONSTRUCTOR_DOTLOTTIEPLAYER_NEW
 void*_Nonnull uniffi_dotlottie_player_fn_constructor_dotlottieplayer_new(RustBuffer config, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_active_animation_id(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_THEME_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_THEME_ID
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_active_theme_id(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_BUFFER_LEN
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_BUFFER_LEN
 uint64_t uniffi_dotlottie_player_fn_method_dotlottieplayer_buffer_len(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_BUFFER_PTR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_BUFFER_PTR
 uint64_t uniffi_dotlottie_player_fn_method_dotlottieplayer_buffer_ptr(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CLEAR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CLEAR
 void uniffi_dotlottie_player_fn_method_dotlottieplayer_clear(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CONFIG
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_config(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CURRENT_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_CURRENT_FRAME
 float uniffi_dotlottie_player_fn_method_dotlottieplayer_current_frame(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_DURATION
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_DURATION
 float uniffi_dotlottie_player_fn_method_dotlottieplayer_duration(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_COMPLETE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_COMPLETE
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_is_complete(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_LOADED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_LOADED
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_is_loaded(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_PAUSED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_PAUSED
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_is_paused(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_PLAYING
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_PLAYING
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_is_playing(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_STOPPED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_STOPPED
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_is_stopped(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_animation(void*_Nonnull ptr, RustBuffer animation_id, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_DATA
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_animation_data(void*_Nonnull ptr, RustBuffer animation_data, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_PATH
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_PATH
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_animation_path(void*_Nonnull ptr, RustBuffer animation_path, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_DOTLOTTIE_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_DOTLOTTIE_DATA
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_dotlottie_data(void*_Nonnull ptr, RustBuffer file_data, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_THEME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_THEME
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(void*_Nonnull ptr, RustBuffer theme_id, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_THEME_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOAD_THEME_DATA
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme_data(void*_Nonnull ptr, RustBuffer theme_data, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOOP_COUNT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_LOOP_COUNT
 uint32_t uniffi_dotlottie_player_fn_method_dotlottieplayer_loop_count(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MANIFEST
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MANIFEST
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MANIFEST_STRING
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MANIFEST_STRING
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_manifest_string(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MARKERS
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_MARKERS
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_markers(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_PAUSE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_PAUSE
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_pause(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_PLAY
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_PLAY
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_play(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_RENDER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_RENDER
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_render(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_REQUEST_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_REQUEST_FRAME
 float uniffi_dotlottie_player_fn_method_dotlottieplayer_request_frame(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_RESIZE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_RESIZE
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_resize(void*_Nonnull ptr, uint32_t width, uint32_t height, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SEEK
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SEEK
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_seek(void*_Nonnull ptr, float no, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SET_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SET_CONFIG
 void uniffi_dotlottie_player_fn_method_dotlottieplayer_set_config(void*_Nonnull ptr, RustBuffer config, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SET_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SET_FRAME
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_set_frame(void*_Nonnull ptr, float no, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STOP
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_stop(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SUBSCRIBE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_SUBSCRIBE
 void uniffi_dotlottie_player_fn_method_dotlottieplayer_subscribe(void*_Nonnull ptr, void*_Nonnull observer, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_TOTAL_FRAMES
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_TOTAL_FRAMES
 float uniffi_dotlottie_player_fn_method_dotlottieplayer_total_frames(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_UNSUBSCRIBE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_UNSUBSCRIBE
 void uniffi_dotlottie_player_fn_method_dotlottieplayer_unsubscribe(void*_Nonnull ptr, void*_Nonnull observer, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CLONE_OBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_CLONE_OBSERVER
 void*_Nonnull uniffi_dotlottie_player_fn_clone_observer(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FREE_OBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FREE_OBSERVER
 void uniffi_dotlottie_player_fn_free_observer(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
-void uniffi_dotlottie_player_fn_init_callback_observer(ForeignCallback _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_INIT_CALLBACK_VTABLE_OBSERVER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_INIT_CALLBACK_VTABLE_OBSERVER
+void uniffi_dotlottie_player_fn_init_callback_vtable_observer(UniffiVTableCallbackInterfaceObserver* _Nonnull vtable
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_COMPLETE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_COMPLETE
 void uniffi_dotlottie_player_fn_method_observer_on_complete(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_FRAME
 void uniffi_dotlottie_player_fn_method_observer_on_frame(void*_Nonnull ptr, float frame_no, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOAD
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOAD
 void uniffi_dotlottie_player_fn_method_observer_on_load(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOAD_ERROR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOAD_ERROR
 void uniffi_dotlottie_player_fn_method_observer_on_load_error(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_LOOP
 void uniffi_dotlottie_player_fn_method_observer_on_loop(void*_Nonnull ptr, uint32_t loop_count, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_PAUSE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_PAUSE
 void uniffi_dotlottie_player_fn_method_observer_on_pause(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_PLAY
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_PLAY
 void uniffi_dotlottie_player_fn_method_observer_on_play(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_RENDER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_RENDER
 void uniffi_dotlottie_player_fn_method_observer_on_render(void*_Nonnull ptr, float frame_no, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_OBSERVER_ON_STOP
 void uniffi_dotlottie_player_fn_method_observer_on_stop(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_CONFIG
+RustBuffer uniffi_dotlottie_player_fn_func_create_default_config(RustCallStatus *_Nonnull out_status
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_LAYOUT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_LAYOUT
 RustBuffer uniffi_dotlottie_player_fn_func_create_default_layout(RustCallStatus *_Nonnull out_status
     
 );
-RustBuffer ffi_dotlottie_player_rustbuffer_alloc(int32_t size, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_ALLOC
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_ALLOC
+RustBuffer ffi_dotlottie_player_rustbuffer_alloc(uint64_t size, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_FROM_BYTES
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_FROM_BYTES
 RustBuffer ffi_dotlottie_player_rustbuffer_from_bytes(ForeignBytes bytes, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_FREE
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_FREE
 void ffi_dotlottie_player_rustbuffer_free(RustBuffer buf, RustCallStatus *_Nonnull out_status
 );
-RustBuffer ffi_dotlottie_player_rustbuffer_reserve(RustBuffer buf, int32_t additional, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_RESERVE
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUSTBUFFER_RESERVE
+RustBuffer ffi_dotlottie_player_rustbuffer_reserve(RustBuffer buf, uint64_t additional, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_u8(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U8
+void ffi_dotlottie_player_rust_future_poll_u8(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_u8(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U8
+void ffi_dotlottie_player_rust_future_cancel_u8(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_u8(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U8
+void ffi_dotlottie_player_rust_future_free_u8(uint64_t handle
 );
-uint8_t ffi_dotlottie_player_rust_future_complete_u8(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U8
+uint8_t ffi_dotlottie_player_rust_future_complete_u8(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_i8(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I8
+void ffi_dotlottie_player_rust_future_poll_i8(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_i8(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I8
+void ffi_dotlottie_player_rust_future_cancel_i8(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_i8(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I8
+void ffi_dotlottie_player_rust_future_free_i8(uint64_t handle
 );
-int8_t ffi_dotlottie_player_rust_future_complete_i8(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I8
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I8
+int8_t ffi_dotlottie_player_rust_future_complete_i8(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_u16(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U16
+void ffi_dotlottie_player_rust_future_poll_u16(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_u16(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U16
+void ffi_dotlottie_player_rust_future_cancel_u16(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_u16(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U16
+void ffi_dotlottie_player_rust_future_free_u16(uint64_t handle
 );
-uint16_t ffi_dotlottie_player_rust_future_complete_u16(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U16
+uint16_t ffi_dotlottie_player_rust_future_complete_u16(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_i16(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I16
+void ffi_dotlottie_player_rust_future_poll_i16(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_i16(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I16
+void ffi_dotlottie_player_rust_future_cancel_i16(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_i16(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I16
+void ffi_dotlottie_player_rust_future_free_i16(uint64_t handle
 );
-int16_t ffi_dotlottie_player_rust_future_complete_i16(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I16
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I16
+int16_t ffi_dotlottie_player_rust_future_complete_i16(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_u32(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U32
+void ffi_dotlottie_player_rust_future_poll_u32(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_u32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U32
+void ffi_dotlottie_player_rust_future_cancel_u32(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_u32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U32
+void ffi_dotlottie_player_rust_future_free_u32(uint64_t handle
 );
-uint32_t ffi_dotlottie_player_rust_future_complete_u32(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U32
+uint32_t ffi_dotlottie_player_rust_future_complete_u32(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_i32(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I32
+void ffi_dotlottie_player_rust_future_poll_i32(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_i32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I32
+void ffi_dotlottie_player_rust_future_cancel_i32(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_i32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I32
+void ffi_dotlottie_player_rust_future_free_i32(uint64_t handle
 );
-int32_t ffi_dotlottie_player_rust_future_complete_i32(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I32
+int32_t ffi_dotlottie_player_rust_future_complete_i32(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_u64(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_U64
+void ffi_dotlottie_player_rust_future_poll_u64(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_u64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_U64
+void ffi_dotlottie_player_rust_future_cancel_u64(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_u64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_U64
+void ffi_dotlottie_player_rust_future_free_u64(uint64_t handle
 );
-uint64_t ffi_dotlottie_player_rust_future_complete_u64(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_U64
+uint64_t ffi_dotlottie_player_rust_future_complete_u64(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_i64(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_I64
+void ffi_dotlottie_player_rust_future_poll_i64(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_i64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_I64
+void ffi_dotlottie_player_rust_future_cancel_i64(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_i64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_I64
+void ffi_dotlottie_player_rust_future_free_i64(uint64_t handle
 );
-int64_t ffi_dotlottie_player_rust_future_complete_i64(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_I64
+int64_t ffi_dotlottie_player_rust_future_complete_i64(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_f32(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_F32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_F32
+void ffi_dotlottie_player_rust_future_poll_f32(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_f32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_F32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_F32
+void ffi_dotlottie_player_rust_future_cancel_f32(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_f32(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_F32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_F32
+void ffi_dotlottie_player_rust_future_free_f32(uint64_t handle
 );
-float ffi_dotlottie_player_rust_future_complete_f32(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_F32
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_F32
+float ffi_dotlottie_player_rust_future_complete_f32(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_f64(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_F64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_F64
+void ffi_dotlottie_player_rust_future_poll_f64(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_f64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_F64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_F64
+void ffi_dotlottie_player_rust_future_cancel_f64(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_f64(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_F64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_F64
+void ffi_dotlottie_player_rust_future_free_f64(uint64_t handle
 );
-double ffi_dotlottie_player_rust_future_complete_f64(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_F64
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_F64
+double ffi_dotlottie_player_rust_future_complete_f64(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_pointer(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_POINTER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_POINTER
+void ffi_dotlottie_player_rust_future_poll_pointer(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_pointer(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_POINTER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_POINTER
+void ffi_dotlottie_player_rust_future_cancel_pointer(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_pointer(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_POINTER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_POINTER
+void ffi_dotlottie_player_rust_future_free_pointer(uint64_t handle
 );
-void*_Nonnull ffi_dotlottie_player_rust_future_complete_pointer(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_POINTER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_POINTER
+void*_Nonnull ffi_dotlottie_player_rust_future_complete_pointer(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_rust_buffer(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_RUST_BUFFER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_RUST_BUFFER
+void ffi_dotlottie_player_rust_future_poll_rust_buffer(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_rust_buffer(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_RUST_BUFFER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_RUST_BUFFER
+void ffi_dotlottie_player_rust_future_cancel_rust_buffer(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_rust_buffer(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_RUST_BUFFER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_RUST_BUFFER
+void ffi_dotlottie_player_rust_future_free_rust_buffer(uint64_t handle
 );
-RustBuffer ffi_dotlottie_player_rust_future_complete_rust_buffer(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_RUST_BUFFER
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_RUST_BUFFER
+RustBuffer ffi_dotlottie_player_rust_future_complete_rust_buffer(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
-void ffi_dotlottie_player_rust_future_poll_void(void* _Nonnull handle, UniFfiRustFutureContinuation _Nonnull callback, void* _Nonnull callback_data
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_VOID
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_POLL_VOID
+void ffi_dotlottie_player_rust_future_poll_void(uint64_t handle, UniffiRustFutureContinuationCallback _Nonnull callback, uint64_t callback_data
 );
-void ffi_dotlottie_player_rust_future_cancel_void(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_VOID
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_CANCEL_VOID
+void ffi_dotlottie_player_rust_future_cancel_void(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_free_void(void* _Nonnull handle
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_VOID
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_FREE_VOID
+void ffi_dotlottie_player_rust_future_free_void(uint64_t handle
 );
-void ffi_dotlottie_player_rust_future_complete_void(void* _Nonnull handle, RustCallStatus *_Nonnull out_status
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_VOID
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_RUST_FUTURE_COMPLETE_VOID
+void ffi_dotlottie_player_rust_future_complete_void(uint64_t handle, RustCallStatus *_Nonnull out_status
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_CONFIG
+uint16_t uniffi_dotlottie_player_checksum_func_create_default_config(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_LAYOUT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_LAYOUT
 uint16_t uniffi_dotlottie_player_checksum_func_create_default_layout(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_animation_id(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_THEME_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_THEME_ID
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_theme_id(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_BUFFER_LEN
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_BUFFER_LEN
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_buffer_len(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_BUFFER_PTR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_BUFFER_PTR
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_buffer_ptr(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CLEAR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CLEAR
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_clear(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CONFIG
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_config(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CURRENT_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_CURRENT_FRAME
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_current_frame(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_DURATION
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_DURATION
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_duration(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_COMPLETE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_COMPLETE
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_complete(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_LOADED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_LOADED
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_loaded(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_PAUSED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_PAUSED
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_paused(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_PLAYING
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_PLAYING
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_playing(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_STOPPED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_IS_STOPPED
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_stopped(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_DATA
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation_data(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_PATH
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_ANIMATION_PATH
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation_path(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_DOTLOTTIE_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_DOTLOTTIE_DATA
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie_data(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_THEME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_THEME
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_THEME_DATA
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOAD_THEME_DATA
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme_data(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOOP_COUNT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_LOOP_COUNT
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_loop_count(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MANIFEST
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MANIFEST
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MANIFEST_STRING
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MANIFEST_STRING
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_manifest_string(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MARKERS
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_MARKERS
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_markers(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_PAUSE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_PAUSE
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_pause(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_PLAY
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_PLAY
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_play(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_RENDER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_RENDER
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_render(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_REQUEST_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_REQUEST_FRAME
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_request_frame(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_RESIZE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_RESIZE
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_resize(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SEEK
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SEEK
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_seek(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SET_CONFIG
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SET_CONFIG
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_config(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SET_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SET_FRAME
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_frame(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STOP
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_stop(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SUBSCRIBE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_SUBSCRIBE
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_subscribe(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_TOTAL_FRAMES
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_TOTAL_FRAMES
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_total_frames(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_UNSUBSCRIBE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_UNSUBSCRIBE
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_unsubscribe(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_COMPLETE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_COMPLETE
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_complete(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_FRAME
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_FRAME
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_frame(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOAD
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOAD
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_load(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOAD_ERROR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOAD_ERROR
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_load_error(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_LOOP
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_loop(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_PAUSE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_PAUSE
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_pause(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_PLAY
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_PLAY
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_play(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_RENDER
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_RENDER
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_render(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_STOP
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_stop(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_CONSTRUCTOR_DOTLOTTIEPLAYER_NEW
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_CONSTRUCTOR_DOTLOTTIEPLAYER_NEW
 uint16_t uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new(void
     
 );
+#endif
+#ifndef UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_UNIFFI_CONTRACT_VERSION
+#define UNIFFI_FFIDEF_FFI_DOTLOTTIE_PLAYER_UNIFFI_CONTRACT_VERSION
 uint32_t ffi_dotlottie_player_uniffi_contract_version(void
     
 );
+#endif
 
