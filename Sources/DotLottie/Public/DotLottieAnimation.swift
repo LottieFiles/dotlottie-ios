@@ -113,7 +113,7 @@ public final class DotLottieAnimation: ObservableObject {
                              mode: config.mode ?? Mode.forward,
                              speed: config.speed ?? 1.0,
                              useFrameInterpolation: config.useFrameInterpolation ?? false,
-                             segments: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
+                             segment: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
                              backgroundColor: 0,
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "")
@@ -368,7 +368,7 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     public func segments() -> (Float, Float) {
-        return (player.config().segments[0], player.config().segments[1])
+        return (player.config().segment[0], player.config().segment[1])
     }
         
     /// Set the current frame.
@@ -389,7 +389,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func setSegments(segments: (Float, Float)) {
         var config = player.config()
         
-        config.segments = [segments.0, segments.1]
+        config.segment = [segments.0, segments.1]
         
         player.setConfig(config: config)
     }
