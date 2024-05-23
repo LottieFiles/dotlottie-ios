@@ -1551,12 +1551,12 @@ public struct ManifestAnimation {
     public var loop: Bool?
     public var loopCount: UInt32?
     public var playMode: String?
-    public var speed: UInt32?
+    public var speed: Float?
     public var themeColor: String?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(autoplay: Bool?, defaultTheme: String?, direction: Int8?, hover: Bool?, id: String, intermission: UInt32?, loop: Bool?, loopCount: UInt32?, playMode: String?, speed: UInt32?, themeColor: String?) {
+    public init(autoplay: Bool?, defaultTheme: String?, direction: Int8?, hover: Bool?, id: String, intermission: UInt32?, loop: Bool?, loopCount: UInt32?, playMode: String?, speed: Float?, themeColor: String?) {
         self.autoplay = autoplay
         self.defaultTheme = defaultTheme
         self.direction = direction
@@ -1637,7 +1637,7 @@ public struct FfiConverterTypeManifestAnimation: FfiConverterRustBuffer {
                 loop: FfiConverterOptionBool.read(from: &buf),
                 loopCount: FfiConverterOptionUInt32.read(from: &buf),
                 playMode: FfiConverterOptionString.read(from: &buf),
-                speed: FfiConverterOptionUInt32.read(from: &buf),
+                speed: FfiConverterOptionFloat.read(from: &buf),
                 themeColor: FfiConverterOptionString.read(from: &buf)
             )
     }
@@ -1652,7 +1652,7 @@ public struct FfiConverterTypeManifestAnimation: FfiConverterRustBuffer {
         FfiConverterOptionBool.write(value.loop, into: &buf)
         FfiConverterOptionUInt32.write(value.loopCount, into: &buf)
         FfiConverterOptionString.write(value.playMode, into: &buf)
-        FfiConverterOptionUInt32.write(value.speed, into: &buf)
+        FfiConverterOptionFloat.write(value.speed, into: &buf)
         FfiConverterOptionString.write(value.themeColor, into: &buf)
     }
 }
@@ -1936,6 +1936,27 @@ private struct FfiConverterOptionUInt32: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterUInt32.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
+    typealias SwiftType = Float?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterFloat.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterFloat.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
