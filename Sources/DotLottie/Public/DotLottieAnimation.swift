@@ -470,6 +470,14 @@ public final class DotLottieAnimation: ObservableObject {
         return player.markers()
     }
     
+    public func setViewPort(x: Int, y: Int, w: Int, h: Int) -> Bool {
+        player.setViewPort(x: x, y: y, w: w, h: h)
+    }
+    
+    public func segment_duration() -> Float {
+        player.segmentDuration()
+    }
+    
     public func setMarker(marker: String) {
         var config = player.config()
         

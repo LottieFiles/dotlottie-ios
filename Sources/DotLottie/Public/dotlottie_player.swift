@@ -406,6 +406,19 @@ private struct FfiConverterUInt32: FfiConverterPrimitive {
     }
 }
 
+private struct FfiConverterInt32: FfiConverterPrimitive {
+    typealias FfiType = Int32
+    typealias SwiftType = Int32
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int32, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
 private struct FfiConverterUInt64: FfiConverterPrimitive {
     typealias FfiType = UInt64
     typealias SwiftType = UInt64
@@ -565,9 +578,13 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func seek(no: Float) -> Bool
 
+    func segmentDuration() -> Float
+
     func setConfig(config: Config)
 
     func setFrame(no: Float) -> Bool
+
+    func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool
 
     func stop() -> Bool
 
@@ -816,6 +833,12 @@ open class DotLottiePlayer:
         })
     }
 
+    open func segmentDuration() -> Float {
+        return try! FfiConverterFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_segment_duration(self.uniffiClonePointer(), $0)
+        })
+    }
+
     open func setConfig(config: Config) { try! rustCall {
         uniffi_dotlottie_player_fn_method_dotlottieplayer_set_config(self.uniffiClonePointer(),
                                                                      FfiConverterTypeConfig.lower(config), $0)
@@ -826,6 +849,16 @@ open class DotLottiePlayer:
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_set_frame(self.uniffiClonePointer(),
                                                                         FfiConverterFloat.lower(no), $0)
+        })
+    }
+
+    open func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_viewport(self.uniffiClonePointer(),
+                                                                           FfiConverterInt32.lower(x),
+                                                                           FfiConverterInt32.lower(y),
+                                                                           FfiConverterInt32.lower(w),
+                                                                           FfiConverterInt32.lower(h), $0)
         })
     }
 
@@ -2300,10 +2333,16 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_seek() != 60656 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_segment_duration() != 38024 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_config() != 39472 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_frame() != 44086 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_viewport() != 29505 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_stop() != 25240 {

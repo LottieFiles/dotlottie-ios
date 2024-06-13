@@ -179,6 +179,14 @@ class Player: ObservableObject {
         setPlayerState(state: .playing)
     }
     
+    public func setViewPort(x: Int, y: Int, w: Int, h: Int) -> Bool {
+        dotLottiePlayer.setViewport(x: Int32(x), y: Int32(y), w: Int32(w), h: Int32(h))
+    }
+    
+    public func segmentDuration() -> Float {
+        dotLottiePlayer.segmentDuration()
+    }
+    
     public func pause() {
         let _ = dotLottiePlayer.pause()
 
