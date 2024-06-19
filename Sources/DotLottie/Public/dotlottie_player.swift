@@ -406,6 +406,19 @@ private struct FfiConverterUInt32: FfiConverterPrimitive {
     }
 }
 
+private struct FfiConverterInt32: FfiConverterPrimitive {
+    typealias FfiType = Int32
+    typealias SwiftType = Int32
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+        return try lift(readInt(&buf))
+    }
+
+    public static func write(_ value: Int32, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
 private struct FfiConverterUInt64: FfiConverterPrimitive {
     typealias FfiType = UInt64
     typealias SwiftType = UInt64
@@ -541,6 +554,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func loadDotlottieData(fileData: Data, width: UInt32, height: UInt32) -> Bool
 
+    func loadStateMachine(str: String) -> Bool
+
     func loadTheme(themeId: String) -> Bool
 
     func loadThemeData(themeData: String) -> Bool
@@ -557,6 +572,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func play() -> Bool
 
+    func postEvent(event: Event) -> Bool
+
     func render() -> Bool
 
     func requestFrame() -> Float
@@ -565,11 +582,25 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func seek(no: Float) -> Bool
 
+    func segmentDuration() -> Float
+
     func setConfig(config: Config)
 
     func setFrame(no: Float) -> Bool
 
+    func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool
+
+    func startStateMachine() -> Bool
+
+    func stateMachineFrameworkSetup() -> [String]
+
+    func stateMachineSubscribe(observer: StateMachineObserver) -> Bool
+
+    func stateMachineUnsubscribe(observer: StateMachineObserver) -> Bool
+
     func stop() -> Bool
+
+    func stopStateMachine() -> Bool
 
     func subscribe(observer: Observer)
 
@@ -739,6 +770,13 @@ open class DotLottiePlayer:
         })
     }
 
+    open func loadStateMachine(str: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_load_state_machine(self.uniffiClonePointer(),
+                                                                                 FfiConverterString.lower(str), $0)
+        })
+    }
+
     open func loadTheme(themeId: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(self.uniffiClonePointer(),
@@ -789,6 +827,13 @@ open class DotLottiePlayer:
         })
     }
 
+    open func postEvent(event: Event) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_post_event(self.uniffiClonePointer(),
+                                                                         FfiConverterTypeEvent.lower(event), $0)
+        })
+    }
+
     open func render() -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_render(self.uniffiClonePointer(), $0)
@@ -816,6 +861,12 @@ open class DotLottiePlayer:
         })
     }
 
+    open func segmentDuration() -> Float {
+        return try! FfiConverterFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_segment_duration(self.uniffiClonePointer(), $0)
+        })
+    }
+
     open func setConfig(config: Config) { try! rustCall {
         uniffi_dotlottie_player_fn_method_dotlottieplayer_set_config(self.uniffiClonePointer(),
                                                                      FfiConverterTypeConfig.lower(config), $0)
@@ -829,9 +880,51 @@ open class DotLottiePlayer:
         })
     }
 
+    open func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_viewport(self.uniffiClonePointer(),
+                                                                           FfiConverterInt32.lower(x),
+                                                                           FfiConverterInt32.lower(y),
+                                                                           FfiConverterInt32.lower(w),
+                                                                           FfiConverterInt32.lower(h), $0)
+        })
+    }
+
+    open func startStateMachine() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_start_state_machine(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func stateMachineFrameworkSetup() -> [String] {
+        return try! FfiConverterSequenceString.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_framework_setup(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func stateMachineSubscribe(observer: StateMachineObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_subscribe(self.uniffiClonePointer(),
+                                                                                      FfiConverterTypeStateMachineObserver.lower(observer), $0)
+        })
+    }
+
+    open func stateMachineUnsubscribe(observer: StateMachineObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_unsubscribe(self.uniffiClonePointer(),
+                                                                                        FfiConverterTypeStateMachineObserver.lower(observer), $0)
+        })
+    }
+
     open func stop() -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_stop(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func stopStateMachine() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_stop_state_machine(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -1263,6 +1356,206 @@ public func FfiConverterTypeObserver_lift(_ pointer: UnsafeMutableRawPointer) th
 
 public func FfiConverterTypeObserver_lower(_ value: Observer) -> UnsafeMutableRawPointer {
     return FfiConverterTypeObserver.lower(value)
+}
+
+public protocol StateMachineObserver: AnyObject {
+    func onStateEntered(enteringState: String)
+
+    func onStateExit(leavingState: String)
+
+    func onTransition(previousState: String, newState: String)
+}
+
+open class StateMachineObserverImpl:
+    StateMachineObserver
+{
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+    public required init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    /// This constructor can be used to instantiate a fake object.
+    /// - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    ///
+    /// - Warning:
+    ///     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    public init(noPointer _: NoPointer) {
+        pointer = nil
+    }
+
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_dotlottie_player_fn_clone_statemachineobserver(self.pointer, $0) }
+    }
+
+    // No primary constructor declared for this class.
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_dotlottie_player_fn_free_statemachineobserver(pointer, $0) }
+    }
+
+    open func onStateEntered(enteringState: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_state_entered(self.uniffiClonePointer(),
+                                                                                FfiConverterString.lower(enteringState), $0)
+    }
+    }
+
+    open func onStateExit(leavingState: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_state_exit(self.uniffiClonePointer(),
+                                                                             FfiConverterString.lower(leavingState), $0)
+    }
+    }
+
+    open func onTransition(previousState: String, newState: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_transition(self.uniffiClonePointer(),
+                                                                             FfiConverterString.lower(previousState),
+                                                                             FfiConverterString.lower(newState), $0)
+    }
+    }
+}
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+private enum UniffiCallbackInterfaceStateMachineObserver {
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    static var vtable: UniffiVTableCallbackInterfaceStateMachineObserver = .init(
+        onStateEntered: { (
+            uniffiHandle: UInt64,
+            enteringState: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onStateEntered(
+                    enteringState: FfiConverterString.lift(enteringState)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onStateExit: { (
+            uniffiHandle: UInt64,
+            leavingState: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onStateExit(
+                    leavingState: FfiConverterString.lift(leavingState)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onTransition: { (
+            uniffiHandle: UInt64,
+            previousState: RustBuffer,
+            newState: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onTransition(
+                    previousState: FfiConverterString.lift(previousState),
+                    newState: FfiConverterString.lift(newState)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) in
+            let result = try? FfiConverterTypeStateMachineObserver.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface StateMachineObserver: handle missing in uniffiFree")
+            }
+        }
+    )
+}
+
+private func uniffiCallbackInitStateMachineObserver() {
+    uniffi_dotlottie_player_fn_init_callback_vtable_statemachineobserver(&UniffiCallbackInterfaceStateMachineObserver.vtable)
+}
+
+public struct FfiConverterTypeStateMachineObserver: FfiConverter {
+    fileprivate static var handleMap = UniffiHandleMap<StateMachineObserver>()
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = StateMachineObserver
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> StateMachineObserver {
+        return StateMachineObserverImpl(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: StateMachineObserver) -> UnsafeMutableRawPointer {
+        guard let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: handleMap.insert(obj: value))) else {
+            fatalError("Cast to UnsafeMutableRawPointer failed")
+        }
+        return ptr
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> StateMachineObserver {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if ptr == nil {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: StateMachineObserver, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+public func FfiConverterTypeStateMachineObserver_lift(_ pointer: UnsafeMutableRawPointer) throws -> StateMachineObserver {
+    return try FfiConverterTypeStateMachineObserver.lift(pointer)
+}
+
+public func FfiConverterTypeStateMachineObserver_lower(_ value: StateMachineObserver) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeStateMachineObserver.lower(value)
 }
 
 public struct Config {
@@ -1780,6 +2073,108 @@ public func FfiConverterTypeMarker_lower(_ value: Marker) -> RustBuffer {
 // Note that we don't yet support `indirect` for enums.
 // See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
 
+public enum Event {
+    case bool(value: Bool
+    )
+    case string(value: String
+    )
+    case numeric(value: Float
+    )
+    case onPointerDown(x: Float, y: Float)
+    case onPointerUp(x: Float, y: Float)
+    case onPointerMove(x: Float, y: Float)
+    case onPointerEnter(x: Float, y: Float)
+    case onPointerExit
+    case onComplete
+}
+
+public struct FfiConverterTypeEvent: FfiConverterRustBuffer {
+    typealias SwiftType = Event
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Event {
+        let variant: Int32 = try readInt(&buf)
+        switch variant {
+        case 1: return try .bool(value: FfiConverterBool.read(from: &buf)
+            )
+
+        case 2: return try .string(value: FfiConverterString.read(from: &buf)
+            )
+
+        case 3: return try .numeric(value: FfiConverterFloat.read(from: &buf)
+            )
+
+        case 4: return try .onPointerDown(x: FfiConverterFloat.read(from: &buf), y: FfiConverterFloat.read(from: &buf))
+
+        case 5: return try .onPointerUp(x: FfiConverterFloat.read(from: &buf), y: FfiConverterFloat.read(from: &buf))
+
+        case 6: return try .onPointerMove(x: FfiConverterFloat.read(from: &buf), y: FfiConverterFloat.read(from: &buf))
+
+        case 7: return try .onPointerEnter(x: FfiConverterFloat.read(from: &buf), y: FfiConverterFloat.read(from: &buf))
+
+        case 8: return .onPointerExit
+
+        case 9: return .onComplete
+
+        default: throw UniffiInternalError.unexpectedEnumCase
+        }
+    }
+
+    public static func write(_ value: Event, into buf: inout [UInt8]) {
+        switch value {
+        case let .bool(value):
+            writeInt(&buf, Int32(1))
+            FfiConverterBool.write(value, into: &buf)
+
+        case let .string(value):
+            writeInt(&buf, Int32(2))
+            FfiConverterString.write(value, into: &buf)
+
+        case let .numeric(value):
+            writeInt(&buf, Int32(3))
+            FfiConverterFloat.write(value, into: &buf)
+
+        case let .onPointerDown(x, y):
+            writeInt(&buf, Int32(4))
+            FfiConverterFloat.write(x, into: &buf)
+            FfiConverterFloat.write(y, into: &buf)
+
+        case let .onPointerUp(x, y):
+            writeInt(&buf, Int32(5))
+            FfiConverterFloat.write(x, into: &buf)
+            FfiConverterFloat.write(y, into: &buf)
+
+        case let .onPointerMove(x, y):
+            writeInt(&buf, Int32(6))
+            FfiConverterFloat.write(x, into: &buf)
+            FfiConverterFloat.write(y, into: &buf)
+
+        case let .onPointerEnter(x, y):
+            writeInt(&buf, Int32(7))
+            FfiConverterFloat.write(x, into: &buf)
+            FfiConverterFloat.write(y, into: &buf)
+
+        case .onPointerExit:
+            writeInt(&buf, Int32(8))
+
+        case .onComplete:
+            writeInt(&buf, Int32(9))
+        }
+    }
+}
+
+public func FfiConverterTypeEvent_lift(_ buf: RustBuffer) throws -> Event {
+    return try FfiConverterTypeEvent.lift(buf)
+}
+
+public func FfiConverterTypeEvent_lower(_ value: Event) -> RustBuffer {
+    return FfiConverterTypeEvent.lower(value)
+}
+
+extension Event: Equatable, Hashable {}
+
+// Note that we don't yet support `indirect` for enums.
+// See https://github.com/mozilla/uniffi-rs/issues/396 for further discussion.
+
 public enum Fit {
     case contain
     case fill
@@ -2264,6 +2659,9 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_dotlottie_data() != 3402 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_state_machine() != 2360 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme() != 58256 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2288,6 +2686,9 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_play() != 54931 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_post_event() != 18408 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_render() != 34602 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2300,13 +2701,34 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_seek() != 60656 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_segment_duration() != 38024 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_config() != 39472 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_frame() != 44086 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_viewport() != 29505 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_start_state_machine() != 12092 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_framework_setup() != 17926 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_subscribe() != 52020 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_unsubscribe() != 8959 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_stop() != 25240 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_stop_state_machine() != 18978 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_subscribe() != 45859 {
@@ -2345,11 +2767,21 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_observer_on_stop() != 52331 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_state_entered() != 49087 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_state_exit() != 30161 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_transition() != 25374 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new() != 34558 {
         return InitializationResult.apiChecksumMismatch
     }
 
     uniffiCallbackInitObserver()
+    uniffiCallbackInitStateMachineObserver()
     return InitializationResult.ok
 }
 

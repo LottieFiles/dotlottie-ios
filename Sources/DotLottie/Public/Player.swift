@@ -173,22 +173,26 @@ class Player: ObservableObject {
         dotLottiePlayer.markers()
     }
     
-    public func play() {
-        let _ = dotLottiePlayer.play()
+    public func play() -> Bool {
+        let play = dotLottiePlayer.play()
         
-        setPlayerState(state: .playing)
+        return play
     }
     
-    public func pause() {
-        let _ = dotLottiePlayer.pause()
+    public func pause() -> Bool {
+        let pause = dotLottiePlayer.pause()
 
         self.setPlayerState(state: .paused)
+        
+        return pause
     }
     
-    public func stop() {
-        let _ = dotLottiePlayer.stop()
+    public func stop() -> Bool {
+        let stop =  dotLottiePlayer.stop()
         
         self.setPlayerState(state: .stopped)
+        
+        return stop
     }
     
     public func resize(width: Int, height: Int) throws {
@@ -205,7 +209,31 @@ class Player: ObservableObject {
 
         return self.setFrame(no: frame)
     }
-       
+    
+    public func loadStateMachine(id: String) -> Bool {
+        dotLottiePlayer.loadStateMachine(str: id)
+    }
+    
+    public func startStateMachine() -> Bool {
+        dotLottiePlayer.startStateMachine()
+    }
+    
+    public func stopStateMachine() -> Bool {
+        dotLottiePlayer.stopStateMachine()
+    }
+    
+    public func postEvent(event: Event) -> Bool {
+        dotLottiePlayer.postEvent(event: event)
+    }
+        
+    public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineSubscribe(observer: oberserver)
+    }
+
+    public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
+    }
+    
     public func duration() -> Float32 {
         return dotLottiePlayer.duration()
     }
