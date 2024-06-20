@@ -454,6 +454,9 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineUnSubscribe(oberserver: oberserver)
     }
     
+    public func stateMachineFrameworkSetup() -> [String] {
+        player.stateMachineFrameworkSetup()
+    }
     
     public func setAutoplay(autoplay: Bool) {
         var config = player.config()

@@ -234,6 +234,10 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
     }
     
+    public func stateMachineFrameworkSetup() -> [String] {
+        dotLottiePlayer.stateMachineFrameworkSetup()
+    }
+    
     public func duration() -> Float32 {
         return dotLottiePlayer.duration()
     }
