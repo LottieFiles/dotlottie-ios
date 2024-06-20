@@ -326,11 +326,11 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: Playback setters / getters
     
-    public func play() {
+    public func play() -> Bool {
         self.player.play()
     }
     
-    public func pause() {
+    public func pause() -> Bool {
         self.player.pause()
     }
     
@@ -343,7 +343,7 @@ public final class DotLottieAnimation: ObservableObject {
      - If there are no segments and direction is 1 (forward) go to start frame
      - If there are segments and direction is -1 (reverse) go to end frame
      */
-    public func stop() {
+    public func stop() -> Bool {
         player.stop()
     }
     
@@ -369,6 +369,10 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func segments() -> (Float, Float) {
         return (player.config().segment[0], player.config().segment[1])
+    }
+    
+    public func setPlayerState(_ state: PlayerState) {
+        player.setPlayerState(state: state)
     }
         
     /// Set the current frame.
@@ -424,6 +428,34 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func useFrameInterpolation() -> Bool {
         return player.config().useFrameInterpolation
+    }
+    
+    public func loadStateMachine(id: String) -> Bool {
+        player.loadStateMachine(id: id)
+    }
+    
+    public func stopStateMachine() -> Bool {
+        player.stopStateMachine()
+    }
+    
+    public func startStateMachine() -> Bool {
+        player.startStateMachine()
+    }
+
+    public func postEvent(_ event: Event) -> Bool {
+        player.postEvent(event: event)
+    }
+        
+    public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
+        player.stateMachineSubscribe(oberserver: oberserver)
+    }
+
+    public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
+        player.stateMachineUnSubscribe(oberserver: oberserver)
+    }
+    
+    public func stateMachineFrameworkSetup() -> [String] {
+        player.stateMachineFrameworkSetup()
     }
     
     public func setAutoplay(autoplay: Bool) {
