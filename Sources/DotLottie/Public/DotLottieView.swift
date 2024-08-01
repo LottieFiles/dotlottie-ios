@@ -59,6 +59,10 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         if self.playerState.isPlaying() {
             uiView.isPaused = false
         }
+        
+        if self.playerState.playerState == .draw {
+            uiView.draw()
+        }
 
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate

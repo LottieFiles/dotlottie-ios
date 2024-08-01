@@ -153,7 +153,7 @@ private func writeDouble(_ writer: inout [UInt8], _ value: Double) {
 }
 
 // Protocol for types that transfer other types across the FFI. This is
-// analogous go the Rust trait of the same name.
+// analogous to the Rust trait of the same name.
 private protocol FfiConverter {
     associatedtype FfiType
     associatedtype SwiftType
@@ -254,19 +254,20 @@ private extension RustCallStatus {
 }
 
 private func rustCall<T>(_ callback: (UnsafeMutablePointer<RustCallStatus>) -> T) throws -> T {
-    try makeRustCall(callback, errorHandler: nil)
+    let neverThrow: ((RustBuffer) throws -> Never)? = nil
+    return try makeRustCall(callback, errorHandler: neverThrow)
 }
 
-private func rustCallWithError<T>(
-    _ errorHandler: @escaping (RustBuffer) throws -> Error,
+private func rustCallWithError<T, E: Swift.Error>(
+    _ errorHandler: @escaping (RustBuffer) throws -> E,
     _ callback: (UnsafeMutablePointer<RustCallStatus>) -> T
 ) throws -> T {
     try makeRustCall(callback, errorHandler: errorHandler)
 }
 
-private func makeRustCall<T>(
+private func makeRustCall<T, E: Swift.Error>(
     _ callback: (UnsafeMutablePointer<RustCallStatus>) -> T,
-    errorHandler: ((RustBuffer) throws -> Error)?
+    errorHandler: ((RustBuffer) throws -> E)?
 ) throws -> T {
     uniffiEnsureInitialized()
     var callStatus = RustCallStatus()
@@ -275,9 +276,9 @@ private func makeRustCall<T>(
     return returnedVal
 }
 
-private func uniffiCheckCallStatus(
+private func uniffiCheckCallStatus<E: Swift.Error>(
     callStatus: RustCallStatus,
-    errorHandler: ((RustBuffer) throws -> Error)?
+    errorHandler: ((RustBuffer) throws -> E)?
 ) throws {
     switch callStatus.code {
     case CALL_SUCCESS:
@@ -524,6 +525,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func activeThemeId() -> String
 
+    func animationSize() -> [Float]
+
     func bufferLen() -> UInt64
 
     func bufferPtr() -> UInt64
@@ -556,6 +559,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func loadStateMachine(str: String) -> Bool
 
+    func loadStateMachineData(stateMachine: String) -> Bool
+
     func loadTheme(themeId: String) -> Bool
 
     func loadThemeData(themeData: String) -> Bool
@@ -572,7 +577,7 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func play() -> Bool
 
-    func postEvent(event: Event) -> Bool
+    func postEvent(event: Event) -> Int32
 
     func render() -> Bool
 
@@ -587,6 +592,12 @@ public protocol DotLottiePlayerProtocol: AnyObject {
     func setConfig(config: Config)
 
     func setFrame(no: Float) -> Bool
+
+    func setStateMachineBooleanContext(key: String, value: Bool) -> Bool
+
+    func setStateMachineNumericContext(key: String, value: Float) -> Bool
+
+    func setStateMachineStringContext(key: String, value: String) -> Bool
 
     func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool
 
@@ -666,6 +677,12 @@ open class DotLottiePlayer:
     open func activeThemeId() -> String {
         return try! FfiConverterString.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_active_theme_id(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func animationSize() -> [Float] {
+        return try! FfiConverterSequenceFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_animation_size(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -777,6 +794,13 @@ open class DotLottiePlayer:
         })
     }
 
+    open func loadStateMachineData(stateMachine: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_load_state_machine_data(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(stateMachine), $0)
+        })
+    }
+
     open func loadTheme(themeId: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_load_theme(self.uniffiClonePointer(),
@@ -827,8 +851,8 @@ open class DotLottiePlayer:
         })
     }
 
-    open func postEvent(event: Event) -> Bool {
-        return try! FfiConverterBool.lift(try! rustCall {
+    open func postEvent(event: Event) -> Int32 {
+        return try! FfiConverterInt32.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_post_event(self.uniffiClonePointer(),
                                                                          FfiConverterTypeEvent.lower(event), $0)
         })
@@ -877,6 +901,30 @@ open class DotLottiePlayer:
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_set_frame(self.uniffiClonePointer(),
                                                                         FfiConverterFloat.lower(no), $0)
+        })
+    }
+
+    open func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_state_machine_boolean_context(self.uniffiClonePointer(),
+                                                                                                FfiConverterString.lower(key),
+                                                                                                FfiConverterBool.lower(value), $0)
+        })
+    }
+
+    open func setStateMachineNumericContext(key: String, value: Float) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_state_machine_numeric_context(self.uniffiClonePointer(),
+                                                                                                FfiConverterString.lower(key),
+                                                                                                FfiConverterFloat.lower(value), $0)
+        })
+    }
+
+    open func setStateMachineStringContext(key: String, value: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_state_machine_string_context(self.uniffiClonePointer(),
+                                                                                               FfiConverterString.lower(key),
+                                                                                               FfiConverterString.lower(value), $0)
         })
     }
 
@@ -2086,6 +2134,7 @@ public enum Event {
     case onPointerEnter(x: Float, y: Float)
     case onPointerExit
     case onComplete
+    case setNumericContext(key: String, value: Float)
 }
 
 public struct FfiConverterTypeEvent: FfiConverterRustBuffer {
@@ -2114,6 +2163,8 @@ public struct FfiConverterTypeEvent: FfiConverterRustBuffer {
         case 8: return .onPointerExit
 
         case 9: return .onComplete
+
+        case 10: return try .setNumericContext(key: FfiConverterString.read(from: &buf), value: FfiConverterFloat.read(from: &buf))
 
         default: throw UniffiInternalError.unexpectedEnumCase
         }
@@ -2158,6 +2209,11 @@ public struct FfiConverterTypeEvent: FfiConverterRustBuffer {
 
         case .onComplete:
             writeInt(&buf, Int32(9))
+
+        case let .setNumericContext(key, value):
+            writeInt(&buf, Int32(10))
+            FfiConverterString.write(key, into: &buf)
+            FfiConverterFloat.write(value, into: &buf)
         }
     }
 }
@@ -2592,9 +2648,9 @@ private enum InitializationResult {
     case apiChecksumMismatch
 }
 
-// Use a global variables to perform the versioning checks. Swift ensures that
+// Use a global variable to perform the versioning checks. Swift ensures that
 // the code inside is only computed once.
-private var initializationResult: InitializationResult {
+private var initializationResult: InitializationResult = {
     // Get the bindings contract version from our ComponentInterface
     let bindings_contract_version = 26
     // Get the scaffolding contract version by calling the into the dylib
@@ -2612,6 +2668,9 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_theme_id() != 60173 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_animation_size() != 49812 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_buffer_len() != 33793 {
@@ -2662,6 +2721,9 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_state_machine() != 2360 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_state_machine_data() != 481 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_theme() != 58256 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -2686,7 +2748,7 @@ private var initializationResult: InitializationResult {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_play() != 54931 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_post_event() != 18408 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_post_event() != 24946 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_render() != 34602 {
@@ -2708,6 +2770,15 @@ private var initializationResult: InitializationResult {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_frame() != 44086 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_state_machine_boolean_context() != 53110 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_state_machine_numeric_context() != 60196 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_state_machine_string_context() != 11860 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_viewport() != 29505 {
@@ -2783,7 +2854,7 @@ private var initializationResult: InitializationResult {
     uniffiCallbackInitObserver()
     uniffiCallbackInitStateMachineObserver()
     return InitializationResult.ok
-}
+}()
 
 private func uniffiEnsureInitialized() {
     switch initializationResult {

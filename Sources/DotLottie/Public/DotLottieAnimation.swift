@@ -117,9 +117,8 @@ public final class DotLottieAnimation: ObservableObject {
                              backgroundColor: 0,
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "")
-        
         self.player = Player(config: self.config)
-        
+                
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
         }
@@ -141,13 +140,13 @@ public final class DotLottieAnimation: ObservableObject {
     /// Requests a frame and renders it if necessary
     public func tick() -> CGImage? {
         let nextFrame = player.requestFrame()
-        
-        if (nextFrame || self.currentFrame() == 0.0) {
+
+        if (nextFrame || ( self.currentFrame() == 0.0) || self.player.playerState == .draw) {
             if let image = player.render() {
                 return image
             }
         }
-        
+
         return nil
     }
     
@@ -433,17 +432,39 @@ public final class DotLottieAnimation: ObservableObject {
     public func loadStateMachine(id: String) -> Bool {
         player.loadStateMachine(id: id)
     }
-    
+
+    public func loadStateMachineData(data: String) -> Bool {
+        player.loadStateMachineData(data: data)
+    }
+
     public func stopStateMachine() -> Bool {
         player.stopStateMachine()
     }
     
     public func startStateMachine() -> Bool {
-        player.startStateMachine()
+        let sm = player.startStateMachine()
+        
+        if (player.isPlaying()) {
+            setPlayerState(.playing)
+        } else {
+            setPlayerState(.paused)
+        }
+        
+        return sm
     }
 
-    public func postEvent(_ event: Event) -> Bool {
-        player.postEvent(event: event)
+    public func postEvent(_ event: Event) -> Int32 {
+        let pe = player.postEvent(event: event)
+        
+        if (pe == 2) {
+            setPlayerState(.playing)
+        } else if (pe == 3) {
+            setPlayerState(.paused)
+        } else if (pe == 4) {
+            setPlayerState(.draw)
+        }
+
+        return pe
     }
         
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
@@ -458,6 +479,18 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineFrameworkSetup()
     }
     
+    public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
+        player.setStateMachineNumericContext(key: key, value: value)
+    }
+
+    public func setStateMachineStringContext(key: String, value: String) -> Bool {
+        player.setStateMachineStringContext(key: key, value: value)
+    }
+
+    public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
+        player.setStateMachineBooleanContext(key: key, value: value)
+    }
+
     public func setAutoplay(autoplay: Bool) {
         var config = player.config()
         
