@@ -175,14 +175,20 @@ class Player: ObservableObject {
     
     public func play() -> Bool {
         let play = dotLottiePlayer.play()
-        
+     
+        if (play) {
+            self.setPlayerState(state: .playing)
+        }
+
         return play
     }
     
     public func pause() -> Bool {
         let pause = dotLottiePlayer.pause()
 
-        self.setPlayerState(state: .paused)
+        if (pause) {
+            self.setPlayerState(state: .paused)
+        }
         
         return pause
     }
@@ -190,7 +196,9 @@ class Player: ObservableObject {
     public func stop() -> Bool {
         let stop =  dotLottiePlayer.stop()
         
-        self.setPlayerState(state: .stopped)
+        if (stop) {
+            self.setPlayerState(state: .stopped)
+        }
         
         return stop
     }
@@ -213,6 +221,10 @@ class Player: ObservableObject {
     public func loadStateMachine(id: String) -> Bool {
         dotLottiePlayer.loadStateMachine(str: id)
     }
+
+    public func loadStateMachineData(data: String) -> Bool {
+        dotLottiePlayer.loadStateMachineData(stateMachine: data)
+    }
     
     public func startStateMachine() -> Bool {
         dotLottiePlayer.startStateMachine()
@@ -222,7 +234,7 @@ class Player: ObservableObject {
         dotLottiePlayer.stopStateMachine()
     }
     
-    public func postEvent(event: Event) -> Bool {
+    public func postEvent(event: Event) -> Int32 {
         dotLottiePlayer.postEvent(event: event)
     }
         
@@ -244,6 +256,18 @@ class Player: ObservableObject {
     
     public func clear() {
         dotLottiePlayer.clear()
+    }
+    
+    public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
+        dotLottiePlayer.setStateMachineNumericContext(key: key, value: value)
+    }
+    
+    public func setStateMachineStringContext(key: String, value: String) -> Bool {
+        dotLottiePlayer.setStateMachineStringContext(key: key, value: value)
+    }
+    
+    public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
+        dotLottiePlayer.setStateMachineBooleanContext(key: key, value: value)
     }
     
     public func setPlayerState(state: PlayerState) {
