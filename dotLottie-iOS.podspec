@@ -58,10 +58,4 @@ Currently this package supports a mimimum iOS version of 15.4+ for iPhone and iP
 
   spec.requires_arc = true
 
-  spec.test_spec 'DotLottieTests' do |test_spec|
-    test_spec.source_files = 'Tests/DotLottieTests/**/*.{swift,h,m}'
-    test_spec.dependency 'Quick' # Example test dependency
-    test_spec.dependency 'Nimble' # Example test dependency
-  end
-
 end
