@@ -22,6 +22,8 @@ public final class DotLottieAnimation: ObservableObject {
     
     internal var config: Config
 
+    internal var animationView: DotLottieAnimationView?
+    
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -576,9 +578,13 @@ public final class DotLottieAnimation: ObservableObject {
     
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
-        let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
-        
-        return view
+        if let animationView = animationView {
+            return animationView
+        } else {
+            let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
+            self.animationView = view
+            return view
+        }
     }
 #endif
 }
