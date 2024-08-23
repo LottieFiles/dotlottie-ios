@@ -80,7 +80,7 @@ class AnimationViewController: UIViewController {
     var simpleVM = DotLottieAnimation(webURL: "https://lottie.host/link.lottie", config: AnimationConfig(autoplay: true, loop: false))
     
     override func viewWillAppear(_ animated: Bool) {
-        let dotLottieView = simpleVM.createDotLottieView()
+        let dotLottieView = simpleVM.view()
         view.addSubview(dotLottieView)
     }
 }
