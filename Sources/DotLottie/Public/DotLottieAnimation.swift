@@ -17,11 +17,15 @@ public final class DotLottieAnimation: ObservableObject {
     public var sizeOverrideActive = false
     
     private var animationModel: AnimationModel = AnimationModel()
-        
+    
     private var defaultWidthHeight = 512
     
     internal var config: Config
-
+    
+    internal var dotLottieAnimationView: DotLottieAnimationView?
+    
+    internal var dotLottieView: DotLottieView?
+    
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -35,7 +39,7 @@ public final class DotLottieAnimation: ObservableObject {
             "player failed to load."
         }
     }
-
+    
     /// Load from an animation (.lottie / .json) from the asset bundle.
     public convenience init(
         fileName: String,
@@ -48,12 +52,13 @@ public final class DotLottieAnimation: ObservableObject {
             "Loading from bundle failed for both .json and .lottie versions of your animation: \(error)"
         }
     }
-
+    
     /// Load an animation (.lottie / .json) from the web.
     public convenience init(
         webURL: String,
         config: AnimationConfig
     ) {
+        print(">> LOADING")
         self.init(config: config) {
             if webURL.contains(".lottie") {
                 try await $0.loadDotLottieFromURL(url: webURL)
@@ -64,7 +69,7 @@ public final class DotLottieAnimation: ObservableObject {
             "Failed to load dotLottie. Failed with error: \(error)"
         }
     }
-
+    
     @_disfavoredOverload
     @available(*, deprecated)
     public convenience init(
@@ -83,7 +88,7 @@ public final class DotLottieAnimation: ObservableObject {
             self.init(config: config, task: { _ in }, errorMessage: { _ in "" })
         }
     }
-
+    
     private convenience init(
         config: AnimationConfig,
         load: @escaping @Sendable (DotLottieAnimation) async throws -> Void,
@@ -102,7 +107,7 @@ public final class DotLottieAnimation: ObservableObject {
             errorMessage($0)
         }
     }
-
+    
     private init(
         config: AnimationConfig,
         task: (DotLottieAnimation) throws -> Void,
@@ -118,7 +123,7 @@ public final class DotLottieAnimation: ObservableObject {
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "")
         self.player = Player(config: self.config)
-                
+        
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
         }
@@ -140,13 +145,13 @@ public final class DotLottieAnimation: ObservableObject {
     /// Requests a frame and renders it if necessary
     public func tick() -> CGImage? {
         let nextFrame = player.requestFrame()
-
+        
         if (nextFrame || ( self.currentFrame() == 0.0) || self.player.playerState == .draw) {
             if let image = player.render() {
                 return image
             }
         }
-
+        
         return nil
     }
     
@@ -313,7 +318,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func unsubscribe(observer: Observer) {
         self.player.unsubscribe(observer: observer);
     }
-
+    
     // MARK: Background color
     public func setBackgroundColor(bgColor: CIImage) {
         self.animationModel.backgroundColor = bgColor
@@ -373,7 +378,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func setPlayerState(_ state: PlayerState) {
         player.setPlayerState(state: state)
     }
-        
+    
     /// Set the current frame.
     /// Can return false if the frame is invalid or equal to the current frame.
     public func setFrame(frame: Float) -> Bool {
@@ -401,7 +406,7 @@ public final class DotLottieAnimation: ObservableObject {
         var config = player.config()
         
         config.mode = mode
-
+        
         player.setConfig(config: config)
     }
     
@@ -432,11 +437,11 @@ public final class DotLottieAnimation: ObservableObject {
     public func loadStateMachine(id: String) -> Bool {
         player.loadStateMachine(id: id)
     }
-
+    
     public func loadStateMachineData(data: String) -> Bool {
         player.loadStateMachineData(data: data)
     }
-
+    
     public func stopStateMachine() -> Bool {
         player.stopStateMachine()
     }
@@ -452,7 +457,7 @@ public final class DotLottieAnimation: ObservableObject {
         
         return sm
     }
-
+    
     public func postEvent(_ event: Event) -> Int32 {
         let pe = player.postEvent(event: event)
         
@@ -463,14 +468,14 @@ public final class DotLottieAnimation: ObservableObject {
         } else if (pe == 4) {
             setPlayerState(.draw)
         }
-
+        
         return pe
     }
-        
+    
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineSubscribe(oberserver: oberserver)
     }
-
+    
     public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineUnSubscribe(oberserver: oberserver)
     }
@@ -482,15 +487,15 @@ public final class DotLottieAnimation: ObservableObject {
     public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
         player.setStateMachineNumericContext(key: key, value: value)
     }
-
+    
     public func setStateMachineStringContext(key: String, value: String) -> Bool {
         player.setStateMachineStringContext(key: key, value: value)
     }
-
+    
     public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
         player.setStateMachineBooleanContext(key: key, value: value)
     }
-
+    
     public func setAutoplay(autoplay: Bool) {
         var config = player.config()
         
@@ -546,11 +551,11 @@ public final class DotLottieAnimation: ObservableObject {
     public func loadTheme(themeId: String) -> Bool {
         return player.loadTheme(themeId: themeId)
     }
-
+    
     public func loadThemeData(themeData: String) -> Bool {
         return player.loadThemeData(themeData: themeData)
     }
-
+    
     public func resize(width: Int, height: Int) {
         self.animationModel.width = width
         self.animationModel.height = height
@@ -562,23 +567,35 @@ public final class DotLottieAnimation: ObservableObject {
             self.animationModel.errorMessage = error.localizedDescription
         }
     }
-
+    
     public func loopCount() -> Int {
         return player.loopCount()
     }
     
     // MARK: View creators
     public func view() -> DotLottieView {
-        let view: DotLottieView = DotLottieView(dotLottie: self)
-        
-        return view
+        if let prevDotLottieView = dotLottieView {
+            return prevDotLottieView
+        } else {
+            let view: DotLottieView = DotLottieView(dotLottie: self)
+            
+            self.dotLottieView = view
+            
+            return view
+        }
     }
     
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
-        let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
-        
-        return view
+        if let prevAnimationView = dotLottieAnimationView {
+            return prevAnimationView
+        } else {
+            let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
+            
+            self.dotLottieAnimationView = view
+            
+            return view
+        }
     }
 #endif
 }
