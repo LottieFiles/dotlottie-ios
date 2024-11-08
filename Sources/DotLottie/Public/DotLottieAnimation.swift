@@ -448,28 +448,14 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func startStateMachine() -> Bool {
         let sm = player.startStateMachine()
-        
-        if (player.isPlaying()) {
-            setPlayerState(.playing)
-        } else {
-            setPlayerState(.paused)
-        }
-        
+
+        setPlayerState(.playing)
+
         return sm
     }
     
     public func postEvent(_ event: Event) -> Int32 {
-        let pe = player.postEvent(event: event)
-        
-        if (pe == 2) {
-            setPlayerState(.playing)
-        } else if (pe == 3) {
-            setPlayerState(.paused)
-        } else if (pe == 4) {
-            setPlayerState(.draw)
-        }
-        
-        return pe
+        player.postEvent(event: event)
     }
     
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
