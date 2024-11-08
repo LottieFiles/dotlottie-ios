@@ -239,11 +239,13 @@ class Player: ObservableObject {
     }
         
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
-        dotLottiePlayer.stateMachineSubscribe(observer: oberserver)
+//        dotLottiePlayer.stateMachineSubscribe(observer: oberserver)
+        false
     }
 
     public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
-        dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
+//        dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
+        false
     }
     
     public func stateMachineFrameworkSetup() -> [String] {
@@ -258,16 +260,16 @@ class Player: ObservableObject {
         dotLottiePlayer.clear()
     }
     
-    public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
-        dotLottiePlayer.setStateMachineNumericContext(key: key, value: value)
+    public func setStateMachineNumericTrigger(key: String, value: Float) -> Bool {
+        (dotLottiePlayer.stateMachineSetNumericTrigger(key: key, value: value) != 0)
     }
     
-    public func setStateMachineStringContext(key: String, value: String) -> Bool {
-        dotLottiePlayer.setStateMachineStringContext(key: key, value: value)
+    public func setStateMachineStringTrigger(key: String, value: String) -> Bool {
+        (dotLottiePlayer.stateMachineSetStringTrigger(key: key, value: value) != 0)
     }
     
-    public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
-        dotLottiePlayer.setStateMachineBooleanContext(key: key, value: value)
+    public func setStateMachineBooleanTrigger(key: String, value: Bool) -> Bool {
+        (dotLottiePlayer.stateMachineSetBooleanTrigger(key: key, value: value) != 0)
     }
     
     public func setPlayerState(state: PlayerState) {
