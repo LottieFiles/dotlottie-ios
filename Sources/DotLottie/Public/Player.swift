@@ -129,14 +129,6 @@ class Player: ObservableObject {
         dotLottiePlayer.totalFrames()
     }
     
-    public func loadTheme(themeId: String) -> Bool {
-        dotLottiePlayer.loadTheme(themeId: themeId)
-    }
-
-    public func loadThemeData(themeData: String) -> Bool {
-        dotLottiePlayer.loadThemeData(themeData: themeData)
-    }
-    
     public func setFrame(no: Float32) -> Bool {
         dotLottiePlayer.setFrame(no: no)
     }
@@ -258,6 +250,30 @@ class Player: ObservableObject {
         dotLottiePlayer.clear()
     }
     
+    public func setSlots(_ slots: String) -> Bool {
+        dotLottiePlayer.setSlots(slots: slots);
+    }
+
+    public func setTheme(_ themeId: String) -> Bool {
+        dotLottiePlayer.setTheme(themeId: themeId)
+    }
+    
+    public func setThemeData(_ themeData: String) -> Bool {
+        dotLottiePlayer.setThemeData(themeData: themeData)
+    }
+    
+    public func resetTheme() -> Bool {
+        dotLottiePlayer.resetTheme();
+    }
+    
+    public func activeThemeId() -> String {
+        dotLottiePlayer.activeThemeId()
+    }
+
+    public func activeAnimationId() -> String {
+        dotLottiePlayer.activeAnimationId()
+    }
+
     public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
         dotLottiePlayer.setStateMachineNumericContext(key: key, value: value)
     }

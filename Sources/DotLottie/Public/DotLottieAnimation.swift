@@ -121,7 +121,8 @@ public final class DotLottieAnimation: ObservableObject {
                              segment: config.segments != nil ? [config.segments!.0, config.segments!.1] : [],
                              backgroundColor: 0,
                              layout: config.layout ?? createDefaultLayout(),
-                             marker: config.marker ?? "")
+                             marker: config.marker ?? "",
+                             themeId: config.themeId ?? "")
         self.player = Player(config: self.config)
         
         if (config.width != nil || config.height != nil) {
@@ -472,6 +473,30 @@ public final class DotLottieAnimation: ObservableObject {
         return pe
     }
     
+    public func setSlots(_ slots: String) -> Bool {
+        player.setSlots(slots)
+    }
+
+    public func setTheme(_ themeId: String) -> Bool {
+        player.setTheme(themeId)
+    }
+    
+    public func setThemeData(_ themeData: String) -> Bool {
+        player.setThemeData(themeData)
+    }
+
+    public func resetTheme() -> Bool {
+        player.resetTheme()
+    }
+
+    public func activeThemeId() -> String {
+        player.activeThemeId()
+    }
+    
+    public func activeAnimationId() -> String {
+        player.activeAnimationId()
+    }
+
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineSubscribe(oberserver: oberserver)
     }
@@ -546,14 +571,6 @@ public final class DotLottieAnimation: ObservableObject {
         config.marker = marker
         
         player.setConfig(config: config)
-    }
-    
-    public func loadTheme(themeId: String) -> Bool {
-        return player.loadTheme(themeId: themeId)
-    }
-    
-    public func loadThemeData(themeData: String) -> Bool {
-        return player.loadThemeData(themeData: themeData)
     }
     
     public func resize(width: Int, height: Int) {
