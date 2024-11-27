@@ -22,8 +22,10 @@ public final class DotLottieAnimation: ObservableObject {
     
     internal var config: Config
     
+#if os(iOS)
     internal var dotLottieAnimationView: DotLottieAnimationView?
-    
+#endif
+
     internal var dotLottieView: DotLottieView?
     
     /// Load directly from a String (.json).
@@ -58,7 +60,6 @@ public final class DotLottieAnimation: ObservableObject {
         webURL: String,
         config: AnimationConfig
     ) {
-        print(">> LOADING")
         self.init(config: config) {
             if webURL.contains(".lottie") {
                 try await $0.loadDotLottieFromURL(url: webURL)

@@ -51,6 +51,8 @@ class Player: ObservableObject {
             self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
+        
+        setPlayerState(state: self.config().autoplay ? .playing : .draw)
     }
     
     public func loadAnimationPath(animationPath: String, width: Int, height: Int) throws {
@@ -167,8 +169,8 @@ class Player: ObservableObject {
     
     public func play() -> Bool {
         let play = dotLottiePlayer.play()
-     
-        if (play) {
+
+        if (dotLottiePlayer.isPlaying()) {
             self.setPlayerState(state: .playing)
         }
 
@@ -178,7 +180,7 @@ class Player: ObservableObject {
     public func pause() -> Bool {
         let pause = dotLottiePlayer.pause()
 
-        if (pause) {
+        if (dotLottiePlayer.isPaused()) {
             self.setPlayerState(state: .paused)
         }
         
@@ -188,7 +190,7 @@ class Player: ObservableObject {
     public func stop() -> Bool {
         let stop =  dotLottiePlayer.stop()
         
-        if (stop) {
+        if (dotLottiePlayer.isStopped()) {
             self.setPlayerState(state: .stopped)
         }
         
