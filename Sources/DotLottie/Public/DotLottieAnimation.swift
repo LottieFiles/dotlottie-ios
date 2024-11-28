@@ -71,6 +71,18 @@ public final class DotLottieAnimation: ObservableObject {
         }
     }
     
+    /// Load a .lottie file from Data.
+    public convenience init(
+        dotLottieData: Data,
+        config: AnimationConfig
+    ) {
+        self.init(config: config) {
+            try $0.loadDotLottie(data: dotLottieData)
+        } errorMessage: { error in
+            "Failed to load dotLottie. Failed with error: \(error)"
+        }
+    }
+    
     @_disfavoredOverload
     @available(*, deprecated)
     public convenience init(
@@ -181,7 +193,7 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     /// Passes the .lottie Data to the Core
-    private func loadDotLottie(data: Data) throws {
+    public func loadDotLottie(data: Data) throws {
         do {
             try player.loadDotlottieData(data: data)
             
