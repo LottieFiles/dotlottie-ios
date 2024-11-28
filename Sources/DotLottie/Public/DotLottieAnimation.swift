@@ -193,7 +193,7 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     /// Passes the .lottie Data to the Core
-    public func loadDotLottie(data: Data) throws {
+    private func loadDotLottie(data: Data) throws {
         do {
             try player.loadDotlottieData(data: data)
             
