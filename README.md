@@ -8,8 +8,8 @@
 
 ## Supported Devices
 
-Currently this package supports a mimimum iOS version of 15.4+ for iPhone and iPad.
-MacOS is supported for versions 12.0 and upwards.
+Currently this package supports a mimimum iOS version of 13.0+ for iPhone and iPad.
+MacOS is supported for versions 11.0 and upwards.
 
 ## Usage
 
@@ -129,6 +129,9 @@ class AnimationViewController: UIViewController {
 | `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
 | `setFrameInterpolation(useFrameInterpolation: Bool)` | Use frame interpolation or not. |
 | `resize(width: Int, height: Int)` | Manually resize the animation. |
+| `setTheme(themeId: String)` | Load a theme. Only available with .lottie files. |
+| `setThemeData(themeData: String)` | Loads the passed theming data. |
+| `resetTheme()` | Remove the currently loaded theme. Only available with .lottie files. |
 
 ### Event callbacks
 
