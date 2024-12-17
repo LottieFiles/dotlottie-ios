@@ -9,7 +9,7 @@ import Foundation
 import MetalKit
 import AVFoundation
 
-public class Coordinator : NSObject, MTKViewDelegate {
+public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegate, GestureManagerDelegate {
     private var parent: DotLottie
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
@@ -40,7 +40,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
         guard let drawable = view.currentDrawable else {
             return
         }
-            
+        
         guard !parent.dotLottieViewModel.error() else {
             return
         }
@@ -77,5 +77,40 @@ public class Coordinator : NSObject, MTKViewDelegate {
         } else {
             return ;
         }
+    }
+    
+    // UIGestureRecognizerDelegate: Allow simultaneous recognition
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
+        let x = location.x * UIScreen.main.scale
+        let y = location.y * UIScreen.main.scale
+        let fX = Float(x)
+        let fY = Float(y)
+        let event = Event.pointerMove(x: fX, y: fY)
+        
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
+        let x = location.x * UIScreen.main.scale
+        let y = location.y * UIScreen.main.scale
+        let fX = Float(x)
+        let fY = Float(y)
+        let event = Event.pointerDown(x: fX, y: fY)
+        
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
+        let x = location.x * UIScreen.main.scale
+        let y = location.y * UIScreen.main.scale
+        let fX = Float(x)
+        let fY = Float(y)
+        let event = Event.pointerUp(x: fX, y: fY)
+        
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
 }

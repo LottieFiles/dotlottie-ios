@@ -212,26 +212,36 @@ class Player: ObservableObject {
         return self.setFrame(no: frame)
     }
     
-    public func loadStateMachine(id: String) -> Bool {
-        dotLottiePlayer.loadStateMachine(str: id)
+    public func stateMachineLoad(id: String) -> Bool {
+        dotLottiePlayer.stateMachineLoad(stateMachineId: id)
     }
 
-    public func loadStateMachineData(data: String) -> Bool {
-        dotLottiePlayer.loadStateMachineData(stateMachine: data)
+    public func stateMachineLoadData(_ data: String) -> Bool {
+        dotLottiePlayer.stateMachineLoadData(stateMachine: data)
     }
     
-    public func startStateMachine() -> Bool {
-        dotLottiePlayer.startStateMachine()
-    }
-    
-    public func stopStateMachine() -> Bool {
-        dotLottiePlayer.stopStateMachine()
-    }
-    
-    public func postEvent(event: Event) -> Int32 {
-        dotLottiePlayer.postEvent(event: event)
-    }
+    public func stateMachineStart() -> Bool {
+        let started = dotLottiePlayer.stateMachineStart()
+        self.setPlayerState(state: .playing)
         
+        return started
+    }
+    
+    public func stateMachineStop() -> Bool {
+        dotLottiePlayer.stateMachineStop()
+    }
+    
+    public func stateMachinePostEvent(event: Event) -> Int32 {
+        let ret = dotLottiePlayer.stateMachinePostEvent(event: event)
+        self.setPlayerState(state: .playing)
+
+        return ret
+    }
+
+    public func stateMachineFire(event: String) {
+        dotLottiePlayer.stateMachineFireEvent(event: event)
+    }
+
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
         dotLottiePlayer.stateMachineSubscribe(observer: oberserver)
     }
@@ -242,6 +252,10 @@ class Player: ObservableObject {
     
     public func stateMachineFrameworkSetup() -> [String] {
         dotLottiePlayer.stateMachineFrameworkSetup()
+    }
+    
+    public func stateMachineCurrentState() -> String {
+        dotLottiePlayer.stateMachineCurrentState()
     }
     
     public func duration() -> Float32 {
@@ -276,16 +290,16 @@ class Player: ObservableObject {
         dotLottiePlayer.activeAnimationId()
     }
 
-    public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
-        dotLottiePlayer.setStateMachineNumericContext(key: key, value: value)
+    public func stateMachineSetNumericTrigger(key: String, value: Float) -> Bool {
+        dotLottiePlayer.stateMachineSetNumericTrigger(key: key, value: value)
     }
     
-    public func setStateMachineStringContext(key: String, value: String) -> Bool {
-        dotLottiePlayer.setStateMachineStringContext(key: key, value: value)
+    public func stateMachineSetStringTrigger(key: String, value: String) -> Bool {
+        dotLottiePlayer.stateMachineSetStringTrigger(key: key, value: value)
     }
     
-    public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
-        dotLottiePlayer.setStateMachineBooleanContext(key: key, value: value)
+    public func stateMachineSetBooleanTrigger(key: String, value: Bool) -> Bool {
+        dotLottiePlayer.stateMachineSetBooleanTrigger(key: key, value: value)
     }
     
     public func setPlayerState(state: PlayerState) {
