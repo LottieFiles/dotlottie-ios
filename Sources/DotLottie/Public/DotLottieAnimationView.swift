@@ -20,20 +20,20 @@ public class DotLottieAnimationView: UIView, DotLottie {
         
         super.init(frame: .zero)
         
-        dotLottieViewModel.player.$playerState.sink { value in
-            if self.mtkView != nil {
-                self.mtkView.draw()
-                
-                if self.dotLottieViewModel.isStopped() || self.dotLottieViewModel.isPaused() {
-                    // Tell the coordinator to draw the last frame before pausing
-                    self.mtkView.isPaused = true
-                }
-                
-                if self.dotLottieViewModel.isPlaying() {
-                    self.mtkView.isPaused = false
-                }
-            }
-        }.store(in: &cancellableBag)
+//        dotLottieViewModel.player.$playerState.sink { value in
+//            if self.mtkView != nil {
+//                self.mtkView.draw()
+//                
+//                if self.dotLottieViewModel.isStopped() || self.dotLottieViewModel.isPaused() {
+//                    // Tell the coordinator to draw the last frame before pausing
+//                    self.mtkView.isPaused = true
+//                }
+//                
+//                if self.dotLottieViewModel.isPlaying() {
+//                    self.mtkView.isPaused = false
+//                }
+//            }
+//        }.store(in: &cancellableBag)
         
         dotLottieViewModel.$framerate.sink { value in
             if self.mtkView != nil {

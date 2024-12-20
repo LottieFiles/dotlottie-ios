@@ -10,13 +10,15 @@ import CoreImage
 import DotLottiePlayer
 
 class Player: ObservableObject {
-    @Published public var playerState: PlayerState = .initial
+//    @Published public var playerState: PlayerState = .initial
 
     internal lazy var dotLottieObserver: DotLottieObserver? = DotLottieObserver(self)
 
     private let dotLottiePlayer: DotLottiePlayer
     private var WIDTH: UInt32 = 512
     private var HEIGHT: UInt32 = 512
+    
+    private var currFrame: Float = -1.0;
     
     init(config: Config) {
         self.dotLottiePlayer = DotLottiePlayer(config: config)
@@ -160,7 +162,13 @@ class Player: ObservableObject {
     }
     
     public func isComplete() -> Bool {
-        dotLottiePlayer.isComplete()
+        let complete = dotLottiePlayer.isComplete()
+        
+        if (dotLottiePlayer.isComplete()) {
+            self.setPlayerState(state: .complete)
+        }
+        
+        return complete
     }
     
     public func markers() -> [Marker] {
@@ -209,7 +217,13 @@ class Player: ObservableObject {
     public func requestFrame() -> Bool {
         let frame = dotLottiePlayer.requestFrame()
 
-        return self.setFrame(no: frame)
+        if (frame != self.currFrame) {
+            currFrame = frame
+            let _ = self.setFrame(no: frame)
+            return true
+        }
+        
+        return false
     }
     
     public func stateMachineLoad(id: String) -> Bool {
@@ -222,18 +236,21 @@ class Player: ObservableObject {
     
     public func stateMachineStart() -> Bool {
         let started = dotLottiePlayer.stateMachineStart()
-        self.setPlayerState(state: .playing)
+
+        if (started) {
+            self.setPlayerState(state: .stateMachineIsActive)
+        }
         
         return started
     }
     
     public func stateMachineStop() -> Bool {
-        dotLottiePlayer.stateMachineStop()
+        self.setPlayerState(state: .initial)
+        return dotLottiePlayer.stateMachineStop()
     }
     
     public func stateMachinePostEvent(event: Event) -> Int32 {
         let ret = dotLottiePlayer.stateMachinePostEvent(event: event)
-        self.setPlayerState(state: .playing)
 
         return ret
     }
@@ -304,7 +321,7 @@ class Player: ObservableObject {
     
     public func setPlayerState(state: PlayerState) {
         DispatchQueue.main.async {
-            self.playerState = state
+//            self.playerState = state
         }
     }
 }

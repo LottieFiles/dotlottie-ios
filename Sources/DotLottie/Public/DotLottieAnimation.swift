@@ -31,6 +31,8 @@ public final class DotLottieAnimation: ObservableObject {
     
     internal var stateMachineListeners: [String] = []
     
+    private var currFrame = 0;
+    
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -163,12 +165,12 @@ public final class DotLottieAnimation: ObservableObject {
     public func tick() -> CGImage? {
         let nextFrame = player.requestFrame()
         
-        if (nextFrame || self.player.playerState == .draw || self.player.playerState == .initial) {
+        if (nextFrame) {
             if let image = player.render() {
                 return image
             }
         }
-        
+
         return nil
     }
     
@@ -469,10 +471,6 @@ public final class DotLottieAnimation: ObservableObject {
         let sm = player.stateMachineStart()
         
         self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
-        
-        if (sm) {
-            setPlayerState(.playing)
-        }
         
         return sm
     }

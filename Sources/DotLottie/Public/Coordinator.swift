@@ -40,11 +40,11 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
         guard let drawable = view.currentDrawable else {
             return
         }
-        
+                
         guard !parent.dotLottieViewModel.error() else {
             return
         }
-        
+    
         if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
@@ -74,8 +74,6 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
             
             commandBuffer?.present(drawable)
             commandBuffer?.commit()
-        } else {
-            return ;
         }
     }
     
