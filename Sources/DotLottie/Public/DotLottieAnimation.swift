@@ -17,7 +17,7 @@ public final class DotLottieAnimation: ObservableObject {
     
     public var sizeOverrideActive = false
     
-    private var animationModel: AnimationModel = AnimationModel()
+    public private(set) var animationModel: AnimationModel = AnimationModel()
     
     private var defaultWidthHeight = 512
     
@@ -142,6 +142,8 @@ public final class DotLottieAnimation: ObservableObject {
                              marker: config.marker ?? "",
                              themeId: config.themeId ?? "")
         self.player = Player(config: self.config)
+//        self.player.WIDTH = UInt32(config.width ?? defaultWidthHeight)
+//        self.player.HEIGHT = UInt32(config.height ?? defaultWidthHeight)
         
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
@@ -200,7 +202,7 @@ public final class DotLottieAnimation: ObservableObject {
     /// Passes the .lottie Data to the Core
     private func loadDotLottie(data: Data) throws {
         do {
-            try player.loadDotlottieData(data: data)
+            try player.loadDotlottieData(data: data, width: self.animationModel.width, height: self.animationModel.height)
             
         } catch let error {
             animationModel.error = true
@@ -396,6 +398,10 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func setPlayerState(_ state: PlayerState) {
         player.setPlayerState(state: state)
+    }
+    
+    public func getLayerBounds(layerName: String) -> [Float] {
+        player.getLayerBounds(layerName: layerName)
     }
     
     /// Set the current frame.

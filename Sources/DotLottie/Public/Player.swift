@@ -10,13 +10,11 @@ import CoreImage
 import DotLottiePlayer
 
 class Player: ObservableObject {
-//    @Published public var playerState: PlayerState = .initial
-
     internal lazy var dotLottieObserver: DotLottieObserver? = DotLottieObserver(self)
 
     private let dotLottiePlayer: DotLottiePlayer
-    private var WIDTH: UInt32 = 512
-    private var HEIGHT: UInt32 = 512
+    public var WIDTH: UInt32 = 512
+    public var HEIGHT: UInt32 = 512
     
     private var currFrame: Float = -1.0;
     
@@ -48,7 +46,10 @@ class Player: ObservableObject {
         }
     }
     
-    func loadDotlottieData(data: Data) throws {
+    func loadDotlottieData(data: Data, width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
         if (!dotLottiePlayer.loadDotlottieData(fileData: data, width: self.WIDTH, height: self.HEIGHT)) {
             self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
@@ -269,6 +270,10 @@ class Player: ObservableObject {
     
     public func stateMachineFrameworkSetup() -> [String] {
         dotLottiePlayer.stateMachineFrameworkSetup()
+    }
+    
+    public func getLayerBounds(layerName: String) -> [Float] {
+        dotLottiePlayer.getLayerBounds(layerName: layerName)
     }
     
     public func stateMachineCurrentState() -> String {
