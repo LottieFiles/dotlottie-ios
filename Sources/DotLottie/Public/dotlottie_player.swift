@@ -1584,6 +1584,8 @@ public func FfiConverterTypeObserver_lower(_ value: Observer) -> UnsafeMutableRa
 }
 
 public protocol StateMachineObserver: AnyObject {
+    func onCustomEvent(message: String)
+
     func onStateEntered(enteringState: String)
 
     func onStateExit(leavingState: String)
@@ -1640,6 +1642,12 @@ open class StateMachineObserverImpl:
         try! rustCall { uniffi_dotlottie_player_fn_free_statemachineobserver(pointer, $0) }
     }
 
+    open func onCustomEvent(message: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_custom_event(self.uniffiClonePointer(),
+                                                                               FfiConverterString.lower(message), $0)
+    }
+    }
+
     open func onStateEntered(enteringState: String) { try! rustCall {
         uniffi_dotlottie_player_fn_method_statemachineobserver_on_state_entered(self.uniffiClonePointer(),
                                                                                 FfiConverterString.lower(enteringState), $0)
@@ -1665,6 +1673,29 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     static var vtable: UniffiVTableCallbackInterfaceStateMachineObserver = .init(
+        onCustomEvent: { (
+            uniffiHandle: UInt64,
+            message: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onCustomEvent(
+                    message: FfiConverterString.lift(message)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
         onStateEntered: { (
             uniffiHandle: UInt64,
             enteringState: RustBuffer,
@@ -3184,6 +3215,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_observer_on_stop() != 52331 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_custom_event() != 50052 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_state_entered() != 49087 {

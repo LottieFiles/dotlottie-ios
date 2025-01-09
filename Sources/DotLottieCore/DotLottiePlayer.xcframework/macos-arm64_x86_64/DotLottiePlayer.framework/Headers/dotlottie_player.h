@@ -330,7 +330,14 @@ typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod1)(uint64_t, Rus
 #endif
 #ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD2
 #define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD2
-typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod2)(uint64_t, RustBuffer, RustBuffer, void* _Nonnull, 
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod2)(uint64_t, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD3
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD3
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod3)(uint64_t, RustBuffer, RustBuffer, void* _Nonnull, 
         RustCallStatus *_Nonnull uniffiCallStatus
     );
 
@@ -354,9 +361,10 @@ typedef struct UniffiVTableCallbackInterfaceObserver {
 #ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER
 #define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER
 typedef struct UniffiVTableCallbackInterfaceStateMachineObserver {
-    UniffiCallbackInterfaceStateMachineObserverMethod0 _Nonnull onStateEntered;
-    UniffiCallbackInterfaceStateMachineObserverMethod1 _Nonnull onStateExit;
-    UniffiCallbackInterfaceStateMachineObserverMethod2 _Nonnull onTransition;
+    UniffiCallbackInterfaceStateMachineObserverMethod0 _Nonnull onCustomEvent;
+    UniffiCallbackInterfaceStateMachineObserverMethod1 _Nonnull onStateEntered;
+    UniffiCallbackInterfaceStateMachineObserverMethod2 _Nonnull onStateExit;
+    UniffiCallbackInterfaceStateMachineObserverMethod3 _Nonnull onTransition;
     UniffiCallbackInterfaceFree _Nonnull uniffiFree;
 } UniffiVTableCallbackInterfaceStateMachineObserver;
 
@@ -759,6 +767,11 @@ void uniffi_dotlottie_player_fn_free_statemachineobserver(void*_Nonnull ptr, Rus
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_INIT_CALLBACK_VTABLE_STATEMACHINEOBSERVER
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_INIT_CALLBACK_VTABLE_STATEMACHINEOBSERVER
 void uniffi_dotlottie_player_fn_init_callback_vtable_statemachineobserver(UniffiVTableCallbackInterfaceStateMachineObserver* _Nonnull vtable
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_custom_event(void*_Nonnull ptr, RustBuffer message, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STATE_ENTERED
@@ -1503,6 +1516,12 @@ uint16_t uniffi_dotlottie_player_checksum_method_observer_on_render(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_STOP
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_OBSERVER_ON_STOP
 uint16_t uniffi_dotlottie_player_checksum_method_observer_on_stop(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_custom_event(void
     
 );
 #endif
