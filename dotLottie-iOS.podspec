@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "dotLottie-iOS"
-  spec.version      = "0.6.2"
+  spec.version      = "0.8.0"
   spec.summary      = "iOS player for .lottie and .json files."
 
   # This description is used to generate tags and improve search results.
@@ -25,7 +25,7 @@ Pod::Spec.new do |spec|
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
   spec.description  = <<-DESC
-Currently this package supports a mimimum iOS version of 15.4+ for iPhone and iPad. MacOS is supported for versions 12.0 and upwards.
+Currently this package supports a mimimum iOS version of 13+ for iPhone and iPad. MacOS is supported for versions 11.0 and upwards.
                    DESC
 
   spec.homepage     = "https://github.com/LottieFiles/dotlottie-ios"
@@ -42,8 +42,8 @@ Currently this package supports a mimimum iOS version of 15.4+ for iPhone and iP
 
   #  When using multiple platforms
   spec.swift_version = '5.0'
-  spec.ios.deployment_target = "15.4"
-  spec.osx.deployment_target = "12.0"
+  spec.ios.deployment_target = "13.0"
+  spec.osx.deployment_target = "11.0"
   # spec.watchos.deployment_target = "2.0"
   # spec.tvos.deployment_target = "9.0"
   # spec.visionos.deployment_target = "1.0"
