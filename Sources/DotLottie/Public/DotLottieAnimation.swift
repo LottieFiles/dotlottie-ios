@@ -22,11 +22,13 @@ public final class DotLottieAnimation: ObservableObject {
     
     internal var config: Config
     
-#if os(iOS)
-    internal var dotLottieAnimationView: DotLottieAnimationView?
-#endif
-
-    internal var dotLottieView: DotLottieView?
+    deinit {
+        self.destroy()
+    }
+    
+    public func destroy() {
+        player.destroy()
+    }
     
     /// Load directly from a String (.json).
     public convenience init(
@@ -489,7 +491,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func setSlots(_ slots: String) -> Bool {
         player.setSlots(slots)
     }
-
+    
     public func setTheme(_ themeId: String) -> Bool {
         player.setTheme(themeId)
     }
@@ -497,11 +499,11 @@ public final class DotLottieAnimation: ObservableObject {
     public func setThemeData(_ themeData: String) -> Bool {
         player.setThemeData(themeData)
     }
-
+    
     public func resetTheme() -> Bool {
         player.resetTheme()
     }
-
+    
     public func activeThemeId() -> String {
         player.activeThemeId()
     }
@@ -509,7 +511,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func activeAnimationId() -> String {
         player.activeAnimationId()
     }
-
+    
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineSubscribe(oberserver: oberserver)
     }
@@ -604,28 +606,13 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: View creators
     public func view() -> DotLottieView {
-        if let prevDotLottieView = dotLottieView {
-            return prevDotLottieView
-        } else {
-            let view: DotLottieView = DotLottieView(dotLottie: self)
-            
-            self.dotLottieView = view
-            
-            return view
-        }
+        DotLottieView(dotLottie: self)
     }
+    
     
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
-        if let prevAnimationView = dotLottieAnimationView {
-            return prevAnimationView
-        } else {
-            let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
-            
-            self.dotLottieAnimationView = view
-            
-            return view
-        }
+            DotLottieAnimationView(dotLottieViewModel: self)
     }
 #endif
 }

@@ -23,6 +23,7 @@ public class DotLottieAnimationView: UIView, DotLottie {
     public var dotLottieViewModel: DotLottieAnimation
     
     public init(dotLottieViewModel: DotLottieAnimation) {
+        print("LOL")
         self.dotLottieViewModel = dotLottieViewModel
         
         super.init(frame: .zero)
