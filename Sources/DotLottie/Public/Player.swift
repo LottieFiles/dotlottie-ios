@@ -235,8 +235,8 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineLoadData(stateMachine: data)
     }
     
-    public func stateMachineStart() -> Bool {
-        let started = dotLottiePlayer.stateMachineStart()
+    public func stateMachineStart(openUrl: OpenUrl) -> Bool {
+        let started = dotLottiePlayer.stateMachineStart(openUrl: openUrl)
 
         if (started) {
             self.setPlayerState(state: .stateMachineIsActive)

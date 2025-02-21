@@ -140,7 +140,8 @@ public final class DotLottieAnimation: ObservableObject {
                              backgroundColor: 0,
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "",
-                             themeId: config.themeId ?? "")
+                             themeId: config.themeId ?? "",
+                             stateMachineId: config.stateMachineId ?? "")
         self.player = Player(config: self.config)
 //        self.player.WIDTH = UInt32(config.width ?? defaultWidthHeight)
 //        self.player.HEIGHT = UInt32(config.height ?? defaultWidthHeight)
@@ -473,8 +474,8 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineStop()
     }
     
-    public func stateMachineStart() -> Bool {
-        let sm = player.stateMachineStart()
+    public func stateMachineStart(openUrl: OpenUrl = OpenUrl(mode: .interaction, whitelist: [])) -> Bool {
+        let sm = player.stateMachineStart(openUrl: openUrl)
         
         self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
         

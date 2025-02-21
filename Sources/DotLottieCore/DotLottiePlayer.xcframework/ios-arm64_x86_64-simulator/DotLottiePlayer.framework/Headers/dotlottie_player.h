@@ -316,7 +316,7 @@ typedef void (*UniffiCallbackInterfaceObserverMethod8)(uint64_t, void* _Nonnull,
 #endif
 #ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD0
 #define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD0
-typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod0)(uint64_t, RustBuffer, void* _Nonnull, 
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod0)(uint64_t, RustBuffer, int8_t, int8_t, void* _Nonnull, 
         RustCallStatus *_Nonnull uniffiCallStatus
     );
 
@@ -337,7 +337,56 @@ typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod2)(uint64_t, Rus
 #endif
 #ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD3
 #define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD3
-typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod3)(uint64_t, RustBuffer, RustBuffer, void* _Nonnull, 
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod3)(uint64_t, RustBuffer, float, float, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD4
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD4
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod4)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD5
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD5
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod5)(uint64_t, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD6
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD6
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod6)(uint64_t, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD7
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD7
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod7)(uint64_t, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD8
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD8
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod8)(uint64_t, RustBuffer, RustBuffer, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD9
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD9
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod9)(uint64_t, RustBuffer, RustBuffer, void* _Nonnull, 
+        RustCallStatus *_Nonnull uniffiCallStatus
+    );
+
+#endif
+#ifndef UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD10
+#define UNIFFI_FFIDEF_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER_METHOD10
+typedef void (*UniffiCallbackInterfaceStateMachineObserverMethod10)(uint64_t, RustBuffer, void* _Nonnull, 
         RustCallStatus *_Nonnull uniffiCallStatus
     );
 
@@ -361,10 +410,17 @@ typedef struct UniffiVTableCallbackInterfaceObserver {
 #ifndef UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER
 #define UNIFFI_FFIDEF_V_TABLE_CALLBACK_INTERFACE_STATE_MACHINE_OBSERVER
 typedef struct UniffiVTableCallbackInterfaceStateMachineObserver {
-    UniffiCallbackInterfaceStateMachineObserverMethod0 _Nonnull onCustomEvent;
-    UniffiCallbackInterfaceStateMachineObserverMethod1 _Nonnull onStateEntered;
-    UniffiCallbackInterfaceStateMachineObserverMethod2 _Nonnull onStateExit;
-    UniffiCallbackInterfaceStateMachineObserverMethod3 _Nonnull onTransition;
+    UniffiCallbackInterfaceStateMachineObserverMethod0 _Nonnull onBooleanTriggerValueChange;
+    UniffiCallbackInterfaceStateMachineObserverMethod1 _Nonnull onCustomEvent;
+    UniffiCallbackInterfaceStateMachineObserverMethod2 _Nonnull onError;
+    UniffiCallbackInterfaceStateMachineObserverMethod3 _Nonnull onNumericTriggerValueChange;
+    UniffiCallbackInterfaceStateMachineObserverMethod4 _Nonnull onStart;
+    UniffiCallbackInterfaceStateMachineObserverMethod5 _Nonnull onStateEntered;
+    UniffiCallbackInterfaceStateMachineObserverMethod6 _Nonnull onStateExit;
+    UniffiCallbackInterfaceStateMachineObserverMethod7 _Nonnull onStop;
+    UniffiCallbackInterfaceStateMachineObserverMethod8 _Nonnull onStringTriggerValueChange;
+    UniffiCallbackInterfaceStateMachineObserverMethod9 _Nonnull onTransition;
+    UniffiCallbackInterfaceStateMachineObserverMethod10 _Nonnull onTriggerFired;
     UniffiCallbackInterfaceFree _Nonnull uniffiFree;
 } UniffiVTableCallbackInterfaceStateMachineObserver;
 
@@ -387,6 +443,11 @@ void*_Nonnull uniffi_dotlottie_player_fn_constructor_dotlottieplayer_new(RustBuf
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_active_animation_id(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_STATE_MACHINE_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_STATE_MACHINE_ID
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_active_state_machine_id(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_ACTIVE_THEME_ID
@@ -432,6 +493,11 @@ float uniffi_dotlottie_player_fn_method_dotlottieplayer_duration(void*_Nonnull p
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_GET_LAYER_BOUNDS
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_GET_LAYER_BOUNDS
 RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_get_layer_bounds(void*_Nonnull ptr, RustBuffer layer_name, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_GET_STATE_MACHINE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_GET_STATE_MACHINE
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_get_state_machine(void*_Nonnull ptr, RustBuffer state_machine_id, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_IS_COMPLETE
@@ -609,6 +675,16 @@ int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_load(void
 int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_load_data(void*_Nonnull ptr, RustBuffer state_machine, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_OVERRIDE_CURRENT_STATE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_OVERRIDE_CURRENT_STATE
+int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_override_current_state(void*_Nonnull ptr, RustBuffer state_name, int8_t do_tick, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_CLICK_EVENT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_CLICK_EVENT
+int32_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_post_click_event(void*_Nonnull ptr, float x, float y, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_EVENT
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_EVENT
 int32_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_post_event(void*_Nonnull ptr, RustBuffer event, RustCallStatus *_Nonnull out_status
@@ -656,7 +732,12 @@ int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_strin
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_START
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_START
-int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_start(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+int8_t uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_start(void*_Nonnull ptr, RustBuffer open_url, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_STATUS
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_STATUS
+RustBuffer uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_status(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_STOP
@@ -769,9 +850,29 @@ void uniffi_dotlottie_player_fn_free_statemachineobserver(void*_Nonnull ptr, Rus
 void uniffi_dotlottie_player_fn_init_callback_vtable_statemachineobserver(UniffiVTableCallbackInterfaceStateMachineObserver* _Nonnull vtable
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_BOOLEAN_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_BOOLEAN_TRIGGER_VALUE_CHANGE
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_boolean_trigger_value_change(void*_Nonnull ptr, RustBuffer trigger_name, int8_t old_value, int8_t new_value, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
 void uniffi_dotlottie_player_fn_method_statemachineobserver_on_custom_event(void*_Nonnull ptr, RustBuffer message, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_ERROR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_ERROR
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_error(void*_Nonnull ptr, RustBuffer message, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_NUMERIC_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_NUMERIC_TRIGGER_VALUE_CHANGE
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_numeric_trigger_value_change(void*_Nonnull ptr, RustBuffer trigger_name, float old_value, float new_value, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_START
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_START
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_start(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STATE_ENTERED
@@ -784,9 +885,24 @@ void uniffi_dotlottie_player_fn_method_statemachineobserver_on_state_entered(voi
 void uniffi_dotlottie_player_fn_method_statemachineobserver_on_state_exit(void*_Nonnull ptr, RustBuffer leaving_state, RustCallStatus *_Nonnull out_status
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STOP
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_stop(void*_Nonnull ptr, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STRING_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_STRING_TRIGGER_VALUE_CHANGE
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_string_trigger_value_change(void*_Nonnull ptr, RustBuffer trigger_name, RustBuffer old_value, RustBuffer new_value, RustCallStatus *_Nonnull out_status
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_TRANSITION
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_TRANSITION
 void uniffi_dotlottie_player_fn_method_statemachineobserver_on_transition(void*_Nonnull ptr, RustBuffer previous_state, RustBuffer new_state, RustCallStatus *_Nonnull out_status
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_TRIGGER_FIRED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_METHOD_STATEMACHINEOBSERVER_ON_TRIGGER_FIRED
+void uniffi_dotlottie_player_fn_method_statemachineobserver_on_trigger_fired(void*_Nonnull ptr, RustBuffer trigger_name, RustCallStatus *_Nonnull out_status
 );
 #endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_CONFIG
@@ -798,6 +914,12 @@ RustBuffer uniffi_dotlottie_player_fn_func_create_default_config(RustCallStatus 
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_LAYOUT
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_LAYOUT
 RustBuffer uniffi_dotlottie_player_fn_func_create_default_layout(RustCallStatus *_Nonnull out_status
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_OPEN_URL
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_FN_FUNC_CREATE_DEFAULT_OPEN_URL
+RustBuffer uniffi_dotlottie_player_fn_func_create_default_open_url(RustCallStatus *_Nonnull out_status
     
 );
 #endif
@@ -1093,9 +1215,21 @@ uint16_t uniffi_dotlottie_player_checksum_func_create_default_layout(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_OPEN_URL
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_FUNC_CREATE_DEFAULT_OPEN_URL
+uint16_t uniffi_dotlottie_player_checksum_func_create_default_open_url(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_ANIMATION_ID
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_animation_id(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_STATE_MACHINE_ID
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_ACTIVE_STATE_MACHINE_ID
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_state_machine_id(void
     
 );
 #endif
@@ -1150,6 +1284,12 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_duration(void
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_GET_LAYER_BOUNDS
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_GET_LAYER_BOUNDS
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_layer_bounds(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_GET_STATE_MACHINE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_GET_STATE_MACHINE
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_state_machine(void
     
 );
 #endif
@@ -1363,6 +1503,18 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_l
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_OVERRIDE_CURRENT_STATE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_OVERRIDE_CURRENT_STATE
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_override_current_state(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_CLICK_EVENT
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_CLICK_EVENT
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_post_click_event(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_EVENT
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_POST_EVENT
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_post_event(void
@@ -1420,6 +1572,12 @@ uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_s
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_START
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_START
 uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_start(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_STATUS
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_DOTLOTTIEPLAYER_STATE_MACHINE_STATUS
+uint16_t uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_status(void
     
 );
 #endif
@@ -1519,9 +1677,33 @@ uint16_t uniffi_dotlottie_player_checksum_method_observer_on_stop(void
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_BOOLEAN_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_BOOLEAN_TRIGGER_VALUE_CHANGE
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_boolean_trigger_value_change(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_CUSTOM_EVENT
 uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_custom_event(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_ERROR
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_ERROR
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_error(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_NUMERIC_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_NUMERIC_TRIGGER_VALUE_CHANGE
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_numeric_trigger_value_change(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_START
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_START
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_start(void
     
 );
 #endif
@@ -1537,9 +1719,27 @@ uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_state_e
     
 );
 #endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_STOP
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_STOP
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_stop(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_STRING_TRIGGER_VALUE_CHANGE
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_STRING_TRIGGER_VALUE_CHANGE
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_string_trigger_value_change(void
+    
+);
+#endif
 #ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_TRANSITION
 #define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_TRANSITION
 uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_transition(void
+    
+);
+#endif
+#ifndef UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_TRIGGER_FIRED
+#define UNIFFI_FFIDEF_UNIFFI_DOTLOTTIE_PLAYER_CHECKSUM_METHOD_STATEMACHINEOBSERVER_ON_TRIGGER_FIRED
+uint16_t uniffi_dotlottie_player_checksum_method_statemachineobserver_on_trigger_fired(void
     
 );
 #endif
