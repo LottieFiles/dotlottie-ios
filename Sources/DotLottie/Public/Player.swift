@@ -260,12 +260,21 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineFireEvent(event: event)
     }
 
-    public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
-        dotLottiePlayer.stateMachineSubscribe(observer: oberserver)
+    public func stateMachineSubscribe(observer: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineSubscribe(observer: observer)
+    }
+    
+    public func stateMachineFrameworkSubscribe(observer: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineFrameworkSubscribe(observer: observer)
     }
 
     public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
         dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
+    }
+    
+    
+    public func stateMachineFrameworkUnsubscribe(observer: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineFrameworkUnsubscribe(observer: observer)
     }
     
     public func stateMachineFrameworkSetup() -> [String] {
