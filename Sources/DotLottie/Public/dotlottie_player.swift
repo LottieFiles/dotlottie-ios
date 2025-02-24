@@ -627,6 +627,10 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func stateMachineFrameworkSetup() -> [String]
 
+    func stateMachineFrameworkSubscribe(observer: StateMachineObserver) -> Bool
+
+    func stateMachineFrameworkUnsubscribe(observer: StateMachineObserver) -> Bool
+
     func stateMachineGetBooleanTrigger(key: String) -> Bool
 
     func stateMachineGetNumericTrigger(key: String) -> Float
@@ -1011,6 +1015,20 @@ open class DotLottiePlayer:
         })
     }
 
+    open func stateMachineFrameworkSubscribe(observer: StateMachineObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_framework_subscribe(self.uniffiClonePointer(),
+                                                                                                FfiConverterTypeStateMachineObserver.lower(observer), $0)
+        })
+    }
+
+    open func stateMachineFrameworkUnsubscribe(observer: StateMachineObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_framework_unsubscribe(self.uniffiClonePointer(),
+                                                                                                  FfiConverterTypeStateMachineObserver.lower(observer), $0)
+        })
+    }
+
     open func stateMachineGetBooleanTrigger(key: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_boolean_trigger(self.uniffiClonePointer(),
@@ -1136,7 +1154,7 @@ open class DotLottiePlayer:
     open func stateMachineStart(openUrl: OpenUrl) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_start(self.uniffiClonePointer(),
-                                                                                  FfiConverterTypeOpenURL.lower(openUrl), $0)
+                                                                                  FfiConverterTypeOpenUrl.lower(openUrl), $0)
         })
     }
 
@@ -2763,17 +2781,17 @@ extension OpenUrl: Equatable, Hashable {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeOpenURL: FfiConverterRustBuffer {
+public struct FfiConverterTypeOpenUrl: FfiConverterRustBuffer {
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> OpenUrl {
         return
             try OpenUrl(
-                mode: FfiConverterTypeOpenURLMode.read(from: &buf),
+                mode: FfiConverterTypeOpenUrlMode.read(from: &buf),
                 whitelist: FfiConverterSequenceString.read(from: &buf)
             )
     }
 
     public static func write(_ value: OpenUrl, into buf: inout [UInt8]) {
-        FfiConverterTypeOpenURLMode.write(value.mode, into: &buf)
+        FfiConverterTypeOpenUrlMode.write(value.mode, into: &buf)
         FfiConverterSequenceString.write(value.whitelist, into: &buf)
     }
 }
@@ -2781,15 +2799,15 @@ public struct FfiConverterTypeOpenURL: FfiConverterRustBuffer {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeOpenURL_lift(_ buf: RustBuffer) throws -> OpenUrl {
-    return try FfiConverterTypeOpenURL.lift(buf)
+public func FfiConverterTypeOpenUrl_lift(_ buf: RustBuffer) throws -> OpenUrl {
+    return try FfiConverterTypeOpenUrl.lift(buf)
 }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeOpenURL_lower(_ value: OpenUrl) -> RustBuffer {
-    return FfiConverterTypeOpenURL.lower(value)
+public func FfiConverterTypeOpenUrl_lower(_ value: OpenUrl) -> RustBuffer {
+    return FfiConverterTypeOpenUrl.lower(value)
 }
 
 // Note that we don't yet support `indirect` for enums.
@@ -3044,7 +3062,7 @@ public enum OpenUrlMode {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public struct FfiConverterTypeOpenURLMode: FfiConverterRustBuffer {
+public struct FfiConverterTypeOpenUrlMode: FfiConverterRustBuffer {
     typealias SwiftType = OpenUrlMode
 
     public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> OpenUrlMode {
@@ -3077,15 +3095,15 @@ public struct FfiConverterTypeOpenURLMode: FfiConverterRustBuffer {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeOpenURLMode_lift(_ buf: RustBuffer) throws -> OpenUrlMode {
-    return try FfiConverterTypeOpenURLMode.lift(buf)
+public func FfiConverterTypeOpenUrlMode_lift(_ buf: RustBuffer) throws -> OpenUrlMode {
+    return try FfiConverterTypeOpenUrlMode.lift(buf)
 }
 
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
-public func FfiConverterTypeOpenURLMode_lower(_ value: OpenUrlMode) -> RustBuffer {
-    return FfiConverterTypeOpenURLMode.lower(value)
+public func FfiConverterTypeOpenUrlMode_lower(_ value: OpenUrlMode) -> RustBuffer {
+    return FfiConverterTypeOpenUrlMode.lower(value)
 }
 
 extension OpenUrlMode: Equatable, Hashable {}
@@ -3399,7 +3417,7 @@ public func createDefaultLayout() -> Layout {
 }
 
 public func createDefaultOpenUrl() -> OpenUrl {
-    return try! FfiConverterTypeOpenURL.lift(try! rustCall {
+    return try! FfiConverterTypeOpenUrl.lift(try! rustCall {
         uniffi_dotlottie_player_fn_func_create_default_open_url($0
         )
     })
@@ -3427,7 +3445,7 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_func_create_default_layout() != 41529 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_func_create_default_open_url() != 42345 {
+    if uniffi_dotlottie_player_checksum_func_create_default_open_url() != 5194 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_animation_id() != 57608 {
@@ -3556,6 +3574,12 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_framework_setup() != 17926 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_framework_subscribe() != 38193 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_framework_unsubscribe() != 64000 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_boolean_trigger() != 30117 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -3604,7 +3628,7 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_string_trigger() != 26005 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_start() != 1389 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_start() != 32431 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_status() != 45792 {

@@ -9,6 +9,49 @@ import Foundation
 import CoreImage
 import UIKit
 
+private class OpenUrlObserver: StateMachineObserver {
+    func onBooleanTriggerValueChange(triggerName: String, oldValue: Bool, newValue: Bool) {
+    }
+    
+    func onCustomEvent(message: String) {
+        if message.hasPrefix("OpenUrl: ") {
+            let url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
+            
+            if let urlObject = URL(string: url),
+               UIApplication.shared.canOpenURL(urlObject) {
+                UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
+            }
+        }
+    }
+    
+    func onError(message: String) {
+    }
+    
+    func onNumericTriggerValueChange(triggerName: String, oldValue: Float, newValue: Float) {
+    }
+    
+    func onStart() {
+    }
+    
+    func onStateEntered(enteringState: String) {
+    }
+    
+    func onStateExit(leavingState: String) {
+    }
+    
+    func onStop() {
+    }
+    
+    func onStringTriggerValueChange(triggerName: String, oldValue: String, newValue: String) {
+    }
+    
+    func onTransition(previousState: String, newState: String) {
+    }
+    
+    func onTriggerFired(triggerName: String) {
+    }
+}
+
 // MARK: DotLottieAnimation
 public final class DotLottieAnimation: ObservableObject {
     @Published public var framerate: Int = 30
@@ -26,10 +69,12 @@ public final class DotLottieAnimation: ObservableObject {
 #if os(iOS)
     internal var dotLottieAnimationView: DotLottieAnimationView?
 #endif
-
+    
     internal var dotLottieView: DotLottieView?
     
     internal var stateMachineListeners: [String] = []
+    
+    private var stateMachineUrlListener = OpenUrlObserver()
     
     private var currFrame = 0;
     
@@ -143,8 +188,8 @@ public final class DotLottieAnimation: ObservableObject {
                              themeId: config.themeId ?? "",
                              stateMachineId: config.stateMachineId ?? "")
         self.player = Player(config: self.config)
-//        self.player.WIDTH = UInt32(config.width ?? defaultWidthHeight)
-//        self.player.HEIGHT = UInt32(config.height ?? defaultWidthHeight)
+        //        self.player.WIDTH = UInt32(config.width ?? defaultWidthHeight)
+        //        self.player.HEIGHT = UInt32(config.height ?? defaultWidthHeight)
         
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
@@ -173,7 +218,7 @@ public final class DotLottieAnimation: ObservableObject {
                 return image
             }
         }
-
+        
         return nil
     }
     
@@ -471,11 +516,17 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     public func stateMachineStop() -> Bool {
-        player.stateMachineStop()
+        let stop = player.stateMachineStop()
+        
+        let _ = player.stateMachineFrameworkUnsubscribe(observer: self.stateMachineUrlListener)
+        
+        return stop
     }
     
     public func stateMachineStart(openUrl: OpenUrl = OpenUrl(mode: .interaction, whitelist: [])) -> Bool {
         let sm = player.stateMachineStart(openUrl: openUrl)
+        
+        let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
         
         self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
         
@@ -525,7 +576,7 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     public func stateMachineSubscribe(_ observer: StateMachineObserver) -> Bool {
-        player.stateMachineSubscribe(oberserver: observer)
+        player.stateMachineSubscribe(observer: observer)
     }
     
     public func stateMachineUnSubscribe(observer: StateMachineObserver) -> Bool {

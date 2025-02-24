@@ -63,21 +63,6 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         // All animations will be paused if this is not set to false here.
         uiView.isPaused = false
         
-//        print("Playerstate stopped: \(self.playerState.isStopped())")
-//        print("Playerstate paused: \(self.playerState.isPaused())")
-//        print("Playerstate isComplete: \(self.playerState.isComplete())")
-//        print("Playerstate state: \(self.playerState.playerState)")
-//        uiView.isPaused = false
-//        if self.playerState.playerState == .playing || self.playerState.playerState == .stateMachineIsActive {
-//            uiView.isPaused = false
-//        } else if self.playerState.playerState == .stopped || self.playerState.playerState == .paused || self.playerState.isComplete() {
-//            // Tell the coordinator to draw the last frame before pausing
-//            uiView.draw()
-//        }
-//        if self.playerState.playerState == .draw {
-//            uiView.draw()
-//        }
-        
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
