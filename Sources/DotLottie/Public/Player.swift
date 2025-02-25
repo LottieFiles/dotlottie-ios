@@ -321,16 +321,16 @@ class Player: ObservableObject {
         dotLottiePlayer.activeAnimationId()
     }
 
-    public func stateMachineSetNumericTrigger(key: String, value: Float) -> Bool {
-        dotLottiePlayer.stateMachineSetNumericTrigger(key: key, value: value)
+    public func stateMachineSetNumericInput(key: String, value: Float) -> Bool {
+        dotLottiePlayer.stateMachineSetNumericInput(key: key, value: value)
     }
     
-    public func stateMachineSetStringTrigger(key: String, value: String) -> Bool {
-        dotLottiePlayer.stateMachineSetStringTrigger(key: key, value: value)
+    public func stateMachineSetStringInput(key: String, value: String) -> Bool {
+        dotLottiePlayer.stateMachineSetStringInput(key: key, value: value)
     }
     
-    public func stateMachineSetBooleanTrigger(key: String, value: Bool) -> Bool {
-        dotLottiePlayer.stateMachineSetBooleanTrigger(key: key, value: value)
+    public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
+        dotLottiePlayer.stateMachineSetBooleanInput(key: key, value: value)
     }
     
     public func setPlayerState(state: PlayerState) {

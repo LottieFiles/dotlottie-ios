@@ -631,11 +631,11 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func stateMachineFrameworkUnsubscribe(observer: StateMachineObserver) -> Bool
 
-    func stateMachineGetBooleanTrigger(key: String) -> Bool
+    func stateMachineGetBooleanInput(key: String) -> Bool
 
-    func stateMachineGetNumericTrigger(key: String) -> Float
+    func stateMachineGetNumericInput(key: String) -> Float
 
-    func stateMachineGetStringTrigger(key: String) -> String
+    func stateMachineGetStringInput(key: String) -> String
 
     func stateMachineLoad(stateMachineId: String) -> Bool
 
@@ -657,11 +657,11 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func stateMachinePostPointerUpEvent(x: Float, y: Float) -> Int32
 
-    func stateMachineSetBooleanTrigger(key: String, value: Bool) -> Bool
+    func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool
 
-    func stateMachineSetNumericTrigger(key: String, value: Float) -> Bool
+    func stateMachineSetNumericInput(key: String, value: Float) -> Bool
 
-    func stateMachineSetStringTrigger(key: String, value: String) -> Bool
+    func stateMachineSetStringInput(key: String, value: String) -> Bool
 
     func stateMachineStart(openUrl: OpenUrl) -> Bool
 
@@ -1029,24 +1029,24 @@ open class DotLottiePlayer:
         })
     }
 
-    open func stateMachineGetBooleanTrigger(key: String) -> Bool {
+    open func stateMachineGetBooleanInput(key: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_boolean_trigger(self.uniffiClonePointer(),
-                                                                                                FfiConverterString.lower(key), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_boolean_input(self.uniffiClonePointer(),
+                                                                                              FfiConverterString.lower(key), $0)
         })
     }
 
-    open func stateMachineGetNumericTrigger(key: String) -> Float {
+    open func stateMachineGetNumericInput(key: String) -> Float {
         return try! FfiConverterFloat.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_numeric_trigger(self.uniffiClonePointer(),
-                                                                                                FfiConverterString.lower(key), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_numeric_input(self.uniffiClonePointer(),
+                                                                                              FfiConverterString.lower(key), $0)
         })
     }
 
-    open func stateMachineGetStringTrigger(key: String) -> String {
+    open func stateMachineGetStringInput(key: String) -> String {
         return try! FfiConverterString.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_string_trigger(self.uniffiClonePointer(),
-                                                                                               FfiConverterString.lower(key), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_string_input(self.uniffiClonePointer(),
+                                                                                             FfiConverterString.lower(key), $0)
         })
     }
 
@@ -1127,27 +1127,27 @@ open class DotLottiePlayer:
         })
     }
 
-    open func stateMachineSetBooleanTrigger(key: String, value: Bool) -> Bool {
+    open func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_boolean_trigger(self.uniffiClonePointer(),
-                                                                                                FfiConverterString.lower(key),
-                                                                                                FfiConverterBool.lower(value), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_boolean_input(self.uniffiClonePointer(),
+                                                                                              FfiConverterString.lower(key),
+                                                                                              FfiConverterBool.lower(value), $0)
         })
     }
 
-    open func stateMachineSetNumericTrigger(key: String, value: Float) -> Bool {
+    open func stateMachineSetNumericInput(key: String, value: Float) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_numeric_trigger(self.uniffiClonePointer(),
-                                                                                                FfiConverterString.lower(key),
-                                                                                                FfiConverterFloat.lower(value), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_numeric_input(self.uniffiClonePointer(),
+                                                                                              FfiConverterString.lower(key),
+                                                                                              FfiConverterFloat.lower(value), $0)
         })
     }
 
-    open func stateMachineSetStringTrigger(key: String, value: String) -> Bool {
+    open func stateMachineSetStringInput(key: String, value: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_string_trigger(self.uniffiClonePointer(),
-                                                                                               FfiConverterString.lower(key),
-                                                                                               FfiConverterString.lower(value), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_set_string_input(self.uniffiClonePointer(),
+                                                                                             FfiConverterString.lower(key),
+                                                                                             FfiConverterString.lower(value), $0)
         })
     }
 
@@ -1648,13 +1648,15 @@ public func FfiConverterTypeObserver_lower(_ value: Observer) -> UnsafeMutableRa
 }
 
 public protocol StateMachineObserver: AnyObject {
-    func onBooleanTriggerValueChange(triggerName: String, oldValue: Bool, newValue: Bool)
+    func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool)
 
     func onCustomEvent(message: String)
 
     func onError(message: String)
 
-    func onNumericTriggerValueChange(triggerName: String, oldValue: Float, newValue: Float)
+    func onInputFired(inputName: String)
+
+    func onNumericInputValueChange(inputName: String, oldValue: Float, newValue: Float)
 
     func onStart()
 
@@ -1664,11 +1666,9 @@ public protocol StateMachineObserver: AnyObject {
 
     func onStop()
 
-    func onStringTriggerValueChange(triggerName: String, oldValue: String, newValue: String)
+    func onStringInputValueChange(inputName: String, oldValue: String, newValue: String)
 
     func onTransition(previousState: String, newState: String)
-
-    func onTriggerFired(triggerName: String)
 }
 
 open class StateMachineObserverImpl:
@@ -1720,11 +1720,11 @@ open class StateMachineObserverImpl:
         try! rustCall { uniffi_dotlottie_player_fn_free_statemachineobserver(pointer, $0) }
     }
 
-    open func onBooleanTriggerValueChange(triggerName: String, oldValue: Bool, newValue: Bool) { try! rustCall {
-        uniffi_dotlottie_player_fn_method_statemachineobserver_on_boolean_trigger_value_change(self.uniffiClonePointer(),
-                                                                                               FfiConverterString.lower(triggerName),
-                                                                                               FfiConverterBool.lower(oldValue),
-                                                                                               FfiConverterBool.lower(newValue), $0)
+    open func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_boolean_input_value_change(self.uniffiClonePointer(),
+                                                                                             FfiConverterString.lower(inputName),
+                                                                                             FfiConverterBool.lower(oldValue),
+                                                                                             FfiConverterBool.lower(newValue), $0)
     }
     }
 
@@ -1740,11 +1740,17 @@ open class StateMachineObserverImpl:
     }
     }
 
-    open func onNumericTriggerValueChange(triggerName: String, oldValue: Float, newValue: Float) { try! rustCall {
-        uniffi_dotlottie_player_fn_method_statemachineobserver_on_numeric_trigger_value_change(self.uniffiClonePointer(),
-                                                                                               FfiConverterString.lower(triggerName),
-                                                                                               FfiConverterFloat.lower(oldValue),
-                                                                                               FfiConverterFloat.lower(newValue), $0)
+    open func onInputFired(inputName: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_input_fired(self.uniffiClonePointer(),
+                                                                              FfiConverterString.lower(inputName), $0)
+    }
+    }
+
+    open func onNumericInputValueChange(inputName: String, oldValue: Float, newValue: Float) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_numeric_input_value_change(self.uniffiClonePointer(),
+                                                                                             FfiConverterString.lower(inputName),
+                                                                                             FfiConverterFloat.lower(oldValue),
+                                                                                             FfiConverterFloat.lower(newValue), $0)
     }
     }
 
@@ -1770,11 +1776,11 @@ open class StateMachineObserverImpl:
     }
     }
 
-    open func onStringTriggerValueChange(triggerName: String, oldValue: String, newValue: String) { try! rustCall {
-        uniffi_dotlottie_player_fn_method_statemachineobserver_on_string_trigger_value_change(self.uniffiClonePointer(),
-                                                                                              FfiConverterString.lower(triggerName),
-                                                                                              FfiConverterString.lower(oldValue),
-                                                                                              FfiConverterString.lower(newValue), $0)
+    open func onStringInputValueChange(inputName: String, oldValue: String, newValue: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_statemachineobserver_on_string_input_value_change(self.uniffiClonePointer(),
+                                                                                            FfiConverterString.lower(inputName),
+                                                                                            FfiConverterString.lower(oldValue),
+                                                                                            FfiConverterString.lower(newValue), $0)
     }
     }
 
@@ -1784,12 +1790,6 @@ open class StateMachineObserverImpl:
                                                                              FfiConverterString.lower(newState), $0)
     }
     }
-
-    open func onTriggerFired(triggerName: String) { try! rustCall {
-        uniffi_dotlottie_player_fn_method_statemachineobserver_on_trigger_fired(self.uniffiClonePointer(),
-                                                                                FfiConverterString.lower(triggerName), $0)
-    }
-    }
 }
 
 // Put the implementation in a struct so we don't pollute the top-level namespace
@@ -1797,9 +1797,9 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
     // Create the VTable using a series of closures.
     // Swift automatically converts these into C callback functions.
     static var vtable: UniffiVTableCallbackInterfaceStateMachineObserver = .init(
-        onBooleanTriggerValueChange: { (
+        onBooleanInputValueChange: { (
             uniffiHandle: UInt64,
-            triggerName: RustBuffer,
+            inputName: RustBuffer,
             oldValue: Int8,
             newValue: Int8,
             _: UnsafeMutableRawPointer,
@@ -1810,8 +1810,8 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
-                return try uniffiObj.onBooleanTriggerValueChange(
-                    triggerName: FfiConverterString.lift(triggerName),
+                return try uniffiObj.onBooleanInputValueChange(
+                    inputName: FfiConverterString.lift(inputName),
                     oldValue: FfiConverterBool.lift(oldValue),
                     newValue: FfiConverterBool.lift(newValue)
                 )
@@ -1870,9 +1870,32 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 writeReturn: writeReturn
             )
         },
-        onNumericTriggerValueChange: { (
+        onInputFired: { (
             uniffiHandle: UInt64,
-            triggerName: RustBuffer,
+            inputName: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onInputFired(
+                    inputName: FfiConverterString.lift(inputName)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onNumericInputValueChange: { (
+            uniffiHandle: UInt64,
+            inputName: RustBuffer,
             oldValue: Float,
             newValue: Float,
             _: UnsafeMutableRawPointer,
@@ -1883,8 +1906,8 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
-                return try uniffiObj.onNumericTriggerValueChange(
-                    triggerName: FfiConverterString.lift(triggerName),
+                return try uniffiObj.onNumericInputValueChange(
+                    inputName: FfiConverterString.lift(inputName),
                     oldValue: FfiConverterFloat.lift(oldValue),
                     newValue: FfiConverterFloat.lift(newValue)
                 )
@@ -1985,9 +2008,9 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 writeReturn: writeReturn
             )
         },
-        onStringTriggerValueChange: { (
+        onStringInputValueChange: { (
             uniffiHandle: UInt64,
-            triggerName: RustBuffer,
+            inputName: RustBuffer,
             oldValue: RustBuffer,
             newValue: RustBuffer,
             _: UnsafeMutableRawPointer,
@@ -1998,8 +2021,8 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
                     throw UniffiInternalError.unexpectedStaleHandle
                 }
-                return try uniffiObj.onStringTriggerValueChange(
-                    triggerName: FfiConverterString.lift(triggerName),
+                return try uniffiObj.onStringInputValueChange(
+                    inputName: FfiConverterString.lift(inputName),
                     oldValue: FfiConverterString.lift(oldValue),
                     newValue: FfiConverterString.lift(newValue)
                 )
@@ -2027,29 +2050,6 @@ private enum UniffiCallbackInterfaceStateMachineObserver {
                 return try uniffiObj.onTransition(
                     previousState: FfiConverterString.lift(previousState),
                     newState: FfiConverterString.lift(newState)
-                )
-            }
-
-            let writeReturn = { () }
-            uniffiTraitInterfaceCall(
-                callStatus: uniffiCallStatus,
-                makeCall: makeCall,
-                writeReturn: writeReturn
-            )
-        },
-        onTriggerFired: { (
-            uniffiHandle: UInt64,
-            triggerName: RustBuffer,
-            _: UnsafeMutableRawPointer,
-            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
-        ) in
-            let makeCall = {
-                () throws in
-                guard let uniffiObj = try? FfiConverterTypeStateMachineObserver.handleMap.get(handle: uniffiHandle) else {
-                    throw UniffiInternalError.unexpectedStaleHandle
-                }
-                return try uniffiObj.onTriggerFired(
-                    triggerName: FfiConverterString.lift(triggerName)
                 )
             }
 
@@ -3580,13 +3580,13 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_framework_unsubscribe() != 64000 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_boolean_trigger() != 30117 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_boolean_input() != 55120 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_numeric_trigger() != 15678 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_numeric_input() != 10400 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_string_trigger() != 52037 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_string_input() != 47598 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_load() != 64493 {
@@ -3619,13 +3619,13 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_post_pointer_up_event() != 24904 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_boolean_trigger() != 12695 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_boolean_input() != 63405 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_numeric_trigger() != 36836 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_numeric_input() != 54841 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_string_trigger() != 26005 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_set_string_input() != 4923 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_start() != 32431 {
@@ -3682,7 +3682,7 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_observer_on_stop() != 52331 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_boolean_trigger_value_change() != 21867 {
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_boolean_input_value_change() != 21933 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_custom_event() != 50052 {
@@ -3691,7 +3691,10 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_error() != 46774 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_numeric_trigger_value_change() != 57476 {
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_input_fired() != 28837 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_numeric_input_value_change() != 49226 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_start() != 26147 {
@@ -3706,13 +3709,10 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_stop() != 19940 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_string_trigger_value_change() != 62692 {
+    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_string_input_value_change() != 58131 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_transition() != 25374 {
-        return InitializationResult.apiChecksumMismatch
-    }
-    if uniffi_dotlottie_player_checksum_method_statemachineobserver_on_trigger_fired() != 65439 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new() != 34558 {
