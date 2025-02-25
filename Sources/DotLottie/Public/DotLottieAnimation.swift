@@ -10,7 +10,7 @@ import CoreImage
 import UIKit
 
 private class OpenUrlObserver: StateMachineObserver {
-    func onBooleanTriggerValueChange(triggerName: String, oldValue: Bool, newValue: Bool) {
+    func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool) {
     }
     
     func onCustomEvent(message: String) {
@@ -27,7 +27,7 @@ private class OpenUrlObserver: StateMachineObserver {
     func onError(message: String) {
     }
     
-    func onNumericTriggerValueChange(triggerName: String, oldValue: Float, newValue: Float) {
+    func onNumericInputValueChange(inputName: String, oldValue: Float, newValue: Float) {
     }
     
     func onStart() {
@@ -42,13 +42,13 @@ private class OpenUrlObserver: StateMachineObserver {
     func onStop() {
     }
     
-    func onStringTriggerValueChange(triggerName: String, oldValue: String, newValue: String) {
+    func onStringInputValueChange(inputName: String, oldValue: String, newValue: String) {
     }
     
     func onTransition(previousState: String, newState: String) {
     }
     
-    func onTriggerFired(triggerName: String) {
+    func onInputFired(inputName: String) {
     }
 }
 
@@ -587,16 +587,16 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineFrameworkSetup()
     }
     
-    public func stateMachineSetNumericTrigger(key: String, value: Float) -> Bool {
-        player.stateMachineSetNumericTrigger(key: key, value: value)
+    public func stateMachineSetNumericInput(key: String, value: Float) -> Bool {
+        player.stateMachineSetNumericInput(key: key, value: value)
     }
     
-    public func stateMachineSetStringTrigger(key: String, value: String) -> Bool {
-        player.stateMachineSetStringTrigger(key: key, value: value)
+    public func stateMachineSetStringInput(key: String, value: String) -> Bool {
+        player.stateMachineSetStringInput(key: key, value: value)
     }
     
-    public func stateMachineSetBooleanTrigger(key: String, value: Bool) -> Bool {
-        player.stateMachineSetBooleanTrigger(key: key, value: value)
+    public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
+        player.stateMachineSetBooleanInput(key: key, value: value)
     }
     
     public func stateMachineCurrentState() -> String {
