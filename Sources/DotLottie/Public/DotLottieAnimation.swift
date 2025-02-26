@@ -188,8 +188,6 @@ public final class DotLottieAnimation: ObservableObject {
                              themeId: config.themeId ?? "",
                              stateMachineId: config.stateMachineId ?? "")
         self.player = Player(config: self.config)
-        //        self.player.WIDTH = UInt32(config.width ?? defaultWidthHeight)
-        //        self.player.HEIGHT = UInt32(config.height ?? defaultWidthHeight)
         
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
@@ -250,6 +248,11 @@ public final class DotLottieAnimation: ObservableObject {
         do {
             try player.loadDotlottieData(data: data, width: self.animationModel.width, height: self.animationModel.height)
             
+            if config.stateMachineId != "" {
+                let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
+                
+                self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
+            }
         } catch let error {
             animationModel.error = true
             animationModel.errorMessage = error.localizedDescription
