@@ -97,6 +97,13 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
     }
+    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
+        print("Sending click")
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    }
+
     
     func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
         let mapped = calculateCoordinates(location: location)

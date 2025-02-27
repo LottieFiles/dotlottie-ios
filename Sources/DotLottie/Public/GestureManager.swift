@@ -11,6 +11,7 @@ protocol GestureManagerDelegate: AnyObject {
     func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint)
     func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint)
     func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint)
 }
 
 class GestureManager : UIGestureRecognizer {
@@ -25,6 +26,8 @@ class GestureManager : UIGestureRecognizer {
         self.doubleTapGestureThreshold = threshold
     }
     
+    private var initialTouchLocation: CGPoint?
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
         self.state = .began
@@ -34,6 +37,7 @@ class GestureManager : UIGestureRecognizer {
         if let touch = touches.first {
             // Get the location of the touch in the view's coordinate system
             let location = touch.location(in: self.view)
+            initialTouchLocation = location
             gestureManagerDelegate?.gestureManagerDidRecognizeDown(self, at: location)
         }
     }
@@ -55,20 +59,35 @@ class GestureManager : UIGestureRecognizer {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
         let currentTime = CACurrentMediaTime()
-        let diff:CFTimeInterval = currentTime - lastTouchTime
+        let diff: CFTimeInterval = currentTime - lastTouchTime
         
-        self.status = diff < doubleTapGestureThreshold ? GestureManagerStatus.success : GestureManagerStatus.fail
-        self.state = .ended
-        
-        lastTouchTime = currentTime
-        // Check if there's a touch
         if let touch = touches.first {
-            // Get the location of the touch in the view's coordinate system
             let location = touch.location(in: self.view)
+            
+            // Check if this could be part of a double tap
+            if diff < doubleTapGestureThreshold {
+                self.status = .success
+            } else {
+                self.status = .fail
+                
+                // This is a single tap if it's not part of a double tap
+                if let initialLocation = initialTouchLocation {
+                    let moveDistance = hypot(location.x - initialLocation.x, location.y - initialLocation.y)
+                    let maxTapDistance: CGFloat = 20
+                    
+                    if moveDistance <= maxTapDistance && diff >= doubleTapGestureThreshold {
+                        gestureManagerDelegate?.gestureManagerDidRecognizeTap(self, at: location)
+                    }
+                }
 
+                initialTouchLocation = nil
+            }
+            
             gestureManagerDelegate?.gestureManagerDidRecognizeUp(self, at: location)
         }
         
+        self.state = .ended
+        lastTouchTime = currentTime
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
