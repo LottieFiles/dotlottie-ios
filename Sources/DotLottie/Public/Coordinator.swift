@@ -16,6 +16,7 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
     private var viewSize: CGSize!
+
     
     init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
@@ -47,7 +48,7 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
         guard !parent.dotLottieViewModel.error() else {
             return
         }
-        
+                
         if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             

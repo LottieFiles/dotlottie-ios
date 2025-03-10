@@ -205,17 +205,25 @@ public final class DotLottieAnimation: ObservableObject {
         animationModel.backgroundColor = config.backgroundColor ?? .clear
     }
     
+    public func render() -> Bool {
+        player.render()
+    }
+    
     // MARK: Tick
     
     /// Requests a frame and renders it if necessary
     public func tick() -> CGImage? {
-        let nextFrame = player.requestFrame()
-        
-        if (nextFrame) {
-            if let image = player.render() {
-                return image
-            }
+        if let image = player.tick() {
+            return image
         }
+
+//        let nextFrame = player.requestFrame()
+//        
+//        if (nextFrame) {
+//            if let image = player.render() {
+//                return image
+//            }
+//        }
         
         return nil
     }

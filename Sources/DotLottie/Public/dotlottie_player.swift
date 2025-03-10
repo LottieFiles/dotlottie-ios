@@ -577,6 +577,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func isStopped() -> Bool
 
+    func isTweening() -> Bool
+
     func loadAnimation(animationId: String, width: UInt32, height: UInt32) -> Bool
 
     func loadAnimationData(animationData: String, width: UInt32, height: UInt32) -> Bool
@@ -677,7 +679,17 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func subscribe(observer: Observer)
 
+    func tick() -> Bool
+
     func totalFrames() -> Float
+
+    func tween(to: Float, duration: Float?, easing: [Float]?) -> Bool
+
+    func tweenStop() -> Bool
+
+    func tweenToMarker(marker: String, duration: Float?, easing: [Float]?) -> Bool
+
+    func tweenUpdate(progress: Float?) -> Bool
 
     func unsubscribe(observer: Observer)
 }
@@ -839,6 +851,12 @@ open class DotLottiePlayer:
     open func isStopped() -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_is_stopped(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func isTweening() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_is_tweening(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -1196,9 +1214,46 @@ open class DotLottiePlayer:
     }
     }
 
+    open func tick() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_tick(self.uniffiClonePointer(), $0)
+        })
+    }
+
     open func totalFrames() -> Float {
         return try! FfiConverterFloat.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_total_frames(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func tween(to: Float, duration: Float?, easing: [Float]?) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_tween(self.uniffiClonePointer(),
+                                                                    FfiConverterFloat.lower(to),
+                                                                    FfiConverterOptionFloat.lower(duration),
+                                                                    FfiConverterOptionSequenceFloat.lower(easing), $0)
+        })
+    }
+
+    open func tweenStop() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_tween_stop(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func tweenToMarker(marker: String, duration: Float?, easing: [Float]?) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_tween_to_marker(self.uniffiClonePointer(),
+                                                                              FfiConverterString.lower(marker),
+                                                                              FfiConverterOptionFloat.lower(duration),
+                                                                              FfiConverterOptionSequenceFloat.lower(easing), $0)
+        })
+    }
+
+    open func tweenUpdate(progress: Float?) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_tween_update(self.uniffiClonePointer(),
+                                                                           FfiConverterOptionFloat.lower(progress), $0)
         })
     }
 
@@ -3111,6 +3166,30 @@ extension OpenUrlMode: Equatable, Hashable {}
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
+private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
+    typealias SwiftType = Float?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterFloat.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterFloat.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
 private struct FfiConverterOptionString: FfiConverterRustBuffer {
     typealias SwiftType = String?
 
@@ -3175,6 +3254,30 @@ private struct FfiConverterOptionTypeManifestInitial: FfiConverterRustBuffer {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeManifestInitial.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+private struct FfiConverterOptionSequenceFloat: FfiConverterRustBuffer {
+    typealias SwiftType = [Float]?
+
+    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceFloat.write(value, into: &buf)
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceFloat.read(from: &buf)
         default: throw UniffiInternalError.unexpectedOptionalTag
         }
     }
@@ -3499,6 +3602,9 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_stopped() != 28412 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_is_tweening() != 55447 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_load_animation() != 52252 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -3649,7 +3755,22 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_subscribe() != 45859 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_tick() != 60075 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_total_frames() != 12091 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_tween() != 57206 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_tween_stop() != 42833 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_tween_to_marker() != 26478 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_tween_update() != 11200 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_unsubscribe() != 1373 {

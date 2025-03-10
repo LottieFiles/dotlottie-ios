@@ -73,7 +73,8 @@ public class DotLottieAnimationView: UIView, DotLottie {
         
         mtkView.enableSetNeedsDisplay = true
         
-        mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
+        mtkView.isPaused = false
+        
         addSubview(mtkView)
     }
 
