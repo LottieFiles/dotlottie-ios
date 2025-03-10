@@ -43,7 +43,6 @@ class Player: ObservableObject {
             .loadAnimationData(animationData: animationData,
                                width: self.WIDTH,
                                height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
     }
@@ -53,11 +52,8 @@ class Player: ObservableObject {
         self.HEIGHT = UInt32(height)
         
         if (!dotLottiePlayer.loadDotlottieData(fileData: data, width: self.WIDTH, height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
-        
-        setPlayerState(state: self.config().autoplay ? .playing : .draw)
     }
     
     public func loadAnimationPath(animationPath: String, width: Int, height: Int) throws {
@@ -67,7 +63,6 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.loadAnimationPath(animationPath: animationPath,
                                                width: self.WIDTH,
                                                height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
     }
@@ -79,7 +74,6 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.loadAnimation(animationId: animationId,
                                            width: self.WIDTH,
                                            height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
     }
@@ -178,11 +172,7 @@ class Player: ObservableObject {
     
     public func isComplete() -> Bool {
         let complete = dotLottiePlayer.isComplete()
-        
-        if (dotLottiePlayer.isComplete()) {
-            self.setPlayerState(state: .complete)
-        }
-        
+                
         return complete
     }
     
@@ -193,30 +183,18 @@ class Player: ObservableObject {
     public func play() -> Bool {
         let play = dotLottiePlayer.play()
         
-        if (dotLottiePlayer.isPlaying()) {
-            self.setPlayerState(state: .playing)
-        }
-        
         return play
     }
     
     public func pause() -> Bool {
         let pause = dotLottiePlayer.pause()
         
-        if (dotLottiePlayer.isPaused()) {
-            self.setPlayerState(state: .paused)
-        }
-        
         return pause
     }
     
     public func stop() -> Bool {
         let stop =  dotLottiePlayer.stop()
-        
-        if (dotLottiePlayer.isStopped()) {
-            self.setPlayerState(state: .stopped)
-        }
-        
+
         return stop
     }
     
@@ -251,16 +229,11 @@ class Player: ObservableObject {
     
     public func stateMachineStart(openUrl: OpenUrl) -> Bool {
         let started = dotLottiePlayer.stateMachineStart(openUrl: openUrl)
-        
-        if (started) {
-            self.setPlayerState(state: .stateMachineIsActive)
-        }
-        
+                
         return started
     }
     
     public func stateMachineStop() -> Bool {
-        self.setPlayerState(state: .initial)
         return dotLottiePlayer.stateMachineStop()
     }
     
@@ -346,11 +319,4 @@ class Player: ObservableObject {
     public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
         dotLottiePlayer.stateMachineSetBooleanInput(key: key, value: value)
     }
-    
-    public func setPlayerState(state: PlayerState) {
-        DispatchQueue.main.async {
-            //            self.playerState = state
-        }
-    }
-    
 }

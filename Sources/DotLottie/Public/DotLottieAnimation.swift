@@ -216,14 +216,6 @@ public final class DotLottieAnimation: ObservableObject {
         if let image = player.tick() {
             return image
         }
-
-//        let nextFrame = player.requestFrame()
-//        
-//        if (nextFrame) {
-//            if let image = player.render() {
-//                return image
-//            }
-//        }
         
         return nil
     }
@@ -451,10 +443,6 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func segments() -> (Float, Float) {
         return (player.config().segment[0], player.config().segment[1])
-    }
-    
-    public func setPlayerState(_ state: PlayerState) {
-        player.setPlayerState(state: state)
     }
     
     public func getLayerBounds(layerName: String) -> [Float] {

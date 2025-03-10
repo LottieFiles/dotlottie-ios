@@ -19,14 +19,12 @@ class DotLottieObserver: Observer {
     }
     
     func onLoad() {
-        self.observedPlayer?.setPlayerState(state: .loaded)
     }
     
     func onLoop(loopCount: UInt32) {
     }
     
     func onComplete() {
-        self.observedPlayer?.setPlayerState(state: .paused)
     }
     
     // Needed to complete the protocol but not used inside Player for the moment
@@ -34,11 +32,9 @@ class DotLottieObserver: Observer {
     }
     
     func onPause() {
-        self.observedPlayer?.setPlayerState(state: .paused)
     }
     
     func onPlay() {
-        self.observedPlayer?.setPlayerState(state: .playing)
     }
     
     // Needed to complete the protocol but not used inside Player for the moment
@@ -46,10 +42,8 @@ class DotLottieObserver: Observer {
     }
     
     func onStop() {
-        self.observedPlayer?.setPlayerState(state: .stopped)
     }
     
     func onLoadError() {
-        self.observedPlayer?.setPlayerState(state: .error)
     }
 }
