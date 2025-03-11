@@ -87,11 +87,14 @@ class Player: ObservableObject {
             return nil
         }
         
-        if dotLottiePlayer.tick() || !hasRenderedFirstFrame || dotLottiePlayer.stateMachineStatus() != "" {
+        let tick = dotLottiePlayer.tick()
+        
+        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() {
+            self.currFrame = dotLottiePlayer.currentFrame()
             
             hasRenderedFirstFrame = true
             
-            let render = dotLottiePlayer.render()
+            _ = dotLottiePlayer.render()
             
             let bitsPerComponent = 8
             let bytesPerRow = 4 * self.WIDTH
@@ -205,18 +208,6 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.resize(width: self.WIDTH, height: self.HEIGHT)) {
             throw PlayerErrors.resizeError
         }
-    }
-    
-    public func requestFrame() -> Bool {
-        let frame = dotLottiePlayer.requestFrame()
-        
-        if (frame != self.currFrame) {
-            currFrame = frame
-            let _ = self.setFrame(no: frame)
-            return true
-        }
-        
-        return false
     }
     
     public func stateMachineLoad(id: String) -> Bool {
