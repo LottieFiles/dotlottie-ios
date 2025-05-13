@@ -344,10 +344,12 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: Playback setters / getters
     
+    @discardableResult
     public func play() -> Bool {
         self.player.play()
     }
     
+    @discardableResult
     public func pause() -> Bool {
         self.player.pause()
     }
@@ -361,6 +363,7 @@ public final class DotLottieAnimation: ObservableObject {
      - If there are no segments and direction is 1 (forward) go to start frame
      - If there are segments and direction is -1 (reverse) go to end frame
      */
+    @discardableResult
     public func stop() -> Bool {
         player.stop()
     }
@@ -373,6 +376,7 @@ public final class DotLottieAnimation: ObservableObject {
         return player.totalFrames()
     }
     
+    @discardableResult
     public func loop() -> Bool {
         return player.config().loopAnimation
     }
@@ -395,6 +399,7 @@ public final class DotLottieAnimation: ObservableObject {
     
     /// Set the current frame.
     /// Can return false if the frame is invalid or equal to the current frame.
+    @discardableResult
     public func setFrame(frame: Float) -> Bool {
         return player.setFrame(no: frame)
     }
@@ -448,18 +453,22 @@ public final class DotLottieAnimation: ObservableObject {
         return player.config().useFrameInterpolation
     }
     
+    @discardableResult
     public func loadStateMachine(id: String) -> Bool {
         player.loadStateMachine(id: id)
     }
     
+    @discardableResult
     public func loadStateMachineData(data: String) -> Bool {
         player.loadStateMachineData(data: data)
     }
     
+    @discardableResult
     public func stopStateMachine() -> Bool {
         player.stopStateMachine()
     }
     
+    @discardableResult
     public func startStateMachine() -> Bool {
         let sm = player.startStateMachine()
         
@@ -472,6 +481,7 @@ public final class DotLottieAnimation: ObservableObject {
         return sm
     }
     
+    @discardableResult
     public func postEvent(_ event: Event) -> Int32 {
         let pe = player.postEvent(event: event)
         
@@ -486,50 +496,62 @@ public final class DotLottieAnimation: ObservableObject {
         return pe
     }
     
+    @discardableResult
     public func setSlots(_ slots: String) -> Bool {
         player.setSlots(slots)
     }
-
+    
+    @discardableResult
     public func setTheme(_ themeId: String) -> Bool {
         player.setTheme(themeId)
     }
     
+    @discardableResult
     public func setThemeData(_ themeData: String) -> Bool {
         player.setThemeData(themeData)
     }
-
+    
+    @discardableResult
     public func resetTheme() -> Bool {
         player.resetTheme()
     }
-
+    
+    @discardableResult
     public func activeThemeId() -> String {
         player.activeThemeId()
     }
     
+    @discardableResult
     public func activeAnimationId() -> String {
         player.activeAnimationId()
     }
-
+    
+    @discardableResult
     public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineSubscribe(oberserver: oberserver)
     }
     
+    @discardableResult
     public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
         player.stateMachineUnSubscribe(oberserver: oberserver)
     }
     
+    @discardableResult
     public func stateMachineFrameworkSetup() -> [String] {
         player.stateMachineFrameworkSetup()
     }
     
+    @discardableResult
     public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
         player.setStateMachineNumericContext(key: key, value: value)
     }
     
+    @discardableResult
     public func setStateMachineStringContext(key: String, value: String) -> Bool {
         player.setStateMachineStringContext(key: key, value: value)
     }
     
+    @discardableResult
     public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
         player.setStateMachineBooleanContext(key: key, value: value)
     }
