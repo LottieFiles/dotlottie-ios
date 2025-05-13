@@ -516,12 +516,10 @@ public final class DotLottieAnimation: ObservableObject {
         player.resetTheme()
     }
     
-    @discardableResult
     public func activeThemeId() -> String {
         player.activeThemeId()
     }
     
-    @discardableResult
     public func activeAnimationId() -> String {
         player.activeAnimationId()
     }
