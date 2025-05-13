@@ -22,6 +22,7 @@ public struct AnimationConfig {
     public var marker: String? = ""
     public var themeId: String? = ""
     public var stateMachineId: String? = ""
+    public var animationId: String? = ""
     
     public init(
         autoplay: Bool? = false,

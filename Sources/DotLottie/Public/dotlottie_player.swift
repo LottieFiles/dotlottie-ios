@@ -567,8 +567,6 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func getStateMachine(stateMachineId: String) -> String
 
-    func instanceId() -> UInt32
-
     func intersect(x: Float, y: Float, layerName: String) -> Bool
 
     func isComplete() -> Bool
@@ -825,12 +823,6 @@ open class DotLottiePlayer:
         return try! FfiConverterString.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_get_state_machine(self.uniffiClonePointer(),
                                                                                 FfiConverterString.lower(stateMachineId), $0)
-        })
-    }
-
-    open func instanceId() -> UInt32 {
-        return try! FfiConverterUInt32.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_instance_id(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -2211,10 +2203,11 @@ public struct Config {
     public var marker: String
     public var themeId: String
     public var stateMachineId: String
+    public var animationId: String
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(autoplay: Bool, loopAnimation: Bool, mode: Mode, speed: Float, useFrameInterpolation: Bool, segment: [Float], backgroundColor: UInt32, layout: Layout, marker: String, themeId: String, stateMachineId: String) {
+    public init(autoplay: Bool, loopAnimation: Bool, mode: Mode, speed: Float, useFrameInterpolation: Bool, segment: [Float], backgroundColor: UInt32, layout: Layout, marker: String, themeId: String, stateMachineId: String, animationId: String) {
         self.autoplay = autoplay
         self.loopAnimation = loopAnimation
         self.mode = mode
@@ -2226,6 +2219,7 @@ public struct Config {
         self.marker = marker
         self.themeId = themeId
         self.stateMachineId = stateMachineId
+        self.animationId = animationId
     }
 }
 
@@ -2264,6 +2258,9 @@ extension Config: Equatable, Hashable {
         if lhs.stateMachineId != rhs.stateMachineId {
             return false
         }
+        if lhs.animationId != rhs.animationId {
+            return false
+        }
         return true
     }
 
@@ -2279,6 +2276,7 @@ extension Config: Equatable, Hashable {
         hasher.combine(marker)
         hasher.combine(themeId)
         hasher.combine(stateMachineId)
+        hasher.combine(animationId)
     }
 }
 
@@ -2299,7 +2297,8 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
                 layout: FfiConverterTypeLayout.read(from: &buf),
                 marker: FfiConverterString.read(from: &buf),
                 themeId: FfiConverterString.read(from: &buf),
-                stateMachineId: FfiConverterString.read(from: &buf)
+                stateMachineId: FfiConverterString.read(from: &buf),
+                animationId: FfiConverterString.read(from: &buf)
             )
     }
 
@@ -2315,6 +2314,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
         FfiConverterString.write(value.marker, into: &buf)
         FfiConverterString.write(value.themeId, into: &buf)
         FfiConverterString.write(value.stateMachineId, into: &buf)
+        FfiConverterString.write(value.animationId, into: &buf)
     }
 }
 
@@ -3616,9 +3616,6 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_state_machine() != 4598 {
-        return InitializationResult.apiChecksumMismatch
-    }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_instance_id() != 43862 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_intersect() != 12346 {

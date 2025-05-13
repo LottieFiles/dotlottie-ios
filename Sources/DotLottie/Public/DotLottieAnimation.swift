@@ -15,8 +15,11 @@ private class OpenUrlObserver: StateMachineObserver {
     
     func onCustomEvent(message: String) {
         if message.hasPrefix("OpenUrl: ") {
-            let url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
-            
+            var url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
+            if let dotRange = url.range(of: " |") {
+              url.removeSubrange(dotRange.lowerBound..<url.endIndex)
+            }
+            print(url);
             if let urlObject = URL(string: url),
                UIApplication.shared.canOpenURL(urlObject) {
                 UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
@@ -186,7 +189,8 @@ public final class DotLottieAnimation: ObservableObject {
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "",
                              themeId: config.themeId ?? "",
-                             stateMachineId: config.stateMachineId ?? "")
+                             stateMachineId: config.stateMachineId ?? "",
+                             animationId: config.animationId ?? "")
         self.player = Player(config: self.config)
         
         if (config.width != nil || config.height != nil) {
