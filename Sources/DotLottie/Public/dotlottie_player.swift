@@ -567,6 +567,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func getStateMachine(stateMachineId: String) -> String
 
+    func instanceId() -> UInt32
+
     func intersect(x: Float, y: Float, layerName: String) -> Bool
 
     func isComplete() -> Bool
@@ -823,6 +825,12 @@ open class DotLottiePlayer:
         return try! FfiConverterString.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_get_state_machine(self.uniffiClonePointer(),
                                                                                 FfiConverterString.lower(stateMachineId), $0)
+        })
+    }
+
+    open func instanceId() -> UInt32 {
+        return try! FfiConverterUInt32.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_instance_id(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -3537,6 +3545,15 @@ public func createDefaultOpenUrl() -> OpenUrl {
     })
 }
 
+public func transformThemeToLottieSlots(themeData: String, animationId: String) -> String {
+    return try! FfiConverterString.lift(try! rustCall {
+        uniffi_dotlottie_player_fn_func_transform_theme_to_lottie_slots(
+            FfiConverterString.lower(themeData),
+            FfiConverterString.lower(animationId), $0
+        )
+    })
+}
+
 private enum InitializationResult {
     case ok
     case contractVersionMismatch
@@ -3560,6 +3577,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_func_create_default_open_url() != 5194 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_func_transform_theme_to_lottie_slots() != 23836 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_active_animation_id() != 57608 {
@@ -3596,6 +3616,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_state_machine() != 4598 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_instance_id() != 43862 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_intersect() != 12346 {
