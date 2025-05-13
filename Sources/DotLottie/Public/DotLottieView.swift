@@ -14,7 +14,10 @@ import SwiftUI
 // View for SwiftUI and MacOS
 public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
+    
     private var mtkView: MTKView = MTKView()
+    
+    private let gestureManager = GestureManager()
     
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
     @ObservedObject internal var playerState: Player
@@ -42,28 +45,24 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 0)
         
+        self.mtkView.isPaused = false
+        
         self.mtkView.enableSetNeedsDisplay = true
         
-        self.mtkView.isPaused = !self.playerState.isPlaying()
-                
+        // Gesture management
+        gestureManager.cancelsTouchesInView = false
+        gestureManager.delegate = context.coordinator
+        gestureManager.gestureManagerDelegate = context.coordinator
+        
+        self.mtkView.addGestureRecognizer(gestureManager)
+        
         return mtkView
     }
     
     public func updateView(_ uiView: MTKView, context: Context) {
-        if self.playerState.isStopped() || self.playerState.isPaused() || self.playerState.isComplete() {
-            // Tell the coordinator to draw the last frame before pausing
-            uiView.draw()
-            uiView.isPaused = true
-        }
-
-        if self.playerState.isPlaying() {
-            uiView.isPaused = false
-        }
+        // All animations will be paused if this is not set to false here.
+        uiView.isPaused = false
         
-        if self.playerState.playerState == .draw {
-            uiView.draw()
-        }
-
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
