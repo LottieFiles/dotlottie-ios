@@ -126,11 +126,11 @@ class AnimationViewController: UIViewController {
 | `setMode(mode: Mode)` | Sets the animation play mode. |
 | `setSegments(segments: (Float, Float))` | Sets the start and end frame of the animation. |
 | `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
-| `setFrameInterpolation(_ useFrameInterpolation: Bool)` | Use frame interpolation or not. |
-| `resize(width: Int, height: Int)` | Manually resize the animation. |
-| `setTheme(_ themeId: String)` | Load a theme. Only available with .lottie files. |
+| `setFrameInterpolation(_ useFrameInterpolation: Bool)` | Uses frame interpolation or not. |
+| `resize(width: Int, height: Int)` | Manually resizes the animation. |
+| `setTheme(_ themeId: String)` | Loads a theme. Only available with .lottie files. |
 | `setThemeData(_ themeData: String)` | Loads the passed theming data. |
-| `resetTheme()` | Remove the currently loaded theme. Only available with .lottie files. |
+| `resetTheme()` | Removes the currently loaded theme. Only available with .lottie files. |
 
 ### Event callbacks
 
