@@ -136,7 +136,7 @@ class AnimationViewController: UIViewController {
 
 The `DotLottieAnimation` instance emits the following events that can be listened to via a class implementing the `Observer` protocol:
 
-```
+```swift
 class YourDotLottieObserver: Observer {
     func onComplete() {
     }
