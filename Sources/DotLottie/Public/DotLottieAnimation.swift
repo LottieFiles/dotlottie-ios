@@ -349,6 +349,28 @@ public final class DotLottieAnimation: ObservableObject {
         self.player.play()
     }
     
+    /// Plays animation from specified frame
+    /// - Parameter frame: Frame in range between 0 and totalFrames()
+    /// - Returns: True if animation is playing
+    @discardableResult
+    public func play(fromFrame frame: Float) -> Bool {
+        player.setFrame(no: frame)
+        return player.play()
+    }
+    
+    /// Plays animation from specified progress
+    /// - Parameter progress: Progress in range between 0 and 1
+    /// - Returns: True if animation is playing
+    @discardableResult
+    public func play(fromProgress progress: Float) -> Bool {
+        guard progress > 0 && progress < 1 else {
+            return false
+        }
+        
+        setProgress(progress: progress)
+        return player.play()
+    }
+    
     @discardableResult
     public func pause() -> Bool {
         self.player.pause()
@@ -366,6 +388,10 @@ public final class DotLottieAnimation: ObservableObject {
     @discardableResult
     public func stop() -> Bool {
         player.stop()
+    }
+    
+    public func currentProgress() -> Float {
+        player.currentFrame() / player.totalFrames()
     }
     
     public func currentFrame() -> Float {
@@ -402,6 +428,17 @@ public final class DotLottieAnimation: ObservableObject {
     @discardableResult
     public func setFrame(frame: Float) -> Bool {
         return player.setFrame(no: frame)
+    }
+    
+    /// Set the current progress.
+    /// Can return false if the progress is invalid or equal to the current progress.
+    @discardableResult
+    public func setProgress(progress: Float) -> Bool {
+        guard progress > 0 && progress < 1 else {
+            return false
+        }
+        
+        return player.setFrame(no: progress*totalFrames())
     }
     
     public func setFrameInterpolation(_ useFrameInterpolation: Bool) {
