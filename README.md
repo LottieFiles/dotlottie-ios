@@ -117,11 +117,14 @@ class AnimationViewController: UIViewController {
 | Event       | Description                                                             | 
 | ----------- | ----------------------------------------------------------------------- | 
 | `play()` | Begins playback from the current animation position. |
+| `play(fromFrame: Float)` | Begins playback from a specific animation frame. |
+| `play(fromProgress: Float)` | Begins playback from a specific animation progress (0...1). |
 | `pause()` | Pauses the animation without resetting its position. |
 | `stop()` | Halts playback and returns the animation to its initial frame. |
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
+| `setProgress(progress: Float)` | Directly navigates the animation to a specified progress (0...1). |
 | `loadAnimationById(_ animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |
 | `setMode(mode: Mode)` | Sets the animation play mode. |
 | `setSegments(segments: (Float, Float))` | Sets the start and end frame of the animation. |
