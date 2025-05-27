@@ -591,7 +591,7 @@ public final class DotLottieAnimation: ObservableObject {
         player.setStateMachineBooleanContext(key: key, value: value)
     }
     
-    public func e(autoplay: Bool) {
+    public func setAutoplay(autoplay: Bool) {
         var config = player.config()
         
         config.autoplay = autoplay
