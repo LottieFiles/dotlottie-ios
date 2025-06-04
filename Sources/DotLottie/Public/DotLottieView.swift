@@ -32,6 +32,8 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     public func makeView(context: Context) -> MTKView {
 #if os(iOS)
         self.mtkView.isOpaque = false
+#elseif os(macOS)
+        self.mtkView.layer?.isOpaque = false
 #endif
         
         self.mtkView.framebufferOnly = false

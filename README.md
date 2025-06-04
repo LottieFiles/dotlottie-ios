@@ -117,27 +117,29 @@ class AnimationViewController: UIViewController {
 | Event       | Description                                                             | 
 | ----------- | ----------------------------------------------------------------------- | 
 | `play()` | Begins playback from the current animation position. |
+| `play(fromFrame: Float)` | Begins playback from a specific animation frame. |
+| `play(fromProgress: Float)` | Begins playback from a specific animation progress (0...1). |
 | `pause()` | Pauses the animation without resetting its position. |
 | `stop()` | Halts playback and returns the animation to its initial frame. |
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
-| `load(config: Config)` | Loads a new configuration or a new animation. |
-| `loadAnimation(animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |
+| `setProgress(progress: Float)` | Directly navigates the animation to a specified progress (0...1). |
+| `loadAnimationById(_ animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |
 | `setMode(mode: Mode)` | Sets the animation play mode. |
 | `setSegments(segments: (Float, Float))` | Sets the start and end frame of the animation. |
 | `setBackgroundColor(color: CIImage)` | Sets the background color of the animation. |
-| `setFrameInterpolation(useFrameInterpolation: Bool)` | Use frame interpolation or not. |
-| `resize(width: Int, height: Int)` | Manually resize the animation. |
-| `setTheme(themeId: String)` | Load a theme. Only available with .lottie files. |
-| `setThemeData(themeData: String)` | Loads the passed theming data. |
-| `resetTheme()` | Remove the currently loaded theme. Only available with .lottie files. |
+| `setFrameInterpolation(_ useFrameInterpolation: Bool)` | Uses frame interpolation or not. |
+| `resize(width: Int, height: Int)` | Manually resizes the animation. |
+| `setTheme(_ themeId: String)` | Loads a theme. Only available with .lottie files. |
+| `setThemeData(_ themeData: String)` | Loads the passed theming data. |
+| `resetTheme()` | Removes the currently loaded theme. Only available with .lottie files. |
 
 ### Event callbacks
 
 The `DotLottieAnimation` instance emits the following events that can be listened to via a class implementing the `Observer` protocol:
 
-```
+```swift
 class YourDotLottieObserver: Observer {
     func onComplete() {
     }
