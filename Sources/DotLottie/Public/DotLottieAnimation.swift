@@ -135,7 +135,9 @@ public final class DotLottieAnimation: ObservableObject {
                              backgroundColor: 0,
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "",
-                             themeId: config.themeId ?? "")
+                             themeId: config.themeId ?? "",
+                             stateMachineId: "",
+                             animationId: config.animationId ?? "")
         self.player = Player(config: self.config)
         
         if (config.width != nil || config.height != nil) {
@@ -491,49 +493,6 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     @discardableResult
-    public func loadStateMachine(id: String) -> Bool {
-        player.loadStateMachine(id: id)
-    }
-    
-    @discardableResult
-    public func loadStateMachineData(data: String) -> Bool {
-        player.loadStateMachineData(data: data)
-    }
-    
-    @discardableResult
-    public func stopStateMachine() -> Bool {
-        player.stopStateMachine()
-    }
-    
-    @discardableResult
-    public func startStateMachine() -> Bool {
-        let sm = player.startStateMachine()
-        
-        if (player.isPlaying()) {
-            setPlayerState(.playing)
-        } else {
-            setPlayerState(.paused)
-        }
-        
-        return sm
-    }
-    
-    @discardableResult
-    public func postEvent(_ event: Event) -> Int32 {
-        let pe = player.postEvent(event: event)
-        
-        if (pe == 2) {
-            setPlayerState(.playing)
-        } else if (pe == 3) {
-            setPlayerState(.paused)
-        } else if (pe == 4) {
-            setPlayerState(.draw)
-        }
-        
-        return pe
-    }
-    
-    @discardableResult
     public func setSlots(_ slots: String) -> Bool {
         player.setSlots(slots)
     }
@@ -559,36 +518,6 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func activeAnimationId() -> String {
         player.activeAnimationId()
-    }
-    
-    @discardableResult
-    public func stateMachineSubscribe(oberserver: StateMachineObserver) -> Bool {
-        player.stateMachineSubscribe(oberserver: oberserver)
-    }
-    
-    @discardableResult
-    public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
-        player.stateMachineUnSubscribe(oberserver: oberserver)
-    }
-    
-    @discardableResult
-    public func stateMachineFrameworkSetup() -> [String] {
-        player.stateMachineFrameworkSetup()
-    }
-    
-    @discardableResult
-    public func setStateMachineNumericContext(key: String, value: Float) -> Bool {
-        player.setStateMachineNumericContext(key: key, value: value)
-    }
-    
-    @discardableResult
-    public func setStateMachineStringContext(key: String, value: String) -> Bool {
-        player.setStateMachineStringContext(key: key, value: value)
-    }
-    
-    @discardableResult
-    public func setStateMachineBooleanContext(key: String, value: Bool) -> Bool {
-        player.setStateMachineBooleanContext(key: key, value: value)
     }
     
     public func setAutoplay(autoplay: Bool) {
