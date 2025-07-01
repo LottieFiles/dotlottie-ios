@@ -23,12 +23,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.dotLottieViewModel = dotLottie
         self.playerState = dotLottie.player
     }
-    
-    public func destroy() {
-        mtkView.delegate = nil
-        mtkView.isPaused = true
-    }
-    
+  
     public func makeCoordinator() -> Coordinator {
         Coordinator(self, mtkView: self.mtkView)
     }
@@ -36,6 +31,8 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     public func makeView(context: Context) -> MTKView {
 #if os(iOS)
         self.mtkView.isOpaque = false
+#elseif os(macOS)
+        self.mtkView.layer?.isOpaque = false
 #endif
         
         self.mtkView.framebufferOnly = false

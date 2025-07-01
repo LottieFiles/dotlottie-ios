@@ -21,6 +21,7 @@ public struct AnimationConfig {
     public var layout: Layout? = createDefaultLayout()
     public var marker: String? = ""
     public var themeId: String? = ""
+    public var animationId: String? = ""
     
     public init(
         autoplay: Bool? = false,
