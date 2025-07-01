@@ -23,8 +23,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.dotLottieViewModel = dotLottie
         self.playerState = dotLottie.player
     }
-    
-    
+  
     public func makeCoordinator() -> Coordinator {
         Coordinator(self, mtkView: self.mtkView)
     }
@@ -47,7 +46,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.mtkView.enableSetNeedsDisplay = true
         
         self.mtkView.isPaused = !self.playerState.isPlaying()
-                
+        
         return mtkView
     }
     
@@ -57,7 +56,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
             uiView.draw()
             uiView.isPaused = true
         }
-
+        
         if self.playerState.isPlaying() {
             uiView.isPaused = false
         }
@@ -65,7 +64,7 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         if self.playerState.playerState == .draw {
             uiView.draw()
         }
-
+        
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
