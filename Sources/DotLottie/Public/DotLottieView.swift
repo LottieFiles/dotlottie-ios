@@ -11,7 +11,7 @@ import MetalKit
 import CoreImage
 import SwiftUI
 
-// View for SwiftUI and MacOS
+// SwiftUI animation view
 public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     private var mtkView: MTKView = MTKView()

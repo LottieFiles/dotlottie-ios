@@ -594,8 +594,7 @@ public final class DotLottieAnimation: ObservableObject {
     public func view() -> DotLottieView {
         DotLottieView(dotLottie: self)
     }
-    
-    
+
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
             DotLottieAnimationView(dotLottieViewModel: self)
