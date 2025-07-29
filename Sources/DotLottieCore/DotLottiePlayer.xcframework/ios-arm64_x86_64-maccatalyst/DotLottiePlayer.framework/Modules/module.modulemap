@@ -1,0 +1,5 @@
+framework module DotLottiePlayer {
+  umbrella header "dotlottie_player.h"
+  export *
+  module * { export * }
+}
