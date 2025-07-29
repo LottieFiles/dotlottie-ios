@@ -9,7 +9,7 @@ import Foundation
 import MetalKit
 import AVFoundation
 
-public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegate, GestureManagerDelegate {
+public class Coordinator : NSObject, MTKViewDelegate {
     private var parent: DotLottie
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
@@ -81,45 +81,45 @@ public class Coordinator : NSObject, MTKViewDelegate, UIGestureRecognizerDelegat
         }
     }
     
-    func calculateCoordinates(location: CGPoint) -> CGPoint {
-        let scaleRatio = CGPoint(
-            x: CGFloat(self.parent.dotLottieViewModel.animationModel.width) / self.viewSize.width,
-            y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
-        )
-        
-        // Map the touch location to animation coordinates
-        let mappedX = location.x * scaleRatio.x * UIScreen.main.scale
-        let mappedY = location.y * scaleRatio.y * UIScreen.main.scale
-        
-        return CGPoint(x: mappedX, y: mappedY)
-    }
-    
-    // UIGestureRecognizerDelegate: Allow simultaneous recognition
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return true
-    }
-    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
-        let mapped = calculateCoordinates(location: location)
-        let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
-        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
-    }
-
-    
-    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
-        let mapped = calculateCoordinates(location: location)
-        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
-        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
-    }
-    
-    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
-        let mapped = calculateCoordinates(location: location)
-        let event = Event.pointerDown(x: Float(mapped.x), y: Float(mapped.y))
-        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
-    }
-    
-    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
-        let mapped = calculateCoordinates(location: location)
-        let event = Event.pointerUp(x: Float(mapped.x), y: Float(mapped.y))
-        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
-    }
+//    func calculateCoordinates(location: CGPoint) -> CGPoint {
+//        let scaleRatio = CGPoint(
+//            x: CGFloat(self.parent.dotLottieViewModel.animationModel.width) / self.viewSize.width,
+//            y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
+//        )
+//        
+//        // Map the touch location to animation coordinates
+//        let mappedX = location.x * scaleRatio.x * UIScreen.main.scale
+//        let mappedY = location.y * scaleRatio.y * UIScreen.main.scale
+//        
+//        return CGPoint(x: mappedX, y: mappedY)
+//    }
+//    
+//    // UIGestureRecognizerDelegate: Allow simultaneous recognition
+//    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+//        return true
+//    }
+//    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
+//        let mapped = calculateCoordinates(location: location)
+//        let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
+//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+//    }
+//
+//    
+//    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
+//        let mapped = calculateCoordinates(location: location)
+//        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
+//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+//    }
+//    
+//    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
+//        let mapped = calculateCoordinates(location: location)
+//        let event = Event.pointerDown(x: Float(mapped.x), y: Float(mapped.y))
+//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+//    }
+//    
+//    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
+//        let mapped = calculateCoordinates(location: location)
+//        let event = Event.pointerUp(x: Float(mapped.x), y: Float(mapped.y))
+//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+//    }
 }

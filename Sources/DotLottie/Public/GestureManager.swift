@@ -1,4 +1,6 @@
 import Foundation
+
+#if os(iOS)
 import UIKit
 
 enum GestureManagerStatus {
@@ -94,3 +96,97 @@ class GestureManager : UIGestureRecognizer {
         super.touchesCancelled(touches, with: event)
     }
 }
+
+#endif
+
+#if os(macOS)
+enum GestureManagerStatus {
+    case unknown
+    case fail
+    case success
+}
+
+protocol GestureManagerDelegate: AnyObject {
+    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidRecognizeHover(_ gestureManager: GestureManager, at location: CGPoint)
+    func gestureManagerDidExitHover(_ gestureManager: GestureManager)
+}
+
+class GestureManager {
+    private var lastClickTime: CFTimeInterval = CFAbsoluteTimeGetCurrent()
+    private(set) var status = GestureManagerStatus.unknown
+    private(set) var doubleClickThreshold: CFTimeInterval = 0.25
+    weak var gestureManagerDelegate: GestureManagerDelegate?
+    
+    private var initialClickLocation: CGPoint?
+    private var isDragging = false
+    private var isHovering = false
+    
+    func setThreshold(threshold: CFTimeInterval) {
+        self.doubleClickThreshold = threshold
+    }
+    
+    // MARK: - Mouse Event Handling
+    
+    func handleMouseDown(at location: CGPoint) {
+        initialClickLocation = location
+        isDragging = false
+        status = .unknown
+        
+        gestureManagerDelegate?.gestureManagerDidRecognizeDown(self, at: location)
+    }
+    
+    func handleMouseDragged(at location: CGPoint) {
+        isDragging = true
+        gestureManagerDelegate?.gestureManagerDidRecognizeMove(self, at: location)
+    }
+    
+    func handleMouseUp(at location: CGPoint) {
+        let currentTime = CFAbsoluteTimeGetCurrent()
+        let timeDiff = currentTime - lastClickTime
+        
+        // Determine if this is a tap (click without significant drag)
+        if let initialLocation = initialClickLocation, !isDragging {
+            let moveDistance = hypot(location.x - initialLocation.x, location.y - initialLocation.y)
+            let maxClickDistance: CGFloat = 5.0 // Smaller threshold for mouse clicks
+            
+            if moveDistance <= maxClickDistance {
+                if timeDiff >= doubleClickThreshold {
+                    gestureManagerDelegate?.gestureManagerDidRecognizeTap(self, at: location)
+                    status = .fail
+                } else {
+                    status = .success
+                }
+            }
+        }
+        
+        gestureManagerDelegate?.gestureManagerDidRecognizeUp(self, at: location)
+        
+        lastClickTime = currentTime
+        initialClickLocation = nil
+        isDragging = false
+    }
+    
+    func handleMouseMoved(at location: CGPoint) {
+        if !isHovering {
+            isHovering = true
+        }
+        
+        gestureManagerDelegate?.gestureManagerDidRecognizeHover(self, at: location)
+    }
+    
+    func handleMouseEntered(at location: CGPoint) {
+        isHovering = true
+        gestureManagerDelegate?.gestureManagerDidRecognizeHover(self, at: location)
+    }
+    
+    func handleMouseExited() {
+        isHovering = false
+        gestureManagerDelegate?.gestureManagerDidExitHover(self)
+    }
+}
+
+#endif

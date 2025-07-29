@@ -7,7 +7,10 @@
 
 import Foundation
 import CoreImage
+
+#if os(iOS)
 import UIKit
+#endif
 
 private class OpenUrlObserver: StateMachineObserver {
     func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool) {
@@ -19,11 +22,12 @@ private class OpenUrlObserver: StateMachineObserver {
             if let dotRange = url.range(of: " |") {
               url.removeSubrange(dotRange.lowerBound..<url.endIndex)
             }
-            print(url);
+            #if os(iOS)
             if let urlObject = URL(string: url),
                UIApplication.shared.canOpenURL(urlObject) {
                 UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
             }
+            #endif
         }
     }
     
