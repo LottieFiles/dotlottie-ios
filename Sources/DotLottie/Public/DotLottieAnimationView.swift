@@ -8,6 +8,7 @@ import CoreImage
 import AVFoundation
 import Combine
 
+// UIKit animation view
 public class DotLottieAnimationView: UIView, DotLottie {
     private var mtkView: MTKView!
     private var coordinator: Coordinator!

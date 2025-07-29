@@ -145,6 +145,7 @@ class Player: ObservableObject {
         dotLottiePlayer.totalFrames()
     }
     
+    @discardableResult
     public func setFrame(no: Float32) -> Bool {
         dotLottiePlayer.setFrame(no: no)
     }

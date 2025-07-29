@@ -68,18 +68,20 @@ public final class DotLottieAnimation: ObservableObject {
     private var defaultWidthHeight = 512
     
     internal var config: Config
-    
-#if os(iOS)
-    internal var dotLottieAnimationView: DotLottieAnimationView?
-#endif
-    
-    internal var dotLottieView: DotLottieView?
-    
+            
     internal var stateMachineListeners: [String] = []
     
     private var stateMachineUrlListener = OpenUrlObserver()
     
     private var currFrame = 0;
+
+    deinit {
+        self.destroy()
+    }
+    
+    public func destroy() {
+        player.destroy()
+    }
     
     /// Load directly from a String (.json).
     public convenience init(
@@ -404,10 +406,34 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: Playback setters / getters
     
+    @discardableResult
     public func play() -> Bool {
         self.player.play()
     }
     
+    /// Plays animation from specified frame
+    /// - Parameter frame: Frame in range between 0 and totalFrames()
+    /// - Returns: True if animation is playing
+    @discardableResult
+    public func play(fromFrame frame: Float) -> Bool {
+        player.setFrame(no: frame)
+        return player.play()
+    }
+    
+    /// Plays animation from specified progress
+    /// - Parameter progress: Progress in range between 0 and 1
+    /// - Returns: True if animation is playing
+    @discardableResult
+    public func play(fromProgress progress: Float) -> Bool {
+        guard progress > 0 && progress < 1 else {
+            return false
+        }
+        
+        setProgress(progress: progress)
+        return player.play()
+    }
+    
+    @discardableResult
     public func pause() -> Bool {
         self.player.pause()
     }
@@ -421,8 +447,13 @@ public final class DotLottieAnimation: ObservableObject {
      - If there are no segments and direction is 1 (forward) go to start frame
      - If there are segments and direction is -1 (reverse) go to end frame
      */
+    @discardableResult
     public func stop() -> Bool {
         player.stop()
+    }
+    
+    public func currentProgress() -> Float {
+        player.currentFrame() / player.totalFrames()
     }
     
     public func currentFrame() -> Float {
@@ -433,6 +464,7 @@ public final class DotLottieAnimation: ObservableObject {
         return player.totalFrames()
     }
     
+    @discardableResult
     public func loop() -> Bool {
         return player.config().loopAnimation
     }
@@ -455,8 +487,20 @@ public final class DotLottieAnimation: ObservableObject {
     
     /// Set the current frame.
     /// Can return false if the frame is invalid or equal to the current frame.
+    @discardableResult
     public func setFrame(frame: Float) -> Bool {
         return player.setFrame(no: frame)
+    }
+    
+    /// Set the current progress.
+    /// Can return false if the progress is invalid or equal to the current progress.
+    @discardableResult
+    public func setProgress(progress: Float) -> Bool {
+        guard progress > 0 && progress < 1 else {
+            return false
+        }
+        
+        return player.setFrame(no: progress*totalFrames())
     }
     
     public func setFrameInterpolation(_ useFrameInterpolation: Bool) {
@@ -508,6 +552,7 @@ public final class DotLottieAnimation: ObservableObject {
         return player.config().useFrameInterpolation
     }
     
+    @discardableResult
     public func stateMachineLoad(id: String) -> Bool {
         player.stateMachineLoad(id: id)
     }
@@ -554,17 +599,22 @@ public final class DotLottieAnimation: ObservableObject {
         player.setSlots(slots)
     }
     
+    @discardableResult
     public func setTheme(_ themeId: String) -> Bool {
         player.setTheme(themeId)
     }
     
+    @discardableResult
     public func setThemeData(_ themeData: String) -> Bool {
         player.setThemeData(themeData)
     }
     
+    @discardableResult
+    
     public func resetTheme() -> Bool {
         player.resetTheme()
     }
+    
     
     public func activeThemeId() -> String {
         player.activeThemeId()
@@ -676,28 +726,12 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: View creators
     public func view() -> DotLottieView {
-        if let prevDotLottieView = dotLottieView {
-            return prevDotLottieView
-        } else {
-            let view: DotLottieView = DotLottieView(dotLottie: self)
-            
-            self.dotLottieView = view
-            
-            return view
-        }
+        DotLottieView(dotLottie: self)
     }
-    
+
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
-        if let prevAnimationView = dotLottieAnimationView {
-            return prevAnimationView
-        } else {
-            let view: DotLottieAnimationView = DotLottieAnimationView(dotLottieViewModel: self)
-            
-            self.dotLottieAnimationView = view
-            
-            return view
-        }
+            DotLottieAnimationView(dotLottieViewModel: self)
     }
 #endif
 }

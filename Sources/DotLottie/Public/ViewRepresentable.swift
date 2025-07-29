@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
 protocol ViewRepresentable: UIViewRepresentable {
     associatedtype ViewType = UIViewType
     func makeView(context: Context) -> ViewType
