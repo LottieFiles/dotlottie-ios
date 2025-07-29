@@ -35,13 +35,13 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.playerState = dotLottie.player
     }
   
-    public func makeCoordinator() -> GestureCoordinator {
+    public func makeCoordinator() -> Coordinator {
         #if os(iOS)
-            return GestureCoordinator(self, mtkView: self.mtkView)
+            return Coordinator(self, mtkView: self.mtkView)
         #elseif os(macOS)
-          return GestureCoordinator(self, mtkView: self.mtkView)
+          return Coordinator(self, mtkView: self.mtkView)
         #else
-            return GestureCoordinator(self, mtkView: self.mtkView)
+            return Coordinator(self, mtkView: self.mtkView)
         #endif
     }
     
