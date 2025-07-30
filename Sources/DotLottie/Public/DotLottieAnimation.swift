@@ -8,6 +8,57 @@
 import Foundation
 import CoreImage
 
+#if os(iOS)
+import UIKit
+#endif
+
+private class OpenUrlObserver: StateMachineObserver {
+    func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool) {
+    }
+    
+    func onCustomEvent(message: String) {
+        if message.hasPrefix("OpenUrl: ") {
+            var url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
+            if let dotRange = url.range(of: " |") {
+              url.removeSubrange(dotRange.lowerBound..<url.endIndex)
+            }
+            #if os(iOS)
+            if let urlObject = URL(string: url),
+               UIApplication.shared.canOpenURL(urlObject) {
+                UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
+            }
+            #endif
+        }
+    }
+    
+    func onError(message: String) {
+    }
+    
+    func onNumericInputValueChange(inputName: String, oldValue: Float, newValue: Float) {
+    }
+    
+    func onStart() {
+    }
+    
+    func onStateEntered(enteringState: String) {
+    }
+    
+    func onStateExit(leavingState: String) {
+    }
+    
+    func onStop() {
+    }
+    
+    func onStringInputValueChange(inputName: String, oldValue: String, newValue: String) {
+    }
+    
+    func onTransition(previousState: String, newState: String) {
+    }
+    
+    func onInputFired(inputName: String) {
+    }
+}
+
 // MARK: DotLottieAnimation
 public final class DotLottieAnimation: ObservableObject {
     @Published public var framerate: Int = 30
@@ -16,20 +67,18 @@ public final class DotLottieAnimation: ObservableObject {
     
     public var sizeOverrideActive = false
     
-    private var animationModel: AnimationModel = AnimationModel()
+    public private(set) var animationModel: AnimationModel = AnimationModel()
     
     private var defaultWidthHeight = 512
     
     internal var config: Config
+            
+    internal var stateMachineListeners: [String] = []
     
-    deinit {
-        self.destroy()
-    }
+    private var stateMachineUrlListener = OpenUrlObserver()
     
-    public func destroy() {
-        player.destroy()
-    }
-    
+    private var currFrame = 0;
+
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -138,7 +187,7 @@ public final class DotLottieAnimation: ObservableObject {
                              layout: config.layout ?? createDefaultLayout(),
                              marker: config.marker ?? "",
                              themeId: config.themeId ?? "",
-                             stateMachineId: "",
+                             stateMachineId: config.stateMachineId ?? "",
                              animationId: config.animationId ?? "")
         self.player = Player(config: self.config)
         
@@ -158,16 +207,16 @@ public final class DotLottieAnimation: ObservableObject {
         animationModel.backgroundColor = config.backgroundColor ?? .clear
     }
     
+    public func render() -> Bool {
+        player.render()
+    }
+    
     // MARK: Tick
     
     /// Requests a frame and renders it if necessary
     public func tick() -> CGImage? {
-        let nextFrame = player.requestFrame()
-        
-        if (nextFrame || ( self.currentFrame() == 0.0) || self.player.playerState == .draw) {
-            if let image = player.render() {
-                return image
-            }
+        if let image = player.tick() {
+            return image
         }
         
         return nil
@@ -199,8 +248,13 @@ public final class DotLottieAnimation: ObservableObject {
     /// Passes the .lottie Data to the Core
     private func loadDotLottie(data: Data) throws {
         do {
-            try player.loadDotlottieData(data: data)
+            try player.loadDotlottieData(data: data, width: self.animationModel.width, height: self.animationModel.height)
             
+            if config.stateMachineId != "" {
+                let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
+                
+                self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
+            }
         } catch let error {
             animationModel.error = true
             animationModel.errorMessage = error.localizedDescription
@@ -423,8 +477,8 @@ public final class DotLottieAnimation: ObservableObject {
         return (player.config().segment[0], player.config().segment[1])
     }
     
-    public func setPlayerState(_ state: PlayerState) {
-        player.setPlayerState(state: state)
+    public func getLayerBounds(layerName: String) -> [Float] {
+        player.getLayerBounds(layerName: layerName)
     }
     
     /// Set the current frame.
@@ -495,6 +549,49 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     @discardableResult
+    public func stateMachineLoad(id: String) -> Bool {
+        player.stateMachineLoad(id: id)
+    }
+    
+    public func stateMachineLoadData(_ data: String) -> Bool {
+        let ret = player.stateMachineLoadData(data)
+        
+        return ret
+    }
+    
+    public func stateMachineStop() -> Bool {
+        let stop = player.stateMachineStop()
+        
+        let _ = player.stateMachineFrameworkUnsubscribe(observer: self.stateMachineUrlListener)
+        
+        return stop
+    }
+    
+    public func stateMachineStart(openUrl: OpenUrl = OpenUrl(mode: .interaction, whitelist: [])) -> Bool {
+        let sm = player.stateMachineStart(openUrl: openUrl)
+        
+        let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
+        
+        self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
+        
+        return sm
+    }
+    
+    @discardableResult
+    public func stateMachinePostEvent(_ event: Event, force: Bool? = false) -> Int {
+        var ret: Int32 = 1
+        // Extract the event name before the parenthesis
+        let eventName = String(describing: event).components(separatedBy: "(").first?.lowercased() ?? String(describing: event)
+        
+        if (force ?? false) {
+            ret = player.stateMachinePostEvent(event: event)
+        } else if (self.stateMachineListeners.contains(eventName)) {
+            ret = player.stateMachinePostEvent(event: event)
+        }
+        
+        return Int(ret)
+    }
+    
     public func setSlots(_ slots: String) -> Bool {
         player.setSlots(slots)
     }
@@ -510,9 +607,11 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     @discardableResult
+    
     public func resetTheme() -> Bool {
         player.resetTheme()
     }
+    
     
     public func activeThemeId() -> String {
         player.activeThemeId()
@@ -520,6 +619,38 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func activeAnimationId() -> String {
         player.activeAnimationId()
+    }
+    
+    public func stateMachineFire(event: String) {
+        player.stateMachineFire(event: event)
+    }
+    
+    public func stateMachineSubscribe(_ observer: StateMachineObserver) -> Bool {
+        player.stateMachineSubscribe(observer: observer)
+    }
+    
+    public func stateMachineUnSubscribe(observer: StateMachineObserver) -> Bool {
+        player.stateMachineUnSubscribe(oberserver: observer)
+    }
+    
+    public func stateMachineFrameworkSetup() -> [String] {
+        player.stateMachineFrameworkSetup()
+    }
+    
+    public func stateMachineSetNumericInput(key: String, value: Float) -> Bool {
+        player.stateMachineSetNumericInput(key: key, value: value)
+    }
+    
+    public func stateMachineSetStringInput(key: String, value: String) -> Bool {
+        player.stateMachineSetStringInput(key: key, value: value)
+    }
+    
+    public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
+        player.stateMachineSetBooleanInput(key: key, value: value)
+    }
+    
+    public func stateMachineCurrentState() -> String {
+        player.stateMachineCurrentState()
     }
     
     public func setAutoplay(autoplay: Bool) {
@@ -580,6 +711,7 @@ public final class DotLottieAnimation: ObservableObject {
         
         do {
             try player.resize(width: width, height: height)
+            
         } catch let error {
             self.animationModel.error = true
             self.animationModel.errorMessage = error.localizedDescription
