@@ -27,7 +27,6 @@ class DotLottieObserver: Observer {
     func onComplete() {
     }
     
-    // Needed to complete the protocol but not used inside Player for the moment
     func onFrame(frameNo: Float) {
     }
     
@@ -37,7 +36,6 @@ class DotLottieObserver: Observer {
     func onPlay() {
     }
     
-    // Needed to complete the protocol but not used inside Player for the moment
     func onRender(frameNo: Float) {
     }
     

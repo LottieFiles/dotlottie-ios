@@ -112,7 +112,7 @@ protocol GestureManagerDelegate: AnyObject {
     func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint)
     func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint)
     func gestureManagerDidRecognizeHover(_ gestureManager: GestureManager, at location: CGPoint)
-    func gestureManagerDidExitHover(_ gestureManager: GestureManager)
+    func gestureManagerDidRecognizeExitHover(_ gestureManager: GestureManager, at location: CGPoint)
 }
 
 class GestureManager {
@@ -175,7 +175,7 @@ class GestureManager {
             isHovering = true
         }
         
-        gestureManagerDelegate?.gestureManagerDidRecognizeHover(self, at: location)
+        gestureManagerDelegate?.gestureManagerDidRecognizeMove(self, at: location)
     }
     
     func handleMouseEntered(at location: CGPoint) {
@@ -183,9 +183,9 @@ class GestureManager {
         gestureManagerDelegate?.gestureManagerDidRecognizeHover(self, at: location)
     }
     
-    func handleMouseExited() {
+    func handleMouseExited(at location: CGPoint) {
         isHovering = false
-        gestureManagerDelegate?.gestureManagerDidExitHover(self)
+        gestureManagerDelegate?.gestureManagerDidRecognizeExitHover(self, at: location)
     }
 }
 

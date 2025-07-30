@@ -10,9 +10,8 @@ import CoreImage
 import DotLottiePlayer
 
 class Player: ObservableObject {
-    internal lazy var dotLottieObserver: DotLottieObserver? = DotLottieObserver(self)
-    
     private let dotLottiePlayer: DotLottiePlayer
+    
     public var WIDTH: UInt32 = 512
     public var HEIGHT: UInt32 = 512
     
@@ -20,19 +19,10 @@ class Player: ObservableObject {
     
     private var hasRenderedFirstFrame = false
     
+    private var hasResized = false
+    
     init(config: Config) {
         self.dotLottiePlayer = DotLottiePlayer(config: config)
-    }
-    
-    deinit {
-        self.destroy()
-    }
-    
-    public func destroy() {
-        if let ob = self.dotLottieObserver {
-            self.dotLottiePlayer.unsubscribe(observer: ob)
-            self.dotLottieObserver = nil
-        }
     }
     
     public func loadAnimationData(animationData: String, width: Int, height: Int) throws {
@@ -89,10 +79,11 @@ class Player: ObservableObject {
         
         let tick = dotLottiePlayer.tick()
         
-        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() {
+        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
             self.currFrame = dotLottiePlayer.currentFrame()
             
             hasRenderedFirstFrame = true
+            hasResized = false
             
             _ = dotLottiePlayer.render()
             
@@ -175,31 +166,26 @@ class Player: ObservableObject {
     }
     
     public func isComplete() -> Bool {
-        let complete = dotLottiePlayer.isComplete()
-                
-        return complete
+        dotLottiePlayer.isComplete()
     }
     
     public func markers() -> [Marker] {
         dotLottiePlayer.markers()
     }
     
+    @discardableResult
     public func play() -> Bool {
-        let play = dotLottiePlayer.play()
-        
-        return play
+        dotLottiePlayer.play()
     }
     
+    @discardableResult
     public func pause() -> Bool {
-        let pause = dotLottiePlayer.pause()
-        
-        return pause
+        dotLottiePlayer.pause()
     }
     
+    @discardableResult
     public func stop() -> Bool {
-        let stop =  dotLottiePlayer.stop()
-
-        return stop
+        dotLottiePlayer.stop()
     }
     
     public func resize(width: Int, height: Int) throws {
@@ -209,6 +195,8 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.resize(width: self.WIDTH, height: self.HEIGHT)) {
             throw PlayerErrors.resizeError
         }
+        
+        hasResized = true
     }
     
     public func stateMachineLoad(id: String) -> Bool {
@@ -221,7 +209,7 @@ class Player: ObservableObject {
     
     public func stateMachineStart(openUrl: OpenUrl) -> Bool {
         let started = dotLottiePlayer.stateMachineStart(openUrl: openUrl)
-                
+        
         return started
     }
     

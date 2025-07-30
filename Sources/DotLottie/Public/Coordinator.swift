@@ -161,7 +161,8 @@ class InteractiveMTKView: MTKView {
     }
     
     override func mouseExited(with event: NSEvent) {
-        gestureCoordinator?.handleMouseExited()
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseExited(at: location)
     }
     
     override func updateTrackingAreas() {
@@ -243,14 +244,15 @@ public class Coordinator : NSObject, MTKViewDelegate, GestureManagerDelegate {
         gestureManager.handleMouseEntered(at: location)
     }
     
-    func handleMouseExited() {
-        gestureManager.handleMouseExited()
+    func handleMouseExited(at location: CGPoint) {
+        gestureManager.handleMouseExited(at: location)
     }
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         self.viewSize = size
         
         if (!self.parent.dotLottieViewModel.sizeOverrideActive) {
+            print(">> Coordinator: Resizing")
             self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
         }
         
@@ -260,6 +262,7 @@ public class Coordinator : NSObject, MTKViewDelegate, GestureManagerDelegate {
         }
     }
     
+    // Draw is called continously, however it only renders a new frame if tick() returns one
     public func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else {
             return
@@ -268,7 +271,6 @@ public class Coordinator : NSObject, MTKViewDelegate, GestureManagerDelegate {
         guard !parent.dotLottieViewModel.error() else {
             return
         }
-        
         if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
@@ -301,20 +303,24 @@ public class Coordinator : NSObject, MTKViewDelegate, GestureManagerDelegate {
         }
     }
     
+    func getMaxDPIScale() -> CGFloat {
+        let screens = NSScreen.screens
+        return screens.map { $0.backingScaleFactor }.max() ?? 1.0
+    }
+    
     func calculateCoordinates(location: CGPoint) -> CGPoint {
         let scaleRatio = CGPoint(
             x: CGFloat(self.parent.dotLottieViewModel.animationModel.width) / self.viewSize.width,
             y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
         )
         
-        // Map the mouse location to animation coordinates
-        // Note: macOS has different coordinate system (origin at bottom-left)
-        let mappedX = location.x * scaleRatio.x
-        let mappedY = (self.viewSize.height - location.y) * scaleRatio.y // Flip Y coordinate
+        // Map the mouse location to animation coordinates with DPI scaling
+        let mappedX = location.x * scaleRatio.x * getMaxDPIScale()
+        let mappedY = location.y * scaleRatio.y * getMaxDPIScale()
         
-        // TOOD: Print the star layer coordinates and compare to what we're posting
-
-        return CGPoint(x: mappedX, y: mappedY)
+        let result = CGPoint(x: mappedX, y: mappedY)
+        
+        return result
     }
     
     // MARK: - GestureManagerDelegate
@@ -322,53 +328,41 @@ public class Coordinator : NSObject, MTKViewDelegate, GestureManagerDelegate {
     func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
         let mapped = calculateCoordinates(location: location)
         let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
-        
-        print("Event bounds: \(mapped.x), \(mapped.y)")
-        print(self.parent.dotLottieViewModel.player.getLayerBounds(layerName: "star1"))
-        
-        print("Posting click event: \(event)")
         let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
     
+    // Click + drag detection
     func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
-//        let mapped = calculateCoordinates(location: location)
-//        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
-//        print("Posting event: \(event)")
-//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
     
     func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
         let mapped = calculateCoordinates(location: location)
         let event = Event.pointerDown(x: Float(mapped.x), y: Float(mapped.y))
-        print("Posting event: \(event)")
-
         let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
     
     func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
         let mapped = calculateCoordinates(location: location)
         let event = Event.pointerUp(x: Float(mapped.x), y: Float(mapped.y))
-        print("Posting event: \(event)")
-
         let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
     
     func gestureManagerDidRecognizeHover(_ gestureManager: GestureManager, at location: CGPoint) {
-//        let mapped = calculateCoordinates(location: location)
-        // Treat hover as pointer move
-//        let event = Event.pointerEnter(x: Float(mapped.x), y: Float(mapped.y))
-//        print("Posting event: \(event)")
-//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+        let mapped = calculateCoordinates(location: location)
+        //     Treat hover as pointer move
+        let event = Event.pointerEnter(x: Float(mapped.x), y: Float(mapped.y))
+        print("Posting event: \(event)")
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
     
-    func gestureManagerDidExitHover(_ gestureManager: GestureManager) {
-        // Handle mouse exit if needed
-        // You might want to post a special exit event or reset some state
-//        let mapped = calculateCoordinates(location: location)
-        // Treat hover as pointer move
-//        let event = Event.pointerExit(x: Float(mapped.x), y: Float(mapped.y))
-//        print("Posting event: \(event)")
-//        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    func gestureManagerDidRecognizeExitHover(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerExit(x: Float(mapped.x), y: Float(mapped.y))
+        print("Posting event: \(event)")
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
     }
 }
 
@@ -386,7 +380,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
     private var viewSize: CGSize!
-
+    
     
     init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
@@ -418,7 +412,7 @@ public class Coordinator : NSObject, MTKViewDelegate {
         guard !parent.dotLottieViewModel.error() else {
             return
         }
-                
+        
         if let frame = parent.dotLottieViewModel.tick() {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             

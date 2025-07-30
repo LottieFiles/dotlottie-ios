@@ -23,7 +23,7 @@ private class OpenUrlObserver: StateMachineObserver {
               url.removeSubrange(dotRange.lowerBound..<url.endIndex)
             }
             #if os(iOS)
-            if let urlObject = URL(string: url),
+            if let urlObject = URL(string: urle),
                UIApplication.shared.canOpenURL(urlObject) {
                 UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
             }
@@ -79,14 +79,6 @@ public final class DotLottieAnimation: ObservableObject {
     
     private var currFrame = 0;
 
-    deinit {
-        self.destroy()
-    }
-    
-    public func destroy() {
-        player.destroy()
-    }
-    
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -585,6 +577,7 @@ public final class DotLottieAnimation: ObservableObject {
         return sm
     }
     
+    @discardableResult
     public func stateMachinePostEvent(_ event: Event, force: Bool? = false) -> Int {
         var ret: Int32 = 1
         // Extract the event name before the parenthesis
@@ -718,6 +711,7 @@ public final class DotLottieAnimation: ObservableObject {
         
         do {
             try player.resize(width: width, height: height)
+            
         } catch let error {
             self.animationModel.error = true
             self.animationModel.errorMessage = error.localizedDescription

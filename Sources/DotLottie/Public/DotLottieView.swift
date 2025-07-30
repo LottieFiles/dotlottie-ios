@@ -15,18 +15,16 @@ import SwiftUI
 public struct DotLottieView: ViewRepresentable, DotLottie {
     public typealias UIViewType = MTKView
     
-#if os(iOS)
-    private var mtkView: MTKView = MTKView()
-#elseif os(macOS)
+#if os(macOS)
     private var mtkView: MTKView = InteractiveMTKView()
 #else
     private var mtkView: MTKView = MTKView()
 #endif
     
-    #if os(iOS)
+#if os(iOS)
     private let gestureManager = GestureManager()
-    #endif
-
+#endif
+    
     @ObservedObject internal var dotLottieViewModel: DotLottieAnimation
     @ObservedObject internal var playerState: Player
     
@@ -34,15 +32,15 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.dotLottieViewModel = dotLottie
         self.playerState = dotLottie.player
     }
-  
+    
     public func makeCoordinator() -> Coordinator {
-        #if os(iOS)
-            return Coordinator(self, mtkView: self.mtkView)
-        #elseif os(macOS)
-          return Coordinator(self, mtkView: self.mtkView)
-        #else
-            return Coordinator(self, mtkView: self.mtkView)
-        #endif
+#if os(iOS)
+        return Coordinator(self, mtkView: self.mtkView)
+#elseif os(macOS)
+        return Coordinator(self, mtkView: self.mtkView)
+#else
+        return Coordinator(self, mtkView: self.mtkView)
+#endif
     }
     
     public func makeView(context: Context) -> MTKView {
@@ -64,13 +62,13 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         
         self.mtkView.enableSetNeedsDisplay = true
         
+#if os(iOS)
         // Gesture management
-        #if os(iOS)
         gestureManager.cancelsTouchesInView = false
         gestureManager.delegate = context.coordinator
         gestureManager.gestureManagerDelegate = context.coordinator
         self.mtkView.addGestureRecognizer(gestureManager)
-        #endif
+#endif
         
         return mtkView
     }
