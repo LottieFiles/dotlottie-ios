@@ -23,7 +23,7 @@ private class OpenUrlObserver: StateMachineObserver {
               url.removeSubrange(dotRange.lowerBound..<url.endIndex)
             }
             #if os(iOS)
-            if let urlObject = URL(string: urle),
+            if let urlObject = URL(string: url),
                UIApplication.shared.canOpenURL(urlObject) {
                 UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
             }
