@@ -14,7 +14,6 @@ import UIKit
 
 private class DotLottieAnimationInternalStateMachineObserver: StateMachineInternalObserver {
     func onMessage(message: String) {
-        print("Message: {}", message)
         if message.hasPrefix("OpenUrl: ") {
             var url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
             if let dotRange = url.range(of: " |") {
