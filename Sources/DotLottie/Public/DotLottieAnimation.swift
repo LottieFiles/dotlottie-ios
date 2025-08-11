@@ -12,11 +12,9 @@ import CoreImage
 import UIKit
 #endif
 
-private class OpenUrlObserver: StateMachineObserver {
-    func onBooleanInputValueChange(inputName: String, oldValue: Bool, newValue: Bool) {
-    }
-    
-    func onCustomEvent(message: String) {
+private class DotLottieAnimationInternalStateMachineObserver: StateMachineInternalObserver {
+    func onMessage(message: String) {
+        print("Message: {}", message)
         if message.hasPrefix("OpenUrl: ") {
             var url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
             if let dotRange = url.range(of: " |") {
@@ -29,33 +27,6 @@ private class OpenUrlObserver: StateMachineObserver {
             }
             #endif
         }
-    }
-    
-    func onError(message: String) {
-    }
-    
-    func onNumericInputValueChange(inputName: String, oldValue: Float, newValue: Float) {
-    }
-    
-    func onStart() {
-    }
-    
-    func onStateEntered(enteringState: String) {
-    }
-    
-    func onStateExit(leavingState: String) {
-    }
-    
-    func onStop() {
-    }
-    
-    func onStringInputValueChange(inputName: String, oldValue: String, newValue: String) {
-    }
-    
-    func onTransition(previousState: String, newState: String) {
-    }
-    
-    func onInputFired(inputName: String) {
     }
 }
 
@@ -75,7 +46,7 @@ public final class DotLottieAnimation: ObservableObject {
             
     internal var stateMachineListeners: [String] = []
     
-    private var stateMachineUrlListener = OpenUrlObserver()
+    private var internalStateMachineObserver = DotLottieAnimationInternalStateMachineObserver()
     
     private var currFrame = 0;
 
@@ -251,7 +222,7 @@ public final class DotLottieAnimation: ObservableObject {
             try player.loadDotlottieData(data: data, width: self.animationModel.width, height: self.animationModel.height)
             
             if config.stateMachineId != "" {
-                let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
+                let _ = player.stateMachineInternalSubscribe(observer: self.internalStateMachineObserver)
                 
                 self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
             }
@@ -562,34 +533,30 @@ public final class DotLottieAnimation: ObservableObject {
     public func stateMachineStop() -> Bool {
         let stop = player.stateMachineStop()
         
-        let _ = player.stateMachineFrameworkUnsubscribe(observer: self.stateMachineUrlListener)
+        let _ = player.stateMachineInternalSubscribe(observer: self.internalStateMachineObserver)
         
         return stop
     }
     
-    public func stateMachineStart(openUrl: OpenUrl = OpenUrl(mode: .interaction, whitelist: [])) -> Bool {
-        let sm = player.stateMachineStart(openUrl: openUrl)
+    public func stateMachineStart(openUrlPolicy: OpenUrlPolicy = OpenUrlPolicy(requireUserInteraction: true, whitelist: [])) -> Bool {
+        let sm = player.stateMachineStart(openUrlPolicy: openUrlPolicy)
         
-        let _ = player.stateMachineFrameworkSubscribe(observer: self.stateMachineUrlListener)
+        let _ = player.stateMachineInternalSubscribe(observer: self.internalStateMachineObserver)
         
         self.stateMachineListeners = stateMachineFrameworkSetup().map { $0.lowercased() }
         
         return sm
     }
     
-    @discardableResult
-    public func stateMachinePostEvent(_ event: Event, force: Bool? = false) -> Int {
-        var ret: Int32 = 1
+    public func stateMachinePostEvent(_ event: Event, force: Bool? = false) {
         // Extract the event name before the parenthesis
         let eventName = String(describing: event).components(separatedBy: "(").first?.lowercased() ?? String(describing: event)
         
         if (force ?? false) {
-            ret = player.stateMachinePostEvent(event: event)
+            player.stateMachinePostEvent(event: event)
         } else if (self.stateMachineListeners.contains(eventName)) {
-            ret = player.stateMachinePostEvent(event: event)
+            player.stateMachinePostEvent(event: event)
         }
-        
-        return Int(ret)
     }
     
     public func setSlots(_ slots: String) -> Bool {

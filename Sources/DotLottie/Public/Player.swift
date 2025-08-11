@@ -207,8 +207,8 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineLoadData(stateMachine: data)
     }
     
-    public func stateMachineStart(openUrl: OpenUrl) -> Bool {
-        let started = dotLottiePlayer.stateMachineStart(openUrl: openUrl)
+    public func stateMachineStart(openUrlPolicy: OpenUrlPolicy) -> Bool {
+        let started = dotLottiePlayer.stateMachineStart(openUrlPolicy: openUrlPolicy)
         
         return started
     }
@@ -217,10 +217,8 @@ class Player: ObservableObject {
         return dotLottiePlayer.stateMachineStop()
     }
     
-    public func stateMachinePostEvent(event: Event) -> Int32 {
-        let ret = dotLottiePlayer.stateMachinePostEvent(event: event)
-        
-        return ret
+    public func stateMachinePostEvent(event: Event) {
+        dotLottiePlayer.stateMachinePostEvent(event: event)
     }
     
     public func stateMachineFire(event: String) {
@@ -231,19 +229,18 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineSubscribe(observer: observer)
     }
     
-    public func stateMachineFrameworkSubscribe(observer: StateMachineObserver) -> Bool {
-        dotLottiePlayer.stateMachineFrameworkSubscribe(observer: observer)
-    }
-    
     public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
         dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
     }
     
-    
-    public func stateMachineFrameworkUnsubscribe(observer: StateMachineObserver) -> Bool {
-        dotLottiePlayer.stateMachineFrameworkUnsubscribe(observer: observer)
+    public func stateMachineInternalSubscribe(observer: StateMachineInternalObserver) -> Bool {
+        dotLottiePlayer.stateMachineInternalSubscribe(observer: observer)
     }
     
+    public func stateMachineInternalUnsubscribe(observer: StateMachineInternalObserver) -> Bool {
+        dotLottiePlayer.stateMachineInternalUnsubscribe(observer: observer)
+    }
+        
     public func stateMachineFrameworkSetup() -> [String] {
         dotLottiePlayer.stateMachineFrameworkSetup()
     }
