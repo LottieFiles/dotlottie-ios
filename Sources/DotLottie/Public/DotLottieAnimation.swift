@@ -85,7 +85,7 @@ public final class DotLottieAnimation: ObservableObject {
         }
     }
     
-    /// Load a .json file from Data.
+    /// Load a .json or .lottie file from Data
     public convenience init(
         lottieData: Data,
         config: AnimationConfig
@@ -189,6 +189,7 @@ public final class DotLottieAnimation: ObservableObject {
         return nil
     }
     
+    /// Generates frame image
     public func frameImage() -> CGImage? {
         player.render()
     }
