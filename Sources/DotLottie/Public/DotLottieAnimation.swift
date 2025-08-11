@@ -85,6 +85,22 @@ public final class DotLottieAnimation: ObservableObject {
         }
     }
     
+    /// Load a .json or .lottie file from Data
+    public convenience init(
+        lottieData: Data,
+        config: AnimationConfig
+    ) {
+        self.init(config: config) {
+            guard let jsonString = String(data: lottieData, encoding: .utf8) else {
+                try $0.loadDotLottie(data: lottieData)
+                return
+            }
+            try $0.loadAnimation(animationData: jsonString)
+        } errorMessage: { error in
+            "Failed to load dotLottie. Failed with error: \(error)"
+        }
+    }
+    
     @_disfavoredOverload
     @available(*, deprecated)
     public convenience init(
@@ -171,6 +187,11 @@ public final class DotLottieAnimation: ObservableObject {
         }
         
         return nil
+    }
+    
+    /// Generates frame image
+    public func frameImage() -> CGImage? {
+        player.render()
     }
     
     // MARK: Loaders
