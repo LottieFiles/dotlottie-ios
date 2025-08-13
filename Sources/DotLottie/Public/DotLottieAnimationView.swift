@@ -1,10 +1,3 @@
-//
-//  File.swift
-//
-//
-//  Created by Sam on 14/11/2023.
-//
-
 #if os(iOS)
 
 import Foundation
@@ -20,36 +13,21 @@ public class DotLottieAnimationView: UIView, DotLottie {
     private var mtkView: MTKView!
     private var coordinator: Coordinator!
     private var cancellableBag = Set<AnyCancellable>()
-
+    
     public var dotLottieViewModel: DotLottieAnimation
     
     public init(dotLottieViewModel: DotLottieAnimation) {
         self.dotLottieViewModel = dotLottieViewModel
         
         super.init(frame: .zero)
-
-        dotLottieViewModel.player.$playerState.sink { value in
-            if self.mtkView != nil {
-                self.mtkView.draw()
-
-                if self.dotLottieViewModel.isStopped() || self.dotLottieViewModel.isPaused() {
-                    // Tell the coordinator to draw the last frame before pausing
-                    self.mtkView.isPaused = true
-                }
-
-                if self.dotLottieViewModel.isPlaying() {
-                    self.mtkView.isPaused = false
-                }
-            }
-        }.store(in: &cancellableBag)
-
+        
         dotLottieViewModel.$framerate.sink { value in
             if self.mtkView != nil {
                 self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
             }
         }.store(in: &cancellableBag)
-
-
+        
+        
         setupMetalView()
     }
     
@@ -81,11 +59,11 @@ public class DotLottieAnimationView: UIView, DotLottie {
         
         mtkView.enableSetNeedsDisplay = true
         
-        mtkView.isPaused = !self.dotLottieViewModel.isPlaying()
+        mtkView.isPaused = false
         
         addSubview(mtkView)
     }
-    
+
     public override func layoutSubviews() {
         super.layoutSubviews()
         mtkView.frame = bounds

@@ -21,6 +21,7 @@ public struct AnimationConfig {
     public var layout: Layout? = createDefaultLayout()
     public var marker: String? = ""
     public var themeId: String? = ""
+    public var stateMachineId: String? = ""
     public var animationId: String? = ""
     
     public init(
@@ -35,7 +36,8 @@ public struct AnimationConfig {
         height: Int? = nil,
         layout: Layout? = createDefaultLayout(),
         marker: String? = nil,
-        themeId: String? = nil
+        themeId: String? = nil,
+        stateMachineId: String? = nil
     ) {
         self.autoplay = autoplay
         self.loop = loop
@@ -49,5 +51,6 @@ public struct AnimationConfig {
         self.layout = layout
         self.marker = marker
         self.themeId = themeId
+        self.stateMachineId = stateMachineId
     }
 }
