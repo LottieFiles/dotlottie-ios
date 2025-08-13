@@ -753,6 +753,15 @@ open class DotLottiePlayer:
         try! rustCall { uniffi_dotlottie_player_fn_free_dotlottieplayer(pointer, $0) }
     }
 
+    public static func withThreads(config: Config, threads: UInt32) -> DotLottiePlayer {
+        return try! FfiConverterTypeDotLottiePlayer.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_constructor_dotlottieplayer_with_threads(
+                FfiConverterTypeConfig.lower(config),
+                FfiConverterUInt32.lower(threads), $0
+            )
+        })
+    }
+
     open func activeAnimationId() -> String {
         return try! FfiConverterString.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_active_animation_id(self.uniffiClonePointer(), $0)
@@ -3962,6 +3971,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_new() != 34558 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_constructor_dotlottieplayer_with_threads() != 55397 {
         return InitializationResult.apiChecksumMismatch
     }
 
