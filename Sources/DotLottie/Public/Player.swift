@@ -10,27 +10,19 @@ import CoreImage
 import DotLottiePlayer
 
 class Player: ObservableObject {
-    @Published public var playerState: PlayerState = .initial
-
-    internal lazy var dotLottieObserver: DotLottieObserver? = DotLottieObserver(self)
-
     private let dotLottiePlayer: DotLottiePlayer
-    private var WIDTH: UInt32 = 512
-    private var HEIGHT: UInt32 = 512
+    
+    public var WIDTH: UInt32 = 512
+    public var HEIGHT: UInt32 = 512
+    
+    private var currFrame: Float = -1.0;
+    
+    private var hasRenderedFirstFrame = false
+    
+    private var hasResized = false
     
     init(config: Config) {
         self.dotLottiePlayer = DotLottiePlayer(config: config)
-    }
-    
-    deinit {
-        self.destroy()
-    }
-    
-    public func destroy() {
-        if let ob = self.dotLottieObserver {
-            self.dotLottiePlayer.unsubscribe(observer: ob)
-            self.dotLottieObserver = nil
-        }
     }
     
     public func loadAnimationData(animationData: String, width: Int, height: Int) throws {
@@ -41,18 +33,17 @@ class Player: ObservableObject {
             .loadAnimationData(animationData: animationData,
                                width: self.WIDTH,
                                height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
     }
     
-    func loadDotlottieData(data: Data) throws {
+    func loadDotlottieData(data: Data, width: Int, height: Int) throws {
+        self.WIDTH = UInt32(width)
+        self.HEIGHT = UInt32(height)
+        
         if (!dotLottiePlayer.loadDotlottieData(fileData: data, width: self.WIDTH, height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadAnimationDataError
         }
-        
-        setPlayerState(state: self.config().autoplay ? .playing : .draw)
     }
     
     public func loadAnimationPath(animationPath: String, width: Int, height: Int) throws {
@@ -62,7 +53,6 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.loadAnimationPath(animationPath: animationPath,
                                                width: self.WIDTH,
                                                height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
     }
@@ -74,39 +64,54 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.loadAnimation(animationId: animationId,
                                            width: self.WIDTH,
                                            height: self.HEIGHT)) {
-            self.setPlayerState(state: .error)
             throw AnimationLoadErrors.loadFromPathError
         }
     }
     
-    public func render() -> CGImage? {
-        if (!self.isLoaded() || !dotLottiePlayer.render()) {
+    public func render() -> Bool {
+        dotLottiePlayer.render()
+    }
+    
+    public func tick() -> CGImage? {
+        if (!self.isLoaded()) {
             return nil
         }
         
-        let bitsPerComponent = 8
-        let bytesPerRow = 4 * self.WIDTH
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let pixelData = UnsafeMutablePointer<UInt8>(bitPattern: UInt(dotLottiePlayer.bufferPtr()))
+        let tick = dotLottiePlayer.tick()
         
-        if (pixelData != nil) {
-            if let context = CGContext(data: pixelData, width: Int(self.WIDTH), height: Int(self.HEIGHT), bitsPerComponent: bitsPerComponent, bytesPerRow: Int(bytesPerRow), space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) {
-                if let newImage = context.makeImage() {
-                    return newImage
+        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
+            self.currFrame = dotLottiePlayer.currentFrame()
+            
+            hasRenderedFirstFrame = true
+            hasResized = false
+            
+            _ = dotLottiePlayer.render()
+            
+            let bitsPerComponent = 8
+            let bytesPerRow = 4 * self.WIDTH
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let pixelData = UnsafeMutablePointer<UInt8>(bitPattern: UInt(dotLottiePlayer.bufferPtr()))
+            
+            if (pixelData != nil) {
+                if let context = CGContext(data: pixelData, width: Int(self.WIDTH), height: Int(self.HEIGHT), bitsPerComponent: bitsPerComponent, bytesPerRow: Int(bytesPerRow), space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) {
+                    if let newImage = context.makeImage() {
+                        return newImage
+                    }
                 }
             }
         }
+        
         return nil
     }
     
     public func subscribe(observer: Observer) {
         dotLottiePlayer.subscribe(observer: observer)
     }
-
+    
     public func unsubscribe(observer: Observer) {
         dotLottiePlayer.unsubscribe(observer: observer)
     }
-
+    
     public func manifest() -> Manifest? {
         return dotLottiePlayer.manifest()
     }
@@ -168,34 +173,19 @@ class Player: ObservableObject {
         dotLottiePlayer.markers()
     }
     
+    @discardableResult
     public func play() -> Bool {
-        let play = dotLottiePlayer.play()
-
-        if (dotLottiePlayer.isPlaying()) {
-            self.setPlayerState(state: .playing)
-        }
-
-        return play
+        dotLottiePlayer.play()
     }
     
+    @discardableResult
     public func pause() -> Bool {
-        let pause = dotLottiePlayer.pause()
-
-        if (dotLottiePlayer.isPaused()) {
-            self.setPlayerState(state: .paused)
-        }
-        
-        return pause
+        dotLottiePlayer.pause()
     }
     
+    @discardableResult
     public func stop() -> Bool {
-        let stop =  dotLottiePlayer.stop()
-        
-        if (dotLottiePlayer.isStopped()) {
-            self.setPlayerState(state: .stopped)
-        }
-        
-        return stop
+        dotLottiePlayer.stop()
     }
     
     public func resize(width: Int, height: Int) throws {
@@ -205,12 +195,62 @@ class Player: ObservableObject {
         if (!dotLottiePlayer.resize(width: self.WIDTH, height: self.HEIGHT)) {
             throw PlayerErrors.resizeError
         }
+        
+        hasResized = true
     }
     
-    public func requestFrame() -> Bool {
-        let frame = dotLottiePlayer.requestFrame()
-
-        return self.setFrame(no: frame)
+    public func stateMachineLoad(id: String) -> Bool {
+        dotLottiePlayer.stateMachineLoad(stateMachineId: id)
+    }
+    
+    public func stateMachineLoadData(_ data: String) -> Bool {
+        dotLottiePlayer.stateMachineLoadData(stateMachine: data)
+    }
+    
+    public func stateMachineStart(openUrlPolicy: OpenUrlPolicy) -> Bool {
+        let started = dotLottiePlayer.stateMachineStart(openUrlPolicy: openUrlPolicy)
+        
+        return started
+    }
+    
+    public func stateMachineStop() -> Bool {
+        return dotLottiePlayer.stateMachineStop()
+    }
+    
+    public func stateMachinePostEvent(event: Event) {
+        dotLottiePlayer.stateMachinePostEvent(event: event)
+    }
+    
+    public func stateMachineFire(event: String) {
+        dotLottiePlayer.stateMachineFireEvent(event: event)
+    }
+    
+    public func stateMachineSubscribe(observer: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineSubscribe(observer: observer)
+    }
+    
+    public func stateMachineUnSubscribe(oberserver: StateMachineObserver) -> Bool {
+        dotLottiePlayer.stateMachineUnsubscribe(observer: oberserver)
+    }
+    
+    public func stateMachineInternalSubscribe(observer: StateMachineInternalObserver) -> Bool {
+        dotLottiePlayer.stateMachineInternalSubscribe(observer: observer)
+    }
+    
+    public func stateMachineInternalUnsubscribe(observer: StateMachineInternalObserver) -> Bool {
+        dotLottiePlayer.stateMachineInternalUnsubscribe(observer: observer)
+    }
+        
+    public func stateMachineFrameworkSetup() -> [String] {
+        dotLottiePlayer.stateMachineFrameworkSetup()
+    }
+    
+    public func getLayerBounds(layerName: String) -> [Float] {
+        dotLottiePlayer.getLayerBounds(layerName: layerName)
+    }
+    
+    public func stateMachineCurrentState() -> String {
+        dotLottiePlayer.stateMachineCurrentState()
     }
     
     public func duration() -> Float32 {
@@ -224,7 +264,7 @@ class Player: ObservableObject {
     public func setSlots(_ slots: String) -> Bool {
         dotLottiePlayer.setSlots(slots: slots);
     }
-
+    
     public func setTheme(_ themeId: String) -> Bool {
         dotLottiePlayer.setTheme(themeId: themeId)
     }
@@ -240,14 +280,20 @@ class Player: ObservableObject {
     public func activeThemeId() -> String {
         dotLottiePlayer.activeThemeId()
     }
-
+    
     public func activeAnimationId() -> String {
         dotLottiePlayer.activeAnimationId()
     }
     
-    public func setPlayerState(state: PlayerState) {
-        DispatchQueue.main.async {
-            self.playerState = state
-        }
+    public func stateMachineSetNumericInput(key: String, value: Float) -> Bool {
+        dotLottiePlayer.stateMachineSetNumericInput(key: key, value: value)
+    }
+    
+    public func stateMachineSetStringInput(key: String, value: String) -> Bool {
+        dotLottiePlayer.stateMachineSetStringInput(key: key, value: value)
+    }
+    
+    public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
+        dotLottiePlayer.stateMachineSetBooleanInput(key: key, value: value)
     }
 }

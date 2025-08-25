@@ -9,18 +9,89 @@ import Foundation
 import MetalKit
 import AVFoundation
 
-public class Coordinator : NSObject, MTKViewDelegate {
+#if os(macOS)
+// Custom MTKView that handles mouse events
+class InteractiveMTKView: MTKView {
+    weak var gestureCoordinator: Coordinator?
+    
+    override func mouseDown(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseDown(at: location)
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseDragged(at: location)
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseUp(at: location)
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseMoved(at: location)
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseEntered(at: location)
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        let location = convert(event.locationInWindow, from: nil)
+        gestureCoordinator?.handleMouseExited(at: location)
+    }
+    
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        
+        // Remove existing tracking areas
+        for trackingArea in trackingAreas {
+            removeTrackingArea(trackingArea)
+        }
+        
+        // Add new tracking area for hover detection
+        let trackingArea = NSTrackingArea(
+            rect: bounds,
+            options: [.activeInKeyWindow, .mouseMoved, .mouseEnteredAndExited],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(trackingArea)
+    }
+    
+    override var acceptsFirstResponder: Bool {
+        return true
+    }
+}
+#endif
+
+// Unified Coordinator for all platforms
+public class Coordinator: NSObject, MTKViewDelegate {
     private var parent: DotLottie
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
+    private var viewSize: CGSize!
+    
+    #if os(macOS)
+    private var gestureManager: GestureManager!
+    #endif
     
     init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
-        
         super.init()
         
+        setupMetal(mtkView: mtkView)
+        setupPlatformSpecificGestures(mtkView: mtkView)
+    }
+    
+    // MARK: - Setup Methods
+    
+    private func setupMetal(mtkView: MTKView) {
         if let metalDevice = MTLCreateSystemDefaultDevice() {
             mtkView.device = metalDevice
             self.metalDevice = metalDevice
@@ -29,18 +100,46 @@ public class Coordinator : NSObject, MTKViewDelegate {
         self.ciContext = CIContext(mtlDevice: metalDevice, options: [.cacheIntermediates: false, .allowLowPower: true])
         self.metalCommandQueue = metalDevice.makeCommandQueue()!
     }
+
+    // iOS gestures are managed through the delegate
+    // macOS gestures are managed here
+    // Other platforms have to self managed gestures
+    private func setupPlatformSpecificGestures(mtkView: MTKView) {
+        #if os(macOS)
+        // Initialize gesture manager for macOS
+        self.gestureManager = GestureManager()
+        self.gestureManager.gestureManagerDelegate = self
+        
+        // Set up mouse event handling if this is an InteractiveMTKView
+        if let interactiveView = mtkView as? InteractiveMTKView {
+            interactiveView.gestureCoordinator = self
+            interactiveView.updateTrackingAreas()
+        }
+        #endif
+    }
+    
+    // MARK: - MTKViewDelegate (Shared across all platforms)
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        self.viewSize = size
+        
         if (!self.parent.dotLottieViewModel.sizeOverrideActive) {
             self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
         }
+        
+        #if os(macOS)
+        // Update tracking areas when view size changes
+        if let interactiveView = view as? InteractiveMTKView {
+            interactiveView.updateTrackingAreas()
+        }
+        #endif
     }
     
     public func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else {
             return
         }
-            
+        
         guard !parent.dotLottieViewModel.error() else {
             return
         }
@@ -74,8 +173,145 @@ public class Coordinator : NSObject, MTKViewDelegate {
             
             commandBuffer?.present(drawable)
             commandBuffer?.commit()
-        } else {
-            return ;
         }
     }
+    
+    // MARK: - Coordinate Calculation (Shared with platform-specific scaling)
+    
+    private func calculateCoordinates(location: CGPoint) -> CGPoint {
+        let scaleRatio = CGPoint(
+            x: CGFloat(self.parent.dotLottieViewModel.animationModel.width) / self.viewSize.width,
+            y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
+        )
+        
+        #if os(iOS)
+        let mappedX = location.x * scaleRatio.x * UIScreen.main.scale
+        let mappedY = location.y * scaleRatio.y * UIScreen.main.scale
+        #elseif os(macOS)
+        let dpiScale = getMaxDPIScale()
+        let mappedX = location.x * scaleRatio.x * dpiScale
+        let mappedY = location.y * scaleRatio.y * dpiScale
+        #else
+        let mappedX = location.x * scaleRatio.x
+        let mappedY = location.y * scaleRatio.y
+        #endif
+        
+        return CGPoint(x: mappedX, y: mappedY)
+    }
+    
+    #if os(macOS)
+    private func getMaxDPIScale() -> CGFloat {
+        let screens = NSScreen.screens
+        return screens.map { $0.backingScaleFactor }.max() ?? 1.0
+    }
+    #endif
+    
+    // MARK: - Event Posting (Shared)
+    
+    private func postEvent(_ event: Event) {
+        let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    }
 }
+
+// MARK: - Platform-Specific Extensions
+
+#if os(iOS)
+extension Coordinator: UIGestureRecognizerDelegate, GestureManagerDelegate {
+    // UIGestureRecognizerDelegate: Allow simultaneous recognition
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    // GestureManagerDelegate methods for iOS
+    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerDown(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerUp(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+}
+
+#elseif os(macOS)
+extension Coordinator: GestureManagerDelegate {
+    // MARK: - Mouse Event Handlers (called by InteractiveMTKView)
+    
+    func handleMouseDown(at location: CGPoint) {
+        gestureManager.handleMouseDown(at: location)
+    }
+    
+    func handleMouseDragged(at location: CGPoint) {
+        gestureManager.handleMouseDragged(at: location)
+    }
+    
+    func handleMouseUp(at location: CGPoint) {
+        gestureManager.handleMouseUp(at: location)
+    }
+    
+    func handleMouseMoved(at location: CGPoint) {
+        gestureManager.handleMouseMoved(at: location)
+    }
+    
+    func handleMouseEntered(at location: CGPoint) {
+        gestureManager.handleMouseEntered(at: location)
+    }
+    
+    func handleMouseExited(at location: CGPoint) {
+        gestureManager.handleMouseExited(at: location)
+    }
+    
+    // MARK: - GestureManagerDelegate methods for macOS
+    
+    func gestureManagerDidRecognizeTap(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.click(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeMove(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerMove(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeDown(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerDown(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeUp(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerUp(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeHover(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerEnter(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+    
+    func gestureManagerDidRecognizeExitHover(_ gestureManager: GestureManager, at location: CGPoint) {
+        let mapped = calculateCoordinates(location: location)
+        let event = Event.pointerExit(x: Float(mapped.x), y: Float(mapped.y))
+        postEvent(event)
+    }
+}
+#endif

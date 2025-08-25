@@ -17,6 +17,8 @@ public enum PlayerState {
     case frozen
     case error
     case draw
+    case complete
+    case stateMachineIsActive
 }
 
 public struct AnimationModel {
