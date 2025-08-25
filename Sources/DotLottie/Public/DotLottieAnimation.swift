@@ -210,7 +210,7 @@ public final class DotLottieAnimation: ObservableObject {
     
     /// Generates frame image
     public func frameImage() -> CGImage? {
-        player.render()
+        player.tick()
     }
     
     // MARK: Loaders
