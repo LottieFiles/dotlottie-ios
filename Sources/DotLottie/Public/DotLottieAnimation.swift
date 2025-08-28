@@ -52,9 +52,10 @@ public final class DotLottieAnimation: ObservableObject {
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil
     ) {
-        self.init(config: config) {
+        self.init(config: config, threads: threads) {
             try $0.player.loadAnimationData(animationData: animationData,
                                             width: $0.animationModel.width,
                                             height: $0.animationModel.height)
@@ -67,9 +68,10 @@ public final class DotLottieAnimation: ObservableObject {
     public convenience init(
         fileName: String,
         bundle: Bundle = .main,
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil
     ) {
-        self.init(config: config) {
+        self.init(config: config, threads: threads) {
             try $0.loadAnimationFromBundle(animationName: fileName, bundle: bundle)
         } errorMessage: { error in
             "Loading from bundle failed for both .json and .lottie versions of your animation: \(error)"
@@ -79,9 +81,10 @@ public final class DotLottieAnimation: ObservableObject {
     /// Load an animation (.lottie / .json) from the web.
     public convenience init(
         webURL: String,
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil
     ) {
-        self.init(config: config) {
+        self.init(config: config, threads: threads) {
             if webURL.contains(".lottie") {
                 try await $0.loadDotLottieFromURL(url: webURL)
             } else {
@@ -95,9 +98,10 @@ public final class DotLottieAnimation: ObservableObject {
     /// Load a .lottie file from Data.
     public convenience init(
         dotLottieData: Data,
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil
     ) {
-        self.init(config: config) {
+        self.init(config: config, threads: threads) {
             try $0.loadDotLottie(data: dotLottieData)
         } errorMessage: { error in
             "Failed to load dotLottie. Failed with error: \(error)"
@@ -107,9 +111,10 @@ public final class DotLottieAnimation: ObservableObject {
     /// Load a .json or .lottie file from Data
     public convenience init(
         lottieData: Data,
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil
     ) {
-        self.init(config: config) {
+        self.init(config: config, threads: threads) {
             guard let jsonString = String(data: lottieData, encoding: .utf8) else {
                 try $0.loadDotLottie(data: lottieData)
                 return
@@ -126,25 +131,27 @@ public final class DotLottieAnimation: ObservableObject {
         animationData: String = "",
         fileName: String = "",
         webURL: String = "",
-        config: AnimationConfig
+        config: AnimationConfig,
+        threads: Int? = nil,
     ) {
         if webURL != "" {
-            self.init(webURL: webURL, config: config)
+            self.init(webURL: webURL, config: config, threads: threads)
         } else if animationData != "" {
-            self.init(animationData: animationData, config: config)
+            self.init(animationData: animationData, config: config, threads: threads)
         } else if fileName != "" {
-            self.init(fileName: fileName, config: config)
+            self.init(fileName: fileName, config: config, threads: threads)
         } else {
-            self.init(config: config, task: { _ in }, errorMessage: { _ in "" })
+            self.init(config: config, threads: threads, task: { _ in }, errorMessage: { _ in "" })
         }
     }
     
     private convenience init(
         config: AnimationConfig,
+        threads: Int? = nil,
         load: @escaping @Sendable (DotLottieAnimation) async throws -> Void,
         errorMessage: @escaping @Sendable (Error) -> String
     ) {
-        self.init(config: config) { `self` in
+        self.init(config: config, threads: threads) { `self` in
             Task {
                 do {
                     try await load(self)
@@ -160,6 +167,7 @@ public final class DotLottieAnimation: ObservableObject {
     
     private init(
         config: AnimationConfig,
+        threads: Int? = nil,
         task: (DotLottieAnimation) throws -> Void,
         errorMessage: @escaping @Sendable (Error) -> String
     ) {
@@ -175,7 +183,8 @@ public final class DotLottieAnimation: ObservableObject {
                              themeId: config.themeId ?? "",
                              stateMachineId: config.stateMachineId ?? "",
                              animationId: config.animationId ?? "")
-        self.player = Player(config: self.config)
+        
+        self.player = Player(config: self.config, threads: threads)
         
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true

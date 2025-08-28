@@ -13,13 +13,13 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>version = 0.1.46</string>
+	<string>0.1.47</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>AppleTVSimulator</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>version = 0.1.46</string>
+	<string>0.1.47</string>
 	<key>MinimumOSVersion</key>
 	<string>13.0</string>
 </dict>

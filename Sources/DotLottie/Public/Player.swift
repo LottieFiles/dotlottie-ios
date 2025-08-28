@@ -21,8 +21,12 @@ class Player: ObservableObject {
     
     private var hasResized = false
     
-    init(config: Config) {
-        self.dotLottiePlayer = DotLottiePlayer(config: config)
+    init(config: Config, threads : Int? = nil) {
+        if let threads = threads {
+            self.dotLottiePlayer = DotLottiePlayer.withThreads(config: config, threads: UInt32(threads))
+        } else {
+            self.dotLottiePlayer = DotLottiePlayer(config: config)
+        }
     }
     
     public func loadAnimationData(animationData: String, width: Int, height: Int) throws {
