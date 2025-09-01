@@ -132,7 +132,7 @@ public final class DotLottieAnimation: ObservableObject {
         fileName: String = "",
         webURL: String = "",
         config: AnimationConfig,
-        threads: Int? = nil,
+        threads: Int? = nil
     ) {
         if webURL != "" {
             self.init(webURL: webURL, config: config, threads: threads)
