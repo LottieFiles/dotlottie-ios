@@ -156,6 +156,19 @@ public class Coordinator: NSObject, MTKViewDelegate {
             var filteredImage = inputImage.transformed(by: CGAffineTransform(
                 scaleX: size.size.width / inputImage.extent.size.width,
                 y: size.size.height / inputImage.extent.size.height))
+            #if os(iOS)
+            // Fix coordinate system for iOS 16.0 only
+            if #available(iOS 16.0, *) {
+                if #available(iOS 17.0, *) {
+                    // iOS 17+ - do nothing
+                } else {
+                    // iOS 16.x only
+                    let flipTransform = CGAffineTransform(scaleX: 1, y: -1)
+                    let translateTransform = CGAffineTransform(translationX: 0, y: view.drawableSize.height)
+                    filteredImage = filteredImage.transformed(by: flipTransform).transformed(by: translateTransform)
+                }
+            }
+            #endif
             let x = -size.origin.x
             let y = -size.origin.y
             
