@@ -15,7 +15,7 @@ class Player: ObservableObject {
     public var WIDTH: UInt32 = 512
     public var HEIGHT: UInt32 = 512
     
-//    private var currFrame: Float = -1.0;
+    private var currFrame: Float = -1.0;
     
     private var hasRenderedFirstFrame = false
     
@@ -83,14 +83,11 @@ class Player: ObservableObject {
         
         let tick = dotLottiePlayer.tick()
         
-//        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
-        if tick || !hasRenderedFirstFrame || hasResized {
-//            self.currFrame = dotLottiePlayer.currentFrame()
+        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
+            self.currFrame = dotLottiePlayer.currentFrame()
             
             hasRenderedFirstFrame = true
             hasResized = false
-            
-//            _ = dotLottiePlayer.render()
             
             let bitsPerComponent = 8
             let bytesPerRow = 4 * self.WIDTH
