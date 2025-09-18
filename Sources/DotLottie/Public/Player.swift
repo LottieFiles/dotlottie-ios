@@ -89,8 +89,6 @@ class Player: ObservableObject {
             hasRenderedFirstFrame = true
             hasResized = false
             
-            _ = dotLottiePlayer.render()
-            
             let bitsPerComponent = 8
             let bytesPerRow = 4 * self.WIDTH
             let colorSpace = CGColorSpaceCreateDeviceRGB()
