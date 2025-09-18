@@ -173,6 +173,7 @@ public final class DotLottieAnimation: ObservableObject {
     ) {
         self.config = Config(autoplay: config.autoplay ?? false,
                              loopAnimation: config.loop ?? false,
+                             loopCount: UInt32(config.loopCount ?? 0),
                              mode: config.mode ?? Mode.forward,
                              speed: config.speed ?? 1.0,
                              useFrameInterpolation: config.useFrameInterpolation ?? false,

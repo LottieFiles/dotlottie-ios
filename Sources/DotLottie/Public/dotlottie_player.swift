@@ -2349,6 +2349,7 @@ public func FfiConverterTypeStateMachineObserver_lower(_ value: StateMachineObse
 public struct Config {
     public var autoplay: Bool
     public var loopAnimation: Bool
+    public var loopCount: UInt32
     public var mode: Mode
     public var speed: Float
     public var useFrameInterpolation: Bool
@@ -2362,9 +2363,10 @@ public struct Config {
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(autoplay: Bool, loopAnimation: Bool, mode: Mode, speed: Float, useFrameInterpolation: Bool, segment: [Float], backgroundColor: UInt32, layout: Layout, marker: String, themeId: String, stateMachineId: String, animationId: String) {
+    public init(autoplay: Bool, loopAnimation: Bool, loopCount: UInt32, mode: Mode, speed: Float, useFrameInterpolation: Bool, segment: [Float], backgroundColor: UInt32, layout: Layout, marker: String, themeId: String, stateMachineId: String, animationId: String) {
         self.autoplay = autoplay
         self.loopAnimation = loopAnimation
+        self.loopCount = loopCount
         self.mode = mode
         self.speed = speed
         self.useFrameInterpolation = useFrameInterpolation
@@ -2384,6 +2386,9 @@ extension Config: Equatable, Hashable {
             return false
         }
         if lhs.loopAnimation != rhs.loopAnimation {
+            return false
+        }
+        if lhs.loopCount != rhs.loopCount {
             return false
         }
         if lhs.mode != rhs.mode {
@@ -2422,6 +2427,7 @@ extension Config: Equatable, Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(autoplay)
         hasher.combine(loopAnimation)
+        hasher.combine(loopCount)
         hasher.combine(mode)
         hasher.combine(speed)
         hasher.combine(useFrameInterpolation)
@@ -2444,6 +2450,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
             try Config(
                 autoplay: FfiConverterBool.read(from: &buf),
                 loopAnimation: FfiConverterBool.read(from: &buf),
+                loopCount: FfiConverterUInt32.read(from: &buf),
                 mode: FfiConverterTypeMode.read(from: &buf),
                 speed: FfiConverterFloat.read(from: &buf),
                 useFrameInterpolation: FfiConverterBool.read(from: &buf),
@@ -2460,6 +2467,7 @@ public struct FfiConverterTypeConfig: FfiConverterRustBuffer {
     public static func write(_ value: Config, into buf: inout [UInt8]) {
         FfiConverterBool.write(value.autoplay, into: &buf)
         FfiConverterBool.write(value.loopAnimation, into: &buf)
+        FfiConverterUInt32.write(value.loopCount, into: &buf)
         FfiConverterTypeMode.write(value.mode, into: &buf)
         FfiConverterFloat.write(value.speed, into: &buf)
         FfiConverterBool.write(value.useFrameInterpolation, into: &buf)

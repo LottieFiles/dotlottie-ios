@@ -11,6 +11,7 @@ import Foundation
 public struct AnimationConfig {
     public var autoplay: Bool? = false
     public var loop: Bool? = false
+    public var loopCount: Int? = 0
     public var mode: Mode? = .forward
     public var speed: Float? = 1
     public var useFrameInterpolation: Bool? = false
@@ -27,6 +28,7 @@ public struct AnimationConfig {
     public init(
         autoplay: Bool? = false,
         loop: Bool? = false,
+        loopCount: Int? = 0,
         mode: Mode? = .forward,
         speed: Float? = 1,
         useFrameInterpolation: Bool? = true,
@@ -41,6 +43,7 @@ public struct AnimationConfig {
     ) {
         self.autoplay = autoplay
         self.loop = loop
+        self.loopCount = loopCount
         self.mode = mode
         self.speed = speed
         self.useFrameInterpolation = useFrameInterpolation
