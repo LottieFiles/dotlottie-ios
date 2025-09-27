@@ -38,7 +38,7 @@ public class DotLottieAnimationView: UIView, DotLottie {
     private func setupMetalView() {
         mtkView = MTKView(frame: bounds)
         
-        self.coordinator = Coordinator(self, mtkView: mtkView)
+        self.coordinator = Coordinator(WeakWrapper(self), mtkView: mtkView)
         
         if let metalDevice = MTLCreateSystemDefaultDevice() {
             mtkView.device = metalDevice
@@ -71,6 +71,20 @@ public class DotLottieAnimationView: UIView, DotLottie {
     
     public func subscribe(observer: Observer) {
         self.dotLottieViewModel.subscribe(observer: observer)
+    }
+    
+    private class WeakWrapper: DotLottie {
+        var dotLottieViewModel: DotLottieAnimation {
+            view?.dotLottieViewModel ?? initialDotLottieViewModel
+        }
+        
+        private weak var view: DotLottieAnimationView?
+        private var initialDotLottieViewModel: DotLottieAnimation
+        
+        init(_ view: DotLottieAnimationView) {
+            self.view = view
+            self.initialDotLottieViewModel = view.dotLottieViewModel
+        }
     }
 }
 
