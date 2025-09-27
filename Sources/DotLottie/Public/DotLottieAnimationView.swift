@@ -21,9 +21,9 @@ public class DotLottieAnimationView: UIView, DotLottie {
         
         super.init(frame: .zero)
         
-        dotLottieViewModel.$framerate.sink { value in
-            if self.mtkView != nil {
-                self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
+        dotLottieViewModel.$framerate.sink { [weak self] value in
+            if let self, mtkView != nil {
+                mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
             }
         }.store(in: &cancellableBag)
         
