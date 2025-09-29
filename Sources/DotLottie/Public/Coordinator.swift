@@ -77,17 +77,19 @@ public class Coordinator: NSObject, MTKViewDelegate {
     private var mtlTexture: MTLTexture!
     private var viewSize: CGSize!
     
-    weak var mtkView: MTKView?
-    private var dpr: CGFloat = 1.0
     
 #if os(macOS)
+    weak var mtkView: MTKView?
+    private var dpr: CGFloat = 1.0
     private var gestureManager: GestureManager!
     private var observerSetup = false
 #endif
     
     init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
+#if os(macOS)
         self.mtkView = mtkView
+#endif
         super.init()
         
         setupMetal(mtkView: mtkView)
@@ -97,7 +99,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
     // MARK: - Setup Methods
     
 #if os(macOS)
-private func setupScreenChangeObserver() {
+    private func setupScreenChangeObserver() {
         NotificationCenter.default.addObserver(
             forName: NSWindow.didChangeScreenNotification,
             object: self.mtkView?.window,
@@ -107,7 +109,7 @@ private func setupScreenChangeObserver() {
         }
     }
 #endif
-
+    
     private func setupMetal(mtkView: MTKView) {
         if let metalDevice = MTLCreateSystemDefaultDevice() {
             mtkView.device = metalDevice
