@@ -77,12 +77,19 @@ public class Coordinator: NSObject, MTKViewDelegate {
     private var mtlTexture: MTLTexture!
     private var viewSize: CGSize!
     
-    #if os(macOS)
+    
+#if os(macOS)
+    weak var mtkView: MTKView?
+    private var dpr: CGFloat = 1.0
     private var gestureManager: GestureManager!
-    #endif
+    private var observerSetup = false
+#endif
     
     init(_ parent: DotLottie, mtkView: MTKView) {
         self.parent = parent
+#if os(macOS)
+        self.mtkView = mtkView
+#endif
         super.init()
         
         setupMetal(mtkView: mtkView)
@@ -90,6 +97,18 @@ public class Coordinator: NSObject, MTKViewDelegate {
     }
     
     // MARK: - Setup Methods
+    
+#if os(macOS)
+    private func setupScreenChangeObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSWindow.didChangeScreenNotification,
+            object: self.mtkView?.window,
+            queue: .main
+        ) { [weak self] notification in
+            self?.dpr = self?.getMaxDPRScale() ?? 1.0
+        }
+    }
+#endif
     
     private func setupMetal(mtkView: MTKView) {
         if let metalDevice = MTLCreateSystemDefaultDevice() {
@@ -100,12 +119,12 @@ public class Coordinator: NSObject, MTKViewDelegate {
         self.ciContext = CIContext(mtlDevice: metalDevice, options: [.cacheIntermediates: false, .allowLowPower: true])
         self.metalCommandQueue = metalDevice.makeCommandQueue()!
     }
-
+    
     // iOS gestures are managed through the delegate
     // macOS gestures are managed here
     // Other platforms have to self managed gestures
     private func setupPlatformSpecificGestures(mtkView: MTKView) {
-        #if os(macOS)
+#if os(macOS)
         // Initialize gesture manager for macOS
         self.gestureManager = GestureManager()
         self.gestureManager.gestureManagerDelegate = self
@@ -115,7 +134,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
             interactiveView.gestureCoordinator = self
             interactiveView.updateTrackingAreas()
         }
-        #endif
+#endif
     }
     
     // MARK: - MTKViewDelegate (Shared across all platforms)
@@ -127,15 +146,24 @@ public class Coordinator: NSObject, MTKViewDelegate {
             self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
         }
         
-        #if os(macOS)
+#if os(macOS)
         // Update tracking areas when view size changes
         if let interactiveView = view as? InteractiveMTKView {
             interactiveView.updateTrackingAreas()
         }
-        #endif
+#endif
     }
     
     public func draw(in view: MTKView) {
+#if os(macOS)
+        // Set up observer on first draw when we know the view is in a window
+        if !observerSetup && view.window != nil {
+            observerSetup = true
+            setupScreenChangeObserver()
+            self.dpr = getMaxDPRScale()
+        }
+#endif
+        
         guard let drawable = view.currentDrawable else {
             return
         }
@@ -156,7 +184,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
             var filteredImage = inputImage.transformed(by: CGAffineTransform(
                 scaleX: size.size.width / inputImage.extent.size.width,
                 y: size.size.height / inputImage.extent.size.height))
-            #if os(iOS)
+#if os(iOS)
             // Fix coordinate system for iOS 16.0 only
             if #available(iOS 16.0, *) {
                 if #available(iOS 17.0, *) {
@@ -168,7 +196,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
                     filteredImage = filteredImage.transformed(by: flipTransform).transformed(by: translateTransform)
                 }
             }
-            #endif
+#endif
             let x = -size.origin.x
             let y = -size.origin.y
             
@@ -197,32 +225,42 @@ public class Coordinator: NSObject, MTKViewDelegate {
             y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
         )
         
-        #if os(iOS)
+#if os(iOS)
         let mappedX = location.x * scaleRatio.x * UIScreen.main.scale
         let mappedY = location.y * scaleRatio.y * UIScreen.main.scale
-        #elseif os(macOS)
-        let dpiScale = getMaxDPIScale()
-        let mappedX = location.x * scaleRatio.x * dpiScale
-        let mappedY = location.y * scaleRatio.y * dpiScale
-        #else
+#elseif os(macOS)
+        let mappedX = location.x * scaleRatio.x * self.dpr
+        let mappedY = location.y * scaleRatio.y * self.dpr
+#else
         let mappedX = location.x * scaleRatio.x
         let mappedY = location.y * scaleRatio.y
-        #endif
+#endif
         
         return CGPoint(x: mappedX, y: mappedY)
     }
     
-    #if os(macOS)
-    private func getMaxDPIScale() -> CGFloat {
-        let screens = NSScreen.screens
-        return screens.map { $0.backingScaleFactor }.max() ?? 1.0
+#if os(macOS)
+    private func getMaxDPRScale() -> CGFloat {
+        // Get the DPR of the screen where the window is currently displayed
+        guard let window = mtkView?.window,
+              let screen = window.screen else {
+            // Fallback to main screen if we can't find the window's screen
+            let fallbackDpr = NSScreen.main?.backingScaleFactor ?? 1.0
+            return fallbackDpr
+        }
+        
+        return screen.backingScaleFactor
     }
-    #endif
+#endif
     
     // MARK: - Event Posting (Shared)
     
     private func postEvent(_ event: Event) {
         let _ = self.parent.dotLottieViewModel.stateMachinePostEvent(event)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
