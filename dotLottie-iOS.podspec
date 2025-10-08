@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "dotLottie-iOS"
-  spec.version      = "0.8.0"
+  spec.version      = "0.9.2"
   spec.summary      = "iOS player for .lottie and .json files."
 
   # This description is used to generate tags and improve search results.
@@ -29,16 +29,14 @@ Currently this package supports a mimimum iOS version of 13+ for iPhone and iPad
                    DESC
 
   spec.homepage     = "https://github.com/LottieFiles/dotlottie-ios"
-  spec.source       = { :git => "https://github.com/LottieFiles/dotlottie-ios.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/LottieFiles/dotlottie-ios.git", :tag => "v#{spec.version}" }
   spec.license      = { :type => 'MIT', :file => 'LICENSE' }
   spec.authors            = {
     "Sam Osborne" => "sam@lottiefiles.com",
     "Evandro Hofffmann" => "evandro@lottiefiles.com"
   }
 
-  spec.source_files = 'Sources/**/*'
-
-  spec.module_name = 'dotLottie'
+  spec.module_name = 'DotLottie'
 
   #  When using multiple platforms
   spec.swift_version = '5.0'
@@ -52,9 +50,6 @@ Currently this package supports a mimimum iOS version of 13+ for iPhone and iPad
 
   # Add the xcframework as an internal framework
   spec.vendored_frameworks = 'Sources/DotLottieCore/DotLottiePlayer.xcframework'
-
-  # If you need to specify the header files (if any) from the xcframework, do it here
-  spec.public_header_files = 'Sources/DotLottieCore/DotLottiePlayer.xcframework/Headers/*.h'
 
   spec.requires_arc = true
 
