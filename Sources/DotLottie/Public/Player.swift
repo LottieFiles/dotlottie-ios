@@ -83,10 +83,6 @@ class Player: ObservableObject {
         
         let tick = dotLottiePlayer.tick()
         
-        if hasResized {
-            print("Detected resize")
-        }
-        
         if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
             self.currFrame = dotLottiePlayer.currentFrame()
             
