@@ -646,8 +646,28 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineSetBooleanInput(key: key, value: value)
     }
     
+    public func stateMachineGetNumericInput(key: String) -> Float {
+        player.stateMachineGetNumericInput(key: key)
+    }
+    
+    public func stateMachineGetStringInput(key: String) -> String {
+        player.stateMachineGetStringInput(key: key)
+    }
+    
+    public func stateMachineGetBooleanInput(key: String) -> Bool {
+        player.stateMachineGetBooleanInput(key: key)
+    }
+    
+    public func stateMachineGetInputs() -> [String] {
+        return player.stateMachineGetInputs()
+    }
+
     public func stateMachineCurrentState() -> String {
         player.stateMachineCurrentState()
+    }
+    
+    public func getStateMachine(_ id: String) -> String {
+        player.getStateMachine(id)
     }
     
     public func setAutoplay(autoplay: Bool) {
