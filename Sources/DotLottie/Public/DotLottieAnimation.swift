@@ -626,7 +626,7 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineSubscribe(observer: observer)
     }
     
-    public func stateMachineUnSubscribe(observer: StateMachineObserver) -> Bool {
+    public func stateMachineUnsubscribe(_ observer: StateMachineObserver) -> Bool {
         player.stateMachineUnSubscribe(oberserver: observer)
     }
     
