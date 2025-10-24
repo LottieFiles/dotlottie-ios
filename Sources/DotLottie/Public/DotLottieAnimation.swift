@@ -658,10 +658,20 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineGetBooleanInput(key: key)
     }
     
-    public func stateMachineGetInputs() -> [String] {
-        return player.stateMachineGetInputs()
+    public func stateMachineGetInputs() -> [String: String] {
+        let stateArray = player.stateMachineGetInputs()
+        var stateDict: [String: String] = [:]
+        
+        // Iterate through array in pairs (key, value)
+        for i in stride(from: 0, to: stateArray.count, by: 2) {
+            let key = stateArray[i]
+            let type = stateArray[i + 1]
+            stateDict[key] = type
+        }
+        
+        return stateDict
     }
-
+    
     public func stateMachineCurrentState() -> String {
         player.stateMachineCurrentState()
     }
