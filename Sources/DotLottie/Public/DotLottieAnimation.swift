@@ -626,7 +626,7 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineSubscribe(observer: observer)
     }
     
-    public func stateMachineUnSubscribe(observer: StateMachineObserver) -> Bool {
+    public func stateMachineUnsubscribe(_ observer: StateMachineObserver) -> Bool {
         player.stateMachineUnSubscribe(oberserver: observer)
     }
     
@@ -646,8 +646,38 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineSetBooleanInput(key: key, value: value)
     }
     
+    public func stateMachineGetNumericInput(key: String) -> Float {
+        player.stateMachineGetNumericInput(key: key)
+    }
+    
+    public func stateMachineGetStringInput(key: String) -> String {
+        player.stateMachineGetStringInput(key: key)
+    }
+    
+    public func stateMachineGetBooleanInput(key: String) -> Bool {
+        player.stateMachineGetBooleanInput(key: key)
+    }
+    
+    public func stateMachineGetInputs() -> [String: String] {
+        let stateArray = player.stateMachineGetInputs()
+        var stateDict: [String: String] = [:]
+        
+        // Iterate through array in pairs (key, value)
+        for i in stride(from: 0, to: stateArray.count, by: 2) {
+            let key = stateArray[i]
+            let type = stateArray[i + 1]
+            stateDict[key] = type
+        }
+        
+        return stateDict
+    }
+    
     public func stateMachineCurrentState() -> String {
         player.stateMachineCurrentState()
+    }
+    
+    public func getStateMachine(_ id: String) -> String {
+        player.getStateMachine(id)
     }
     
     public func setAutoplay(autoplay: Bool) {

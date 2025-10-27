@@ -226,7 +226,7 @@ private enum UniffiInternalError: LocalizedError {
     case unexpectedStaleHandle
     case rustPanic(_ message: String)
 
-    public var errorDescription: String? {
+    var errorDescription: String? {
         switch self {
         case .bufferOverflow: return "Reading the requested value would read past the end of the buffer"
         case .incompleteData: return "The buffer still has data after lifting its containing value"
@@ -398,15 +398,31 @@ private class UniffiHandleMap<T> {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
+private struct FfiConverterUInt8: FfiConverterPrimitive {
+    typealias FfiType = UInt8
+    typealias SwiftType = UInt8
+
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt8 {
+        return try lift(readInt(&buf))
+    }
+
+    static func write(_ value: UInt8, into buf: inout [UInt8]) {
+        writeInt(&buf, lower(value))
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
 private struct FfiConverterUInt32: FfiConverterPrimitive {
     typealias FfiType = UInt32
     typealias SwiftType = UInt32
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt32 {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt32 {
         return try lift(readInt(&buf))
     }
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -418,11 +434,11 @@ private struct FfiConverterInt32: FfiConverterPrimitive {
     typealias FfiType = Int32
     typealias SwiftType = Int32
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Int32 {
         return try lift(readInt(&buf))
     }
 
-    public static func write(_ value: Int32, into buf: inout [UInt8]) {
+    static func write(_ value: Int32, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -434,11 +450,11 @@ private struct FfiConverterUInt64: FfiConverterPrimitive {
     typealias FfiType = UInt64
     typealias SwiftType = UInt64
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt64 {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> UInt64 {
         return try lift(readInt(&buf))
     }
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -450,11 +466,11 @@ private struct FfiConverterFloat: FfiConverterPrimitive {
     typealias FfiType = Float
     typealias SwiftType = Float
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Float {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Float {
         return try lift(readFloat(&buf))
     }
 
-    public static func write(_ value: Float, into buf: inout [UInt8]) {
+    static func write(_ value: Float, into buf: inout [UInt8]) {
         writeFloat(&buf, lower(value))
     }
 }
@@ -466,19 +482,19 @@ private struct FfiConverterBool: FfiConverter {
     typealias FfiType = Int8
     typealias SwiftType = Bool
 
-    public static func lift(_ value: Int8) throws -> Bool {
+    static func lift(_ value: Int8) throws -> Bool {
         return value != 0
     }
 
-    public static func lower(_ value: Bool) -> Int8 {
+    static func lower(_ value: Bool) -> Int8 {
         return value ? 1 : 0
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Bool {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Bool {
         return try lift(readInt(&buf))
     }
 
-    public static func write(_ value: Bool, into buf: inout [UInt8]) {
+    static func write(_ value: Bool, into buf: inout [UInt8]) {
         writeInt(&buf, lower(value))
     }
 }
@@ -490,7 +506,7 @@ private struct FfiConverterString: FfiConverter {
     typealias SwiftType = String
     typealias FfiType = RustBuffer
 
-    public static func lift(_ value: RustBuffer) throws -> String {
+    static func lift(_ value: RustBuffer) throws -> String {
         defer {
             value.deallocate()
         }
@@ -501,7 +517,7 @@ private struct FfiConverterString: FfiConverter {
         return String(bytes: bytes, encoding: String.Encoding.utf8)!
     }
 
-    public static func lower(_ value: String) -> RustBuffer {
+    static func lower(_ value: String) -> RustBuffer {
         return value.utf8CString.withUnsafeBufferPointer { ptr in
             // The swift string gives us int8_t, we want uint8_t.
             ptr.withMemoryRebound(to: UInt8.self) { ptr in
@@ -512,12 +528,12 @@ private struct FfiConverterString: FfiConverter {
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> String {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> String {
         let len: Int32 = try readInt(&buf)
         return try String(bytes: readBytes(&buf, count: Int(len)), encoding: String.Encoding.utf8)!
     }
 
-    public static func write(_ value: String, into buf: inout [UInt8]) {
+    static func write(_ value: String, into buf: inout [UInt8]) {
         let len = Int32(value.utf8.count)
         writeInt(&buf, len)
         writeBytes(&buf, value.utf8)
@@ -530,12 +546,12 @@ private struct FfiConverterString: FfiConverter {
 private struct FfiConverterData: FfiConverterRustBuffer {
     typealias SwiftType = Data
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> Data {
         let len: Int32 = try readInt(&buf)
         return try Data(readBytes(&buf, count: Int(len)))
     }
 
-    public static func write(_ value: Data, into buf: inout [UInt8]) {
+    static func write(_ value: Data, into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         writeBytes(&buf, value)
@@ -566,6 +582,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
     func getLayerBounds(layerName: String) -> [Float]
 
     func getStateMachine(stateMachineId: String) -> String
+
+    func getTransform() -> [Float]
 
     func intersect(x: Float, y: Float, layerName: String) -> Bool
 
@@ -617,11 +635,15 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func setFrame(no: Float) -> Bool
 
+    func setQuality(quality: UInt8) -> Bool
+
     func setSlots(slots: String) -> Bool
 
     func setTheme(themeId: String) -> Bool
 
     func setThemeData(themeData: String) -> Bool
+
+    func setTransform(transform: [Float]) -> Bool
 
     func setViewport(x: Int32, y: Int32, w: Int32, h: Int32) -> Bool
 
@@ -632,6 +654,8 @@ public protocol DotLottiePlayerProtocol: AnyObject {
     func stateMachineFrameworkSetup() -> [String]
 
     func stateMachineGetBooleanInput(key: String) -> Bool
+
+    func stateMachineGetInputs() -> [String]
 
     func stateMachineGetNumericInput(key: String) -> Float
 
@@ -835,6 +859,12 @@ open class DotLottiePlayer:
         })
     }
 
+    open func getTransform() -> [Float] {
+        return try! FfiConverterSequenceFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_get_transform(self.uniffiClonePointer(), $0)
+        })
+    }
+
     open func intersect(x: Float, y: Float, layerName: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_intersect(self.uniffiClonePointer(),
@@ -1004,6 +1034,13 @@ open class DotLottiePlayer:
         })
     }
 
+    open func setQuality(quality: UInt8) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_quality(self.uniffiClonePointer(),
+                                                                          FfiConverterUInt8.lower(quality), $0)
+        })
+    }
+
     open func setSlots(slots: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_set_slots(self.uniffiClonePointer(),
@@ -1022,6 +1059,13 @@ open class DotLottiePlayer:
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_set_theme_data(self.uniffiClonePointer(),
                                                                              FfiConverterString.lower(themeData), $0)
+        })
+    }
+
+    open func setTransform(transform: [Float]) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_transform(self.uniffiClonePointer(),
+                                                                            FfiConverterSequenceFloat.lower(transform), $0)
         })
     }
 
@@ -1057,6 +1101,12 @@ open class DotLottiePlayer:
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_boolean_input(self.uniffiClonePointer(),
                                                                                               FfiConverterString.lower(key), $0)
+        })
+    }
+
+    open func stateMachineGetInputs() -> [String] {
+        return try! FfiConverterSequenceString.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_state_machine_get_inputs(self.uniffiClonePointer(), $0)
         })
     }
 
@@ -3293,7 +3343,7 @@ extension Mode: Equatable, Hashable {}
 private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
     typealias SwiftType = Float?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3302,7 +3352,7 @@ private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
         FfiConverterFloat.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterFloat.read(from: &buf)
@@ -3317,7 +3367,7 @@ private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
 private struct FfiConverterOptionString: FfiConverterRustBuffer {
     typealias SwiftType = String?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3326,7 +3376,7 @@ private struct FfiConverterOptionString: FfiConverterRustBuffer {
         FfiConverterString.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterString.read(from: &buf)
@@ -3341,7 +3391,7 @@ private struct FfiConverterOptionString: FfiConverterRustBuffer {
 private struct FfiConverterOptionTypeManifest: FfiConverterRustBuffer {
     typealias SwiftType = Manifest?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3350,7 +3400,7 @@ private struct FfiConverterOptionTypeManifest: FfiConverterRustBuffer {
         FfiConverterTypeManifest.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeManifest.read(from: &buf)
@@ -3365,7 +3415,7 @@ private struct FfiConverterOptionTypeManifest: FfiConverterRustBuffer {
 private struct FfiConverterOptionTypeManifestInitial: FfiConverterRustBuffer {
     typealias SwiftType = ManifestInitial?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3374,7 +3424,7 @@ private struct FfiConverterOptionTypeManifestInitial: FfiConverterRustBuffer {
         FfiConverterTypeManifestInitial.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterTypeManifestInitial.read(from: &buf)
@@ -3389,7 +3439,7 @@ private struct FfiConverterOptionTypeManifestInitial: FfiConverterRustBuffer {
 private struct FfiConverterOptionSequenceFloat: FfiConverterRustBuffer {
     typealias SwiftType = [Float]?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3398,7 +3448,7 @@ private struct FfiConverterOptionSequenceFloat: FfiConverterRustBuffer {
         FfiConverterSequenceFloat.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterSequenceFloat.read(from: &buf)
@@ -3413,7 +3463,7 @@ private struct FfiConverterOptionSequenceFloat: FfiConverterRustBuffer {
 private struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
     typealias SwiftType = [String]?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3422,7 +3472,7 @@ private struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
         FfiConverterSequenceString.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterSequenceString.read(from: &buf)
@@ -3437,7 +3487,7 @@ private struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
 private struct FfiConverterOptionSequenceTypeManifestStateMachine: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestStateMachine]?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3446,7 +3496,7 @@ private struct FfiConverterOptionSequenceTypeManifestStateMachine: FfiConverterR
         FfiConverterSequenceTypeManifestStateMachine.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterSequenceTypeManifestStateMachine.read(from: &buf)
@@ -3461,7 +3511,7 @@ private struct FfiConverterOptionSequenceTypeManifestStateMachine: FfiConverterR
 private struct FfiConverterOptionSequenceTypeManifestTheme: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestTheme]?
 
-    public static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
         guard let value = value else {
             writeInt(&buf, Int8(0))
             return
@@ -3470,7 +3520,7 @@ private struct FfiConverterOptionSequenceTypeManifestTheme: FfiConverterRustBuff
         FfiConverterSequenceTypeManifestTheme.write(value, into: &buf)
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
         switch try readInt(&buf) as Int8 {
         case 0: return nil
         case 1: return try FfiConverterSequenceTypeManifestTheme.read(from: &buf)
@@ -3485,7 +3535,7 @@ private struct FfiConverterOptionSequenceTypeManifestTheme: FfiConverterRustBuff
 private struct FfiConverterSequenceFloat: FfiConverterRustBuffer {
     typealias SwiftType = [Float]
 
-    public static func write(_ value: [Float], into buf: inout [UInt8]) {
+    static func write(_ value: [Float], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3493,7 +3543,7 @@ private struct FfiConverterSequenceFloat: FfiConverterRustBuffer {
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Float] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Float] {
         let len: Int32 = try readInt(&buf)
         var seq = [Float]()
         seq.reserveCapacity(Int(len))
@@ -3510,7 +3560,7 @@ private struct FfiConverterSequenceFloat: FfiConverterRustBuffer {
 private struct FfiConverterSequenceString: FfiConverterRustBuffer {
     typealias SwiftType = [String]
 
-    public static func write(_ value: [String], into buf: inout [UInt8]) {
+    static func write(_ value: [String], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3518,7 +3568,7 @@ private struct FfiConverterSequenceString: FfiConverterRustBuffer {
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [String] {
         let len: Int32 = try readInt(&buf)
         var seq = [String]()
         seq.reserveCapacity(Int(len))
@@ -3535,7 +3585,7 @@ private struct FfiConverterSequenceString: FfiConverterRustBuffer {
 private struct FfiConverterSequenceTypeManifestAnimation: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestAnimation]
 
-    public static func write(_ value: [ManifestAnimation], into buf: inout [UInt8]) {
+    static func write(_ value: [ManifestAnimation], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3543,7 +3593,7 @@ private struct FfiConverterSequenceTypeManifestAnimation: FfiConverterRustBuffer
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestAnimation] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestAnimation] {
         let len: Int32 = try readInt(&buf)
         var seq = [ManifestAnimation]()
         seq.reserveCapacity(Int(len))
@@ -3560,7 +3610,7 @@ private struct FfiConverterSequenceTypeManifestAnimation: FfiConverterRustBuffer
 private struct FfiConverterSequenceTypeManifestStateMachine: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestStateMachine]
 
-    public static func write(_ value: [ManifestStateMachine], into buf: inout [UInt8]) {
+    static func write(_ value: [ManifestStateMachine], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3568,7 +3618,7 @@ private struct FfiConverterSequenceTypeManifestStateMachine: FfiConverterRustBuf
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestStateMachine] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestStateMachine] {
         let len: Int32 = try readInt(&buf)
         var seq = [ManifestStateMachine]()
         seq.reserveCapacity(Int(len))
@@ -3585,7 +3635,7 @@ private struct FfiConverterSequenceTypeManifestStateMachine: FfiConverterRustBuf
 private struct FfiConverterSequenceTypeManifestTheme: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestTheme]
 
-    public static func write(_ value: [ManifestTheme], into buf: inout [UInt8]) {
+    static func write(_ value: [ManifestTheme], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3593,7 +3643,7 @@ private struct FfiConverterSequenceTypeManifestTheme: FfiConverterRustBuffer {
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestTheme] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestTheme] {
         let len: Int32 = try readInt(&buf)
         var seq = [ManifestTheme]()
         seq.reserveCapacity(Int(len))
@@ -3610,7 +3660,7 @@ private struct FfiConverterSequenceTypeManifestTheme: FfiConverterRustBuffer {
 private struct FfiConverterSequenceTypeMarker: FfiConverterRustBuffer {
     typealias SwiftType = [Marker]
 
-    public static func write(_ value: [Marker], into buf: inout [UInt8]) {
+    static func write(_ value: [Marker], into buf: inout [UInt8]) {
         let len = Int32(value.count)
         writeInt(&buf, len)
         for item in value {
@@ -3618,7 +3668,7 @@ private struct FfiConverterSequenceTypeMarker: FfiConverterRustBuffer {
         }
     }
 
-    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Marker] {
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [Marker] {
         let len: Int32 = try readInt(&buf)
         var seq = [Marker]()
         seq.reserveCapacity(Int(len))
@@ -3723,6 +3773,9 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_state_machine() != 4598 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_transform() != 49287 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_intersect() != 12346 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -3798,6 +3851,9 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_frame() != 44086 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_quality() != 55740 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_slots() != 64804 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -3805,6 +3861,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_theme_data() != 31802 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_transform() != 1923 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_viewport() != 29505 {
@@ -3820,6 +3879,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_boolean_input() != 55120 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_inputs() != 47898 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_state_machine_get_numeric_input() != 10400 {

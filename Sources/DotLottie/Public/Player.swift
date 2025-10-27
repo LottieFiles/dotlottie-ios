@@ -242,7 +242,7 @@ class Player: ObservableObject {
     public func stateMachineInternalUnsubscribe(observer: StateMachineInternalObserver) -> Bool {
         dotLottiePlayer.stateMachineInternalUnsubscribe(observer: observer)
     }
-        
+    
     public func stateMachineFrameworkSetup() -> [String] {
         dotLottiePlayer.stateMachineFrameworkSetup()
     }
@@ -297,5 +297,25 @@ class Player: ObservableObject {
     
     public func stateMachineSetBooleanInput(key: String, value: Bool) -> Bool {
         dotLottiePlayer.stateMachineSetBooleanInput(key: key, value: value)
+    }
+    
+    public func stateMachineGetNumericInput(key: String) -> Float {
+        dotLottiePlayer.stateMachineGetNumericInput(key: key)
+    }
+    
+    public func stateMachineGetStringInput(key: String) -> String {
+        dotLottiePlayer.stateMachineGetStringInput(key: key)
+    }
+    
+    public func stateMachineGetBooleanInput(key: String) -> Bool {
+        dotLottiePlayer.stateMachineGetBooleanInput(key: key)
+    }
+    
+    public func stateMachineGetInputs() -> [String] {
+        return dotLottiePlayer.stateMachineGetInputs()
+    }
+    
+    public func getStateMachine(_ id: String) -> String {
+        dotLottiePlayer.getStateMachine(stateMachineId: id)
     }
 }
