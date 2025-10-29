@@ -143,7 +143,9 @@ func getAnimationWidthHeight(animationData: String) throws -> (UInt32, UInt32) {
 func verifyUrlType(url: String) throws {
     let stringCheck: NSString = NSString(string: url)
     
-    if stringCheck.pathExtension != "json" && stringCheck.pathExtension != "lottie" {
+    if stringCheck.pathExtension.lowercased() != "json" &&
+        stringCheck.pathExtension.lowercased() != "lot" &&
+        stringCheck.pathExtension.lowercased() != "lottie" {
         throw FileErrors.invalidFileExtension
     }
 }

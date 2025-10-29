@@ -15,31 +15,37 @@ class InteractiveMTKView: MTKView {
     weak var gestureCoordinator: Coordinator?
     
     override func mouseDown(with event: NSEvent) {
+        super.mouseDown(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseDown(at: location)
     }
     
     override func mouseDragged(with event: NSEvent) {
+        super.mouseDragged(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseDragged(at: location)
     }
     
     override func mouseUp(with event: NSEvent) {
+        super.mouseUp(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseUp(at: location)
     }
     
     override func mouseMoved(with event: NSEvent) {
+        super.mouseMoved(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseMoved(at: location)
     }
     
     override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseEntered(at: location)
     }
     
     override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
         let location = convert(event.locationInWindow, from: nil)
         gestureCoordinator?.handleMouseExited(at: location)
     }
@@ -55,7 +61,7 @@ class InteractiveMTKView: MTKView {
         // Add new tracking area for hover detection
         let trackingArea = NSTrackingArea(
             rect: bounds,
-            options: [.activeInKeyWindow, .mouseMoved, .mouseEnteredAndExited],
+            options: [.activeAlways, .inVisibleRect, .mouseMoved, .mouseEnteredAndExited],
             owner: self,
             userInfo: nil
         )
@@ -64,6 +70,14 @@ class InteractiveMTKView: MTKView {
     
     override var acceptsFirstResponder: Bool {
         return true
+    }
+    
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        // Ensure this view receives all mouse events within its bounds
+        if self.bounds.contains(point) {
+            return self
+        }
+        return super.hitTest(point)
     }
 }
 #endif
@@ -76,6 +90,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
     private var viewSize: CGSize!
+    private var drawableSize: CGSize!
     
     
 #if os(macOS)
@@ -140,7 +155,8 @@ public class Coordinator: NSObject, MTKViewDelegate {
     // MARK: - MTKViewDelegate (Shared across all platforms)
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        self.viewSize = size
+        self.drawableSize = size
+        self.viewSize = view.bounds.size // Use view bounds (in points) for coordinate conversion
         
         if (!self.parent.dotLottieViewModel.sizeOverrideActive) {
             self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
@@ -220,17 +236,28 @@ public class Coordinator: NSObject, MTKViewDelegate {
     // MARK: - Coordinate Calculation (Shared with platform-specific scaling)
     
     private func calculateCoordinates(location: CGPoint) -> CGPoint {
+        // Animation dimensions are in pixels (drawable size)
+        let animationWidth = CGFloat(self.parent.dotLottieViewModel.animationModel.width)
+        let animationHeight = CGFloat(self.parent.dotLottieViewModel.animationModel.height)
+        
+        // Calculate scale ratio: animation pixels / view points
+        // Note: viewSize is in points, animation dimensions are in pixels
         let scaleRatio = CGPoint(
-            x: CGFloat(self.parent.dotLottieViewModel.animationModel.width) / self.viewSize.width,
-            y: CGFloat(self.parent.dotLottieViewModel.animationModel.height) / self.viewSize.height
+            x: animationWidth / self.viewSize.width,
+            y: animationHeight / self.viewSize.height
         )
         
 #if os(iOS)
         let mappedX = location.x * scaleRatio.x * UIScreen.main.scale
         let mappedY = location.y * scaleRatio.y * UIScreen.main.scale
 #elseif os(macOS)
-        let mappedX = location.x * scaleRatio.x * self.dpr
-        let mappedY = location.y * scaleRatio.y * self.dpr
+        // Flip Y coordinate for macOS (origin is bottom-left on macOS, top-left in animation space)
+        let flippedY = self.viewSize.height - location.y
+        
+        // Convert from view coordinates (points) to animation coordinates (pixels)
+        // scaleRatio already accounts for pixel density since animation is in pixels
+        let mappedX = location.x * scaleRatio.x
+        let mappedY = flippedY * scaleRatio.y
 #else
         let mappedX = location.x * scaleRatio.x
         let mappedY = location.y * scaleRatio.y
