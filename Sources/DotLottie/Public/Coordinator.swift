@@ -89,9 +89,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
     private var mtlTexture: MTLTexture!
-    private var viewSize: CGSize!
-    private var drawableSize: CGSize!
-    
+    private var viewSize: CGSize!    
     
 #if os(macOS)
     weak var mtkView: MTKView?
@@ -155,9 +153,11 @@ public class Coordinator: NSObject, MTKViewDelegate {
     // MARK: - MTKViewDelegate (Shared across all platforms)
     
     public func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-        self.drawableSize = size
+#if os(macOS)
         self.viewSize = view.bounds.size // Use view bounds (in points) for coordinate conversion
-        
+#else
+        self.viewSize = size
+#endif
         if (!self.parent.dotLottieViewModel.sizeOverrideActive) {
             self.parent.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
         }
