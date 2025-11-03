@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "LottieFiles-dotLottie-iOS"
-  spec.version      = "0.9.3"
+  spec.version      = "0.11.1"
   spec.summary      = "iOS player for .lottie and .json files."
 
   spec.description  = <<-DESC
