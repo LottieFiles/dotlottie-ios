@@ -48,6 +48,12 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         self.mtkView.isOpaque = false
 #elseif os(macOS)
         self.mtkView.layer?.isOpaque = false
+        self.mtkView.layer?.backgroundColor = NSColor.clear.cgColor
+        // Ensure the view can become first responder and receive mouse events
+        if let interactiveView = self.mtkView as? InteractiveMTKView {
+            interactiveView.gestureCoordinator = context.coordinator
+            interactiveView.updateTrackingAreas()
+        }
 #endif
         
         self.mtkView.framebufferOnly = false
@@ -80,6 +86,13 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         if self.dotLottieViewModel.framerate != 30 {
             uiView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }
+        
+#if os(macOS)
+        // Update tracking areas when view updates (e.g., size changes)
+        if let interactiveView = uiView as? InteractiveMTKView {
+            interactiveView.updateTrackingAreas()
+        }
+#endif
     }
     
     public func subscribe(observer: Observer) {
