@@ -8,5 +8,5 @@
 import Foundation
 
 protocol DotLottie {
-    var dotLottieViewModel: DotLottieAnimation { get set }
+    var dotLottieViewModel: DotLottieAnimation { get }
 }
