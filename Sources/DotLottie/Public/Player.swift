@@ -264,7 +264,7 @@ class Player: ObservableObject {
     }
     
     public func setSlots(_ slots: String) -> Bool {
-        dotLottiePlayer.setSlots(slots: slots);
+        dotLottiePlayer.setSlotsStr(slots: slots);
     }
     
     public func setTheme(_ themeId: String) -> Bool {
@@ -281,6 +281,10 @@ class Player: ObservableObject {
     
     public func activeThemeId() -> String {
         dotLottiePlayer.activeThemeId()
+    }
+    
+    public func registerNewFont(fontName: String, fontData: Data) -> Bool {
+        registerFont(fontName: fontName, fontData: fontData)
     }
     
     public func activeAnimationId() -> String {
@@ -318,4 +322,88 @@ class Player: ObservableObject {
     public func getStateMachine(_ id: String) -> String {
         dotLottiePlayer.getStateMachine(stateMachineId: id)
     }
+    
+    // MARK: - Global Inputs
+
+    public func globalInputsLoad(id: String) -> Bool {
+        dotLottiePlayer.globalInputsLoad(id: id)
+    }
+
+    public func globalInputsLoadData(data: String) -> Bool {
+        dotLottiePlayer.globalInputsLoadData(data: data)
+    }
+
+    public func globalInputsStart() -> Bool {
+        dotLottiePlayer.globalInputsStart()
+    }
+
+    public func globalInputsStop() -> Bool {
+        dotLottiePlayer.globalInputsStop()
+    }
+
+    public func globalInputsRemove() -> Bool {
+        dotLottiePlayer.globalInputsRemove()
+    }
+
+    public func globalInputsSubscribe(observer: GlobalInputsObserver) -> Bool {
+        dotLottiePlayer.globalInputsSubscribe(observer: observer)
+    }
+
+    public func globalInputsUnsubscribe(observer: GlobalInputsObserver) -> Bool {
+        dotLottiePlayer.globalInputsUnsubscribe(observer: observer)
+    }
+
+    // MARK: - Global Inputs Setters
+
+    public func globalInputsSetString(bindingName: String, newValue: String) -> Bool {
+        dotLottiePlayer.globalInputsSetString(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetColor(bindingName: String, newValue: [Float]) -> Bool {
+        dotLottiePlayer.globalInputsSetColor(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetVector(bindingName: String, newValue: [Float]) -> Bool {
+        dotLottiePlayer.globalInputsSetVector(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetNumeric(bindingName: String, newValue: Float) -> Bool {
+        dotLottiePlayer.globalInputsSetNumeric(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetBoolean(bindingName: String, newValue: Bool) -> Bool {
+        dotLottiePlayer.globalInputsSetBoolean(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetGradient(bindingName: String, newValue: [GradientStop]) -> Bool {
+        dotLottiePlayer.globalInputsSetGradient(bindingName: bindingName, newValue: newValue)
+    }
+
+    // MARK: - Global Inputs Getters
+
+    public func globalInputsGetString(bindingName: String) -> String? {
+        dotLottiePlayer.globalInputsGetString(bindingName: bindingName)
+    }
+
+    public func globalInputsGetColor(bindingName: String) -> [Float] {
+        dotLottiePlayer.globalInputsGetColor(bindingName: bindingName)
+    }
+
+    public func globalInputsGetVector(bindingName: String) -> [Float] {
+        dotLottiePlayer.globalInputsGetVector(bindingName: bindingName)
+    }
+
+    public func globalInputsGetBoolean(bindingName: String) -> Bool? {
+        true
+//        dotLottiePlayer.globalinputsGetBoolean(bindingName: bindingName)
+    }
+
+    public func globalInputsGetNumeric(bindingName: String) -> Float? {
+        dotLottiePlayer.globalInputsGetNumeric(bindingName: bindingName)
+    }
+
+    public func globalInputsGetGradient(bindingName: String) -> [GradientStop] {
+        dotLottiePlayer.globalInputsGetGradient(bindingName: bindingName)
+    }
+    
 }

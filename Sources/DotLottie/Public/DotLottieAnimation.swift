@@ -17,14 +17,14 @@ private class DotLottieAnimationInternalStateMachineObserver: StateMachineIntern
         if message.hasPrefix("OpenUrl: ") {
             var url = message.replacingOccurrences(of: "OpenUrl: ", with: "")
             if let dotRange = url.range(of: " |") {
-              url.removeSubrange(dotRange.lowerBound..<url.endIndex)
+                url.removeSubrange(dotRange.lowerBound..<url.endIndex)
             }
-            #if os(iOS)
+#if os(iOS)
             if let urlObject = URL(string: url),
                UIApplication.shared.canOpenURL(urlObject) {
                 UIApplication.shared.open(urlObject, options: [:], completionHandler: nil)
             }
-            #endif
+#endif
         }
     }
 }
@@ -42,13 +42,13 @@ public final class DotLottieAnimation: ObservableObject {
     private var defaultWidthHeight = 512
     
     internal var config: Config
-            
+    
     internal var stateMachineListeners: [String] = []
     
     private var internalStateMachineObserver = DotLottieAnimationInternalStateMachineObserver()
     
     private var currFrame = 0;
-
+    
     /// Load directly from a String (.json).
     public convenience init(
         animationData: String,
@@ -609,6 +609,9 @@ public final class DotLottieAnimation: ObservableObject {
         player.resetTheme()
     }
     
+    public func registerFont(fontName: String, fontData: Data) -> Bool {
+        player.registerNewFont(fontName: fontName, fontData: fontData)
+    }
     
     public func activeThemeId() -> String {
         player.activeThemeId()
@@ -670,6 +673,88 @@ public final class DotLottieAnimation: ObservableObject {
         }
         
         return stateDict
+    }
+    
+    // MARK: - Global Inputs
+
+    public func globalInputsLoad(id: String) -> Bool {
+        player.globalInputsLoad(id: id)
+    }
+
+    public func globalInputsLoadData(data: String) -> Bool {
+        player.globalInputsLoadData(data: data)
+    }
+
+    public func globalInputsStart() -> Bool {
+        player.globalInputsStart()
+    }
+
+    public func globalInputsStop() -> Bool {
+        player.globalInputsStop()
+    }
+
+    public func globalInputsRemove() -> Bool {
+        player.globalInputsRemove()
+    }
+
+    public func globalInputsSubscribe(observer: GlobalInputsObserver) -> Bool {
+        player.globalInputsSubscribe(observer: observer)
+    }
+
+    public func globalInputsUnsubscribe(observer: GlobalInputsObserver) -> Bool {
+        player.globalInputsUnsubscribe(observer: observer)
+    }
+
+    // MARK: - Global Inputs Setters
+
+    public func globalInputsSetString(bindingName: String, newValue: String) -> Bool {
+        player.globalInputsSetString(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetColor(bindingName: String, newValue: [Float]) -> Bool {
+        player.globalInputsSetColor(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetVector(bindingName: String, newValue: [Float]) -> Bool {
+        player.globalInputsSetVector(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetNumeric(bindingName: String, newValue: Float) -> Bool {
+        player.globalInputsSetNumeric(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetBoolean(bindingName: String, newValue: Bool) -> Bool {
+        player.globalInputsSetBoolean(bindingName: bindingName, newValue: newValue)
+    }
+
+    public func globalInputsSetGradient(bindingName: String, newValue: [GradientStop]) -> Bool {
+        player.globalInputsSetGradient(bindingName: bindingName, newValue: newValue)
+    }
+
+    // MARK: - Global Inputs Getters
+
+    public func globalInputsGetString(bindingName: String) -> String? {
+        player.globalInputsGetString(bindingName: bindingName)
+    }
+
+    public func globalInputsGetColor(bindingName: String) -> [Float] {
+        player.globalInputsGetColor(bindingName: bindingName)
+    }
+
+    public func globalInputsGetVector(bindingName: String) -> [Float] {
+        player.globalInputsGetVector(bindingName: bindingName)
+    }
+
+    public func globalInputsGetBoolean(bindingName: String) -> Bool? {
+        player.globalInputsGetBoolean(bindingName: bindingName)
+    }
+
+    public func globalInputsGetNumeric(bindingName: String) -> Float? {
+        player.globalInputsGetNumeric(bindingName: bindingName)
+    }
+
+    public func globalInputsGetGradient(bindingName: String) -> [GradientStop] {
+        player.globalInputsGetGradient(bindingName: bindingName)
     }
     
     public func stateMachineCurrentState() -> String {
@@ -753,10 +838,10 @@ public final class DotLottieAnimation: ObservableObject {
     public func view() -> DotLottieView {
         DotLottieView(dotLottie: self)
     }
-
+    
 #if os(iOS)
     public func view() -> DotLottieAnimationView {
-            DotLottieAnimationView(dotLottieViewModel: self)
+        DotLottieAnimationView(dotLottieViewModel: self)
     }
 #endif
 }

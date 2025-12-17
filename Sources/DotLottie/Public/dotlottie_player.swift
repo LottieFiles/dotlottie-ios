@@ -585,6 +585,44 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func getTransform() -> [Float]
 
+    func globalInputsGetBoolean(bindingName: String) -> Bool?
+
+    func globalInputsGetColor(bindingName: String) -> [Float]
+
+    func globalInputsGetGradient(bindingName: String) -> [GradientStop]
+
+    func globalInputsGetNumeric(bindingName: String) -> Float?
+
+    func globalInputsGetString(bindingName: String) -> String?
+
+    func globalInputsGetVector(bindingName: String) -> [Float]
+
+    func globalInputsLoad(id: String) -> Bool
+
+    func globalInputsLoadData(data: String) -> Bool
+
+    func globalInputsRemove() -> Bool
+
+    func globalInputsSetBoolean(bindingName: String, newValue: Bool) -> Bool
+
+    func globalInputsSetColor(bindingName: String, newValue: [Float]) -> Bool
+
+    func globalInputsSetGradient(bindingName: String, newValue: [GradientStop]) -> Bool
+
+    func globalInputsSetNumeric(bindingName: String, newValue: Float) -> Bool
+
+    func globalInputsSetString(bindingName: String, newValue: String) -> Bool
+
+    func globalInputsSetVector(bindingName: String, newValue: [Float]) -> Bool
+
+    func globalInputsStart() -> Bool
+
+    func globalInputsStop() -> Bool
+
+    func globalInputsSubscribe(observer: GlobalInputsObserver) -> Bool
+
+    func globalInputsUnsubscribe(observer: GlobalInputsObserver) -> Bool
+
     func intersect(x: Float, y: Float, layerName: String) -> Bool
 
     func isComplete() -> Bool
@@ -637,7 +675,7 @@ public protocol DotLottiePlayerProtocol: AnyObject {
 
     func setQuality(quality: UInt8) -> Bool
 
-    func setSlots(slots: String) -> Bool
+    func setSlotsStr(slots: String) -> Bool
 
     func setTheme(themeId: String) -> Bool
 
@@ -865,6 +903,142 @@ open class DotLottiePlayer:
         })
     }
 
+    open func globalInputsGetBoolean(bindingName: String) -> Bool? {
+        return try! FfiConverterOptionBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_boolean(self.uniffiClonePointer(),
+                                                                                        FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsGetColor(bindingName: String) -> [Float] {
+        return try! FfiConverterSequenceFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_color(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsGetGradient(bindingName: String) -> [GradientStop] {
+        return try! FfiConverterSequenceTypeGradientStop.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_gradient(self.uniffiClonePointer(),
+                                                                                         FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsGetNumeric(bindingName: String) -> Float? {
+        return try! FfiConverterOptionFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_numeric(self.uniffiClonePointer(),
+                                                                                        FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsGetString(bindingName: String) -> String? {
+        return try! FfiConverterOptionString.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_string(self.uniffiClonePointer(),
+                                                                                       FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsGetVector(bindingName: String) -> [Float] {
+        return try! FfiConverterSequenceFloat.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_get_vector(self.uniffiClonePointer(),
+                                                                                       FfiConverterString.lower(bindingName), $0)
+        })
+    }
+
+    open func globalInputsLoad(id: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_load(self.uniffiClonePointer(),
+                                                                                 FfiConverterString.lower(id), $0)
+        })
+    }
+
+    open func globalInputsLoadData(data: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_load_data(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(data), $0)
+        })
+    }
+
+    open func globalInputsRemove() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_remove(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func globalInputsSetBoolean(bindingName: String, newValue: Bool) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_boolean(self.uniffiClonePointer(),
+                                                                                        FfiConverterString.lower(bindingName),
+                                                                                        FfiConverterBool.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsSetColor(bindingName: String, newValue: [Float]) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_color(self.uniffiClonePointer(),
+                                                                                      FfiConverterString.lower(bindingName),
+                                                                                      FfiConverterSequenceFloat.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsSetGradient(bindingName: String, newValue: [GradientStop]) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_gradient(self.uniffiClonePointer(),
+                                                                                         FfiConverterString.lower(bindingName),
+                                                                                         FfiConverterSequenceTypeGradientStop.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsSetNumeric(bindingName: String, newValue: Float) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_numeric(self.uniffiClonePointer(),
+                                                                                        FfiConverterString.lower(bindingName),
+                                                                                        FfiConverterFloat.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsSetString(bindingName: String, newValue: String) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_string(self.uniffiClonePointer(),
+                                                                                       FfiConverterString.lower(bindingName),
+                                                                                       FfiConverterString.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsSetVector(bindingName: String, newValue: [Float]) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_set_vector(self.uniffiClonePointer(),
+                                                                                       FfiConverterString.lower(bindingName),
+                                                                                       FfiConverterSequenceFloat.lower(newValue), $0)
+        })
+    }
+
+    open func globalInputsStart() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_start(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func globalInputsStop() -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_stop(self.uniffiClonePointer(), $0)
+        })
+    }
+
+    open func globalInputsSubscribe(observer: GlobalInputsObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_subscribe(self.uniffiClonePointer(),
+                                                                                      FfiConverterTypeGlobalInputsObserver.lower(observer), $0)
+        })
+    }
+
+    open func globalInputsUnsubscribe(observer: GlobalInputsObserver) -> Bool {
+        return try! FfiConverterBool.lift(try! rustCall {
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_global_inputs_unsubscribe(self.uniffiClonePointer(),
+                                                                                        FfiConverterTypeGlobalInputsObserver.lower(observer), $0)
+        })
+    }
+
     open func intersect(x: Float, y: Float, layerName: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
             uniffi_dotlottie_player_fn_method_dotlottieplayer_intersect(self.uniffiClonePointer(),
@@ -1041,10 +1215,10 @@ open class DotLottiePlayer:
         })
     }
 
-    open func setSlots(slots: String) -> Bool {
+    open func setSlotsStr(slots: String) -> Bool {
         return try! FfiConverterBool.lift(try! rustCall {
-            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_slots(self.uniffiClonePointer(),
-                                                                        FfiConverterString.lower(slots), $0)
+            uniffi_dotlottie_player_fn_method_dotlottieplayer_set_slots_str(self.uniffiClonePointer(),
+                                                                            FfiConverterString.lower(slots), $0)
         })
     }
 
@@ -1374,6 +1548,358 @@ public func FfiConverterTypeDotLottiePlayer_lower(_ value: DotLottiePlayer) -> U
     return FfiConverterTypeDotLottiePlayer.lower(value)
 }
 
+public protocol GlobalInputsObserver: AnyObject {
+    func onBooleanGlobalInputValueChange(globalInputName: String, oldValue: Bool, newValue: Bool)
+
+    func onColorGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float])
+
+    func onGradientGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float])
+
+    func onNumericGlobalInputValueChange(globalInputName: String, oldValue: Float, newValue: Float)
+
+    func onStringGlobalInputValueChange(globalInputName: String, oldValue: String, newValue: String)
+
+    func onVectorGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float])
+}
+
+open class GlobalInputsObserverImpl:
+    GlobalInputsObserver
+{
+    fileprivate let pointer: UnsafeMutableRawPointer!
+
+    /// Used to instantiate a [FFIObject] without an actual pointer, for fakes in tests, mostly.
+    #if swift(>=5.8)
+        @_documentation(visibility: private)
+    #endif
+    public struct NoPointer {
+        public init() {}
+    }
+
+    // TODO: We'd like this to be `private` but for Swifty reasons,
+    // we can't implement `FfiConverter` without making this `required` and we can't
+    // make it `required` without making it `public`.
+    public required init(unsafeFromRawPointer pointer: UnsafeMutableRawPointer) {
+        self.pointer = pointer
+    }
+
+    // This constructor can be used to instantiate a fake object.
+    // - Parameter noPointer: Placeholder value so we can have a constructor separate from the default empty one that may be implemented for classes extending [FFIObject].
+    //
+    // - Warning:
+    //     Any object instantiated with this constructor cannot be passed to an actual Rust-backed object. Since there isn't a backing [Pointer] the FFI lower functions will crash.
+    #if swift(>=5.8)
+        @_documentation(visibility: private)
+    #endif
+    public init(noPointer _: NoPointer) {
+        pointer = nil
+    }
+
+    #if swift(>=5.8)
+        @_documentation(visibility: private)
+    #endif
+    public func uniffiClonePointer() -> UnsafeMutableRawPointer {
+        return try! rustCall { uniffi_dotlottie_player_fn_clone_globalinputsobserver(self.pointer, $0) }
+    }
+
+    // No primary constructor declared for this class.
+
+    deinit {
+        guard let pointer = pointer else {
+            return
+        }
+
+        try! rustCall { uniffi_dotlottie_player_fn_free_globalinputsobserver(pointer, $0) }
+    }
+
+    open func onBooleanGlobalInputValueChange(globalInputName: String, oldValue: Bool, newValue: Bool) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_boolean_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                    FfiConverterString.lower(globalInputName),
+                                                                                                    FfiConverterBool.lower(oldValue),
+                                                                                                    FfiConverterBool.lower(newValue), $0)
+    }
+    }
+
+    open func onColorGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float]) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_color_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                  FfiConverterString.lower(globalInputName),
+                                                                                                  FfiConverterSequenceFloat.lower(oldValue),
+                                                                                                  FfiConverterSequenceFloat.lower(newValue), $0)
+    }
+    }
+
+    open func onGradientGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float]) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_gradient_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                     FfiConverterString.lower(globalInputName),
+                                                                                                     FfiConverterSequenceFloat.lower(oldValue),
+                                                                                                     FfiConverterSequenceFloat.lower(newValue), $0)
+    }
+    }
+
+    open func onNumericGlobalInputValueChange(globalInputName: String, oldValue: Float, newValue: Float) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_numeric_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                    FfiConverterString.lower(globalInputName),
+                                                                                                    FfiConverterFloat.lower(oldValue),
+                                                                                                    FfiConverterFloat.lower(newValue), $0)
+    }
+    }
+
+    open func onStringGlobalInputValueChange(globalInputName: String, oldValue: String, newValue: String) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_string_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                   FfiConverterString.lower(globalInputName),
+                                                                                                   FfiConverterString.lower(oldValue),
+                                                                                                   FfiConverterString.lower(newValue), $0)
+    }
+    }
+
+    open func onVectorGlobalInputValueChange(globalInputName: String, oldValue: [Float], newValue: [Float]) { try! rustCall {
+        uniffi_dotlottie_player_fn_method_globalinputsobserver_on_vector_global_input_value_change(self.uniffiClonePointer(),
+                                                                                                   FfiConverterString.lower(globalInputName),
+                                                                                                   FfiConverterSequenceFloat.lower(oldValue),
+                                                                                                   FfiConverterSequenceFloat.lower(newValue), $0)
+    }
+    }
+}
+
+// Magic number for the Rust proxy to call using the same mechanism as every other method,
+// to free the callback once it's dropped by Rust.
+private let IDX_CALLBACK_FREE: Int32 = 0
+// Callback return codes
+private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
+private let UNIFFI_CALLBACK_ERROR: Int32 = 1
+private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
+
+// Put the implementation in a struct so we don't pollute the top-level namespace
+private enum UniffiCallbackInterfaceGlobalInputsObserver {
+    // Create the VTable using a series of closures.
+    // Swift automatically converts these into C callback functions.
+    static var vtable: UniffiVTableCallbackInterfaceGlobalInputsObserver = .init(
+        onBooleanGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: Int8,
+            newValue: Int8,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onBooleanGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterBool.lift(oldValue),
+                    newValue: FfiConverterBool.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onColorGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: RustBuffer,
+            newValue: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onColorGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterSequenceFloat.lift(oldValue),
+                    newValue: FfiConverterSequenceFloat.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onGradientGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: RustBuffer,
+            newValue: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onGradientGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterSequenceFloat.lift(oldValue),
+                    newValue: FfiConverterSequenceFloat.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onNumericGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: Float,
+            newValue: Float,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onNumericGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterFloat.lift(oldValue),
+                    newValue: FfiConverterFloat.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onStringGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: RustBuffer,
+            newValue: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onStringGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterString.lift(oldValue),
+                    newValue: FfiConverterString.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        onVectorGlobalInputValueChange: { (
+            uniffiHandle: UInt64,
+            globalInputName: RustBuffer,
+            oldValue: RustBuffer,
+            newValue: RustBuffer,
+            _: UnsafeMutableRawPointer,
+            uniffiCallStatus: UnsafeMutablePointer<RustCallStatus>
+        ) in
+            let makeCall = {
+                () throws in
+                guard let uniffiObj = try? FfiConverterTypeGlobalInputsObserver.handleMap.get(handle: uniffiHandle) else {
+                    throw UniffiInternalError.unexpectedStaleHandle
+                }
+                return try uniffiObj.onVectorGlobalInputValueChange(
+                    globalInputName: FfiConverterString.lift(globalInputName),
+                    oldValue: FfiConverterSequenceFloat.lift(oldValue),
+                    newValue: FfiConverterSequenceFloat.lift(newValue)
+                )
+            }
+
+            let writeReturn = { () }
+            uniffiTraitInterfaceCall(
+                callStatus: uniffiCallStatus,
+                makeCall: makeCall,
+                writeReturn: writeReturn
+            )
+        },
+        uniffiFree: { (uniffiHandle: UInt64) in
+            let result = try? FfiConverterTypeGlobalInputsObserver.handleMap.remove(handle: uniffiHandle)
+            if result == nil {
+                print("Uniffi callback interface GlobalInputsObserver: handle missing in uniffiFree")
+            }
+        }
+    )
+}
+
+private func uniffiCallbackInitGlobalInputsObserver() {
+    uniffi_dotlottie_player_fn_init_callback_vtable_globalinputsobserver(&UniffiCallbackInterfaceGlobalInputsObserver.vtable)
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeGlobalInputsObserver: FfiConverter {
+    fileprivate static var handleMap = UniffiHandleMap<GlobalInputsObserver>()
+
+    typealias FfiType = UnsafeMutableRawPointer
+    typealias SwiftType = GlobalInputsObserver
+
+    public static func lift(_ pointer: UnsafeMutableRawPointer) throws -> GlobalInputsObserver {
+        return GlobalInputsObserverImpl(unsafeFromRawPointer: pointer)
+    }
+
+    public static func lower(_ value: GlobalInputsObserver) -> UnsafeMutableRawPointer {
+        guard let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: handleMap.insert(obj: value))) else {
+            fatalError("Cast to UnsafeMutableRawPointer failed")
+        }
+        return ptr
+    }
+
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> GlobalInputsObserver {
+        let v: UInt64 = try readInt(&buf)
+        // The Rust code won't compile if a pointer won't fit in a UInt64.
+        // We have to go via `UInt` because that's the thing that's the size of a pointer.
+        let ptr = UnsafeMutableRawPointer(bitPattern: UInt(truncatingIfNeeded: v))
+        if ptr == nil {
+            throw UniffiInternalError.unexpectedNullPointer
+        }
+        return try lift(ptr!)
+    }
+
+    public static func write(_ value: GlobalInputsObserver, into buf: inout [UInt8]) {
+        // This fiddling is because `Int` is the thing that's the same size as a pointer.
+        // The Rust code won't compile if a pointer won't fit in a `UInt64`.
+        writeInt(&buf, UInt64(bitPattern: Int64(Int(bitPattern: lower(value)))))
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGlobalInputsObserver_lift(_ pointer: UnsafeMutableRawPointer) throws -> GlobalInputsObserver {
+    return try FfiConverterTypeGlobalInputsObserver.lift(pointer)
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGlobalInputsObserver_lower(_ value: GlobalInputsObserver) -> UnsafeMutableRawPointer {
+    return FfiConverterTypeGlobalInputsObserver.lower(value)
+}
+
 public protocol Observer: AnyObject {
     func onComplete()
 
@@ -1491,14 +2017,6 @@ open class ObserverImpl:
     }
     }
 }
-
-// Magic number for the Rust proxy to call using the same mechanism as every other method,
-// to free the callback once it's dropped by Rust.
-private let IDX_CALLBACK_FREE: Int32 = 0
-// Callback return codes
-private let UNIFFI_CALLBACK_SUCCESS: Int32 = 0
-private let UNIFFI_CALLBACK_ERROR: Int32 = 1
-private let UNIFFI_CALLBACK_UNEXPECTED_ERROR: Int32 = 2
 
 // Put the implementation in a struct so we don't pollute the top-level namespace
 private enum UniffiCallbackInterfaceObserver {
@@ -2545,6 +3063,67 @@ public func FfiConverterTypeConfig_lower(_ value: Config) -> RustBuffer {
     return FfiConverterTypeConfig.lower(value)
 }
 
+public struct GradientStop {
+    public var offset: Float
+    public var color: [Float]
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(offset: Float, color: [Float]) {
+        self.offset = offset
+        self.color = color
+    }
+}
+
+extension GradientStop: Equatable, Hashable {
+    public static func == (lhs: GradientStop, rhs: GradientStop) -> Bool {
+        if lhs.offset != rhs.offset {
+            return false
+        }
+        if lhs.color != rhs.color {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(offset)
+        hasher.combine(color)
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeGradientStop: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> GradientStop {
+        return
+            try GradientStop(
+                offset: FfiConverterFloat.read(from: &buf),
+                color: FfiConverterSequenceFloat.read(from: &buf)
+            )
+    }
+
+    public static func write(_ value: GradientStop, into buf: inout [UInt8]) {
+        FfiConverterFloat.write(value.offset, into: &buf)
+        FfiConverterSequenceFloat.write(value.color, into: &buf)
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGradientStop_lift(_ buf: RustBuffer) throws -> GradientStop {
+    return try FfiConverterTypeGradientStop.lift(buf)
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeGradientStop_lower(_ value: GradientStop) -> RustBuffer {
+    return FfiConverterTypeGradientStop.lower(value)
+}
+
 public struct Layout {
     public var fit: Fit
     public var align: [Float]
@@ -2613,16 +3192,18 @@ public struct Manifest {
     public var animations: [ManifestAnimation]
     public var themes: [ManifestTheme]?
     public var stateMachines: [ManifestStateMachine]?
+    public var globalInputs: [ManifestGlobalInputs]?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(version: String?, generator: String?, initial: ManifestInitial?, animations: [ManifestAnimation], themes: [ManifestTheme]?, stateMachines: [ManifestStateMachine]?) {
+    public init(version: String?, generator: String?, initial: ManifestInitial?, animations: [ManifestAnimation], themes: [ManifestTheme]?, stateMachines: [ManifestStateMachine]?, globalInputs: [ManifestGlobalInputs]?) {
         self.version = version
         self.generator = generator
         self.initial = initial
         self.animations = animations
         self.themes = themes
         self.stateMachines = stateMachines
+        self.globalInputs = globalInputs
     }
 }
 
@@ -2646,6 +3227,9 @@ extension Manifest: Equatable, Hashable {
         if lhs.stateMachines != rhs.stateMachines {
             return false
         }
+        if lhs.globalInputs != rhs.globalInputs {
+            return false
+        }
         return true
     }
 
@@ -2656,6 +3240,7 @@ extension Manifest: Equatable, Hashable {
         hasher.combine(animations)
         hasher.combine(themes)
         hasher.combine(stateMachines)
+        hasher.combine(globalInputs)
     }
 }
 
@@ -2671,7 +3256,8 @@ public struct FfiConverterTypeManifest: FfiConverterRustBuffer {
                 initial: FfiConverterOptionTypeManifestInitial.read(from: &buf),
                 animations: FfiConverterSequenceTypeManifestAnimation.read(from: &buf),
                 themes: FfiConverterOptionSequenceTypeManifestTheme.read(from: &buf),
-                stateMachines: FfiConverterOptionSequenceTypeManifestStateMachine.read(from: &buf)
+                stateMachines: FfiConverterOptionSequenceTypeManifestStateMachine.read(from: &buf),
+                globalInputs: FfiConverterOptionSequenceTypeManifestGlobalInputs.read(from: &buf)
             )
     }
 
@@ -2682,6 +3268,7 @@ public struct FfiConverterTypeManifest: FfiConverterRustBuffer {
         FfiConverterSequenceTypeManifestAnimation.write(value.animations, into: &buf)
         FfiConverterOptionSequenceTypeManifestTheme.write(value.themes, into: &buf)
         FfiConverterOptionSequenceTypeManifestStateMachine.write(value.stateMachines, into: &buf)
+        FfiConverterOptionSequenceTypeManifestGlobalInputs.write(value.globalInputs, into: &buf)
     }
 }
 
@@ -2784,15 +3371,78 @@ public func FfiConverterTypeManifestAnimation_lower(_ value: ManifestAnimation) 
     return FfiConverterTypeManifestAnimation.lower(value)
 }
 
-public struct ManifestInitial {
-    public var animation: String?
-    public var stateMachine: String?
+public struct ManifestGlobalInputs {
+    public var id: String
+    public var name: String?
 
     // Default memberwise initializers are never public by default, so we
     // declare one manually.
-    public init(animation: String?, stateMachine: String?) {
+    public init(id: String, name: String?) {
+        self.id = id
+        self.name = name
+    }
+}
+
+extension ManifestGlobalInputs: Equatable, Hashable {
+    public static func == (lhs: ManifestGlobalInputs, rhs: ManifestGlobalInputs) -> Bool {
+        if lhs.id != rhs.id {
+            return false
+        }
+        if lhs.name != rhs.name {
+            return false
+        }
+        return true
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+        hasher.combine(name)
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public struct FfiConverterTypeManifestGlobalInputs: FfiConverterRustBuffer {
+    public static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> ManifestGlobalInputs {
+        return
+            try ManifestGlobalInputs(
+                id: FfiConverterString.read(from: &buf),
+                name: FfiConverterOptionString.read(from: &buf)
+            )
+    }
+
+    public static func write(_ value: ManifestGlobalInputs, into buf: inout [UInt8]) {
+        FfiConverterString.write(value.id, into: &buf)
+        FfiConverterOptionString.write(value.name, into: &buf)
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeManifestGlobalInputs_lift(_ buf: RustBuffer) throws -> ManifestGlobalInputs {
+    return try FfiConverterTypeManifestGlobalInputs.lift(buf)
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+public func FfiConverterTypeManifestGlobalInputs_lower(_ value: ManifestGlobalInputs) -> RustBuffer {
+    return FfiConverterTypeManifestGlobalInputs.lower(value)
+}
+
+public struct ManifestInitial {
+    public var animation: String?
+    public var stateMachine: String?
+    public var bindings: String?
+
+    // Default memberwise initializers are never public by default, so we
+    // declare one manually.
+    public init(animation: String?, stateMachine: String?, bindings: String?) {
         self.animation = animation
         self.stateMachine = stateMachine
+        self.bindings = bindings
     }
 }
 
@@ -2804,12 +3454,16 @@ extension ManifestInitial: Equatable, Hashable {
         if lhs.stateMachine != rhs.stateMachine {
             return false
         }
+        if lhs.bindings != rhs.bindings {
+            return false
+        }
         return true
     }
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(animation)
         hasher.combine(stateMachine)
+        hasher.combine(bindings)
     }
 }
 
@@ -2821,13 +3475,15 @@ public struct FfiConverterTypeManifestInitial: FfiConverterRustBuffer {
         return
             try ManifestInitial(
                 animation: FfiConverterOptionString.read(from: &buf),
-                stateMachine: FfiConverterOptionString.read(from: &buf)
+                stateMachine: FfiConverterOptionString.read(from: &buf),
+                bindings: FfiConverterOptionString.read(from: &buf)
             )
     }
 
     public static func write(_ value: ManifestInitial, into buf: inout [UInt8]) {
         FfiConverterOptionString.write(value.animation, into: &buf)
         FfiConverterOptionString.write(value.stateMachine, into: &buf)
+        FfiConverterOptionString.write(value.bindings, into: &buf)
     }
 }
 
@@ -3364,6 +4020,30 @@ private struct FfiConverterOptionFloat: FfiConverterRustBuffer {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
+private struct FfiConverterOptionBool: FfiConverterRustBuffer {
+    typealias SwiftType = Bool?
+
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterBool.write(value, into: &buf)
+    }
+
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterBool.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
 private struct FfiConverterOptionString: FfiConverterRustBuffer {
     typealias SwiftType = String?
 
@@ -3484,6 +4164,30 @@ private struct FfiConverterOptionSequenceString: FfiConverterRustBuffer {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
+private struct FfiConverterOptionSequenceTypeManifestGlobalInputs: FfiConverterRustBuffer {
+    typealias SwiftType = [ManifestGlobalInputs]?
+
+    static func write(_ value: SwiftType, into buf: inout [UInt8]) {
+        guard let value = value else {
+            writeInt(&buf, Int8(0))
+            return
+        }
+        writeInt(&buf, Int8(1))
+        FfiConverterSequenceTypeManifestGlobalInputs.write(value, into: &buf)
+    }
+
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> SwiftType {
+        switch try readInt(&buf) as Int8 {
+        case 0: return nil
+        case 1: return try FfiConverterSequenceTypeManifestGlobalInputs.read(from: &buf)
+        default: throw UniffiInternalError.unexpectedOptionalTag
+        }
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
 private struct FfiConverterOptionSequenceTypeManifestStateMachine: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestStateMachine]?
 
@@ -3582,6 +4286,31 @@ private struct FfiConverterSequenceString: FfiConverterRustBuffer {
 #if swift(>=5.8)
     @_documentation(visibility: private)
 #endif
+private struct FfiConverterSequenceTypeGradientStop: FfiConverterRustBuffer {
+    typealias SwiftType = [GradientStop]
+
+    static func write(_ value: [GradientStop], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeGradientStop.write(item, into: &buf)
+        }
+    }
+
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [GradientStop] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [GradientStop]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            try seq.append(FfiConverterTypeGradientStop.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
 private struct FfiConverterSequenceTypeManifestAnimation: FfiConverterRustBuffer {
     typealias SwiftType = [ManifestAnimation]
 
@@ -3599,6 +4328,31 @@ private struct FfiConverterSequenceTypeManifestAnimation: FfiConverterRustBuffer
         seq.reserveCapacity(Int(len))
         for _ in 0 ..< len {
             try seq.append(FfiConverterTypeManifestAnimation.read(from: &buf))
+        }
+        return seq
+    }
+}
+
+#if swift(>=5.8)
+    @_documentation(visibility: private)
+#endif
+private struct FfiConverterSequenceTypeManifestGlobalInputs: FfiConverterRustBuffer {
+    typealias SwiftType = [ManifestGlobalInputs]
+
+    static func write(_ value: [ManifestGlobalInputs], into buf: inout [UInt8]) {
+        let len = Int32(value.count)
+        writeInt(&buf, len)
+        for item in value {
+            FfiConverterTypeManifestGlobalInputs.write(item, into: &buf)
+        }
+    }
+
+    static func read(from buf: inout (data: Data, offset: Data.Index)) throws -> [ManifestGlobalInputs] {
+        let len: Int32 = try readInt(&buf)
+        var seq = [ManifestGlobalInputs]()
+        seq.reserveCapacity(Int(len))
+        for _ in 0 ..< len {
+            try seq.append(FfiConverterTypeManifestGlobalInputs.read(from: &buf))
         }
         return seq
     }
@@ -3700,6 +4454,15 @@ public func createDefaultOpenUrlPolicy() -> OpenUrlPolicy {
     })
 }
 
+public func registerFont(fontName: String, fontData: Data) -> Bool {
+    return try! FfiConverterBool.lift(try! rustCall {
+        uniffi_dotlottie_player_fn_func_register_font(
+            FfiConverterString.lower(fontName),
+            FfiConverterData.lower(fontData), $0
+        )
+    })
+}
+
 public func transformThemeToLottieSlots(themeData: String, animationId: String) -> String {
     return try! FfiConverterString.lift(try! rustCall {
         uniffi_dotlottie_player_fn_func_transform_theme_to_lottie_slots(
@@ -3732,6 +4495,9 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_func_create_default_open_url_policy() != 13935 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_func_register_font() != 7201 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_func_transform_theme_to_lottie_slots() != 23836 {
@@ -3774,6 +4540,63 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_get_transform() != 49287 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_boolean() != 60889 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_color() != 32172 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_gradient() != 47776 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_numeric() != 33873 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_string() != 6610 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_get_vector() != 28260 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_load() != 46753 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_load_data() != 39324 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_remove() != 14213 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_boolean() != 24732 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_color() != 11357 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_gradient() != 30564 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_numeric() != 55620 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_string() != 9413 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_set_vector() != 44044 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_start() != 7503 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_stop() != 25906 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_subscribe() != 65266 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_global_inputs_unsubscribe() != 48314 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_intersect() != 12346 {
@@ -3854,7 +4677,7 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_quality() != 55740 {
         return InitializationResult.apiChecksumMismatch
     }
-    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_slots() != 64804 {
+    if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_slots_str() != 29936 {
         return InitializationResult.apiChecksumMismatch
     }
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_set_theme() != 33069 {
@@ -3977,6 +4800,24 @@ private var initializationResult: InitializationResult = {
     if uniffi_dotlottie_player_checksum_method_dotlottieplayer_unsubscribe() != 1373 {
         return InitializationResult.apiChecksumMismatch
     }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_boolean_global_input_value_change() != 37331 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_color_global_input_value_change() != 50004 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_gradient_global_input_value_change() != 61684 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_numeric_global_input_value_change() != 52214 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_string_global_input_value_change() != 24661 {
+        return InitializationResult.apiChecksumMismatch
+    }
+    if uniffi_dotlottie_player_checksum_method_globalinputsobserver_on_vector_global_input_value_change() != 55933 {
+        return InitializationResult.apiChecksumMismatch
+    }
     if uniffi_dotlottie_player_checksum_method_observer_on_complete() != 24930 {
         return InitializationResult.apiChecksumMismatch
     }
@@ -4047,6 +4888,7 @@ private var initializationResult: InitializationResult = {
         return InitializationResult.apiChecksumMismatch
     }
 
+    uniffiCallbackInitGlobalInputsObserver()
     uniffiCallbackInitObserver()
     uniffiCallbackInitStateMachineInternalObserver()
     uniffiCallbackInitStateMachineObserver()
