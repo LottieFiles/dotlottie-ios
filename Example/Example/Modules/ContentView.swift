@@ -12,23 +12,13 @@ import DotLottie
 
 struct ContentView: View {
     var body: some View {
-        // Use NavigationSplitView where available (macOS 13+/iOS 16+) — the modern
-        // replacement for the deprecated NavigationView, which on macOS can collapse
-        // its sidebar to nothing and leave the window blank. Fall back to
-        // NavigationView on older macOS (deployment target goes down to 12.5).
-        if #available(macOS 13.0, iOS 16.0, *) {
-            NavigationSplitView {
-                exampleList
-            } detail: {
-                Text("Select an example")
-                    .font(.title3)
-                    .foregroundColor(.secondary)
-            }
-        } else {
-            NavigationView {
-                exampleList
-            }
-        }
+        DotLottieAnimation(
+            fileName: "pigeon",
+            config: AnimationConfig(
+                autoplay: true,
+                loop: true
+            )
+        ).view()
     }
     
     @ViewBuilder

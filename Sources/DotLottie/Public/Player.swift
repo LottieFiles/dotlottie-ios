@@ -7,6 +7,9 @@
 
 import Foundation
 import CoreGraphics
+#if !os(watchOS)
+import Metal
+#endif
 import DotLottiePlayer
 
 class Player: ObservableObject {
@@ -15,9 +18,16 @@ class Player: ObservableObject {
     public var WIDTH: UInt32 = 512
     public var HEIGHT: UInt32 = 512
     
-    // Software rendering buffer
+    // Software rendering buffer. Points either at a plain heap allocation or, when a Metal
+    // device is available, at the GPU-visible contents of `renderMTLBuffer` (zero-copy: the
+    // core renders straight into memory the GPU reads).
     private var renderBuffer: UnsafeMutablePointer<UInt32>?
     private var bufferSize: Int = 0
+#if !os(watchOS)
+    private var renderMTLBuffer: MTLBuffer?
+    private var renderBufferIsMetalBacked = false
+    private weak var metalDevice: MTLDevice?
+#endif
 
     private var currFrame: Float = -1.0;
     
@@ -93,32 +103,84 @@ class Player: ObservableObject {
         dotLottiePlayer.render()
     }
 
+#if !os(watchOS)
+    /// Supplies the Metal device so the render buffer can be allocated as GPU-visible memory.
+    /// Passing a device switches the buffer to zero-copy (`MTLBuffer`) backing on next allocate.
+    func setMetalDevice(_ device: MTLDevice?) {
+        guard metalDevice !== device else { return }
+        metalDevice = device
+
+        // The buffer is often allocated at load time, before the device is known. In the
+        // size-override path `resize` is never called, so without re-creating it here the buffer
+        // would stay non-Metal-backed and `tickMetalBuffer` would return nil (nothing renders).
+        if bufferSize > 0 {
+            try? allocateRenderBuffer()
+            hasResized = true
+        }
+    }
+#endif
+
     private func allocateRenderBuffer() throws {
-        // Clean up existing buffer
-        deallocateRenderBuffer()
+        let newSize = Int(WIDTH * HEIGHT)
+        let byteLength = newSize * MemoryLayout<UInt32>.stride
 
-        // Allocate new buffer
-        bufferSize = Int(WIDTH * HEIGHT)
-        renderBuffer = UnsafeMutablePointer<UInt32>.allocate(capacity: bufferSize)
-        renderBuffer?.initialize(repeating: 0, count: bufferSize)
+#if !os(watchOS)
+        if let device = metalDevice {
+            // Zero-copy: allocate shared (CPU+GPU) memory and let the core render into it.
+            if renderMTLBuffer == nil || newSize != bufferSize || !renderBufferIsMetalBacked {
+                deallocateRenderBuffer()
+                guard let mtlBuffer = device.makeBuffer(length: byteLength, options: .storageModeShared) else {
+                    throw PlayerErrors.bufferAllocationError
+                }
+                renderMTLBuffer = mtlBuffer
+                renderBuffer = mtlBuffer.contents().bindMemory(to: UInt32.self, capacity: newSize)
+                bufferSize = newSize
+                renderBufferIsMetalBacked = true
+            }
+            memset(renderBuffer!, 0, byteLength)
 
-        // Configure software renderer
+            guard let buffer = renderBuffer else {
+                throw PlayerErrors.bufferAllocationError
+            }
+            if !dotLottiePlayer.setSoftwareTarget(buffer: buffer, width: WIDTH, height: HEIGHT, colorSpace: .abgr8888) {
+                deallocateRenderBuffer()
+                throw PlayerErrors.rendererConfigurationError
+            }
+            return
+        }
+#endif
+
+        // Fallback (e.g. watchOS / no Metal device): plain heap buffer. Reuse it when the pixel
+        // count is unchanged instead of churning a full-resolution allocation on every resize.
+        if let existing = renderBuffer, newSize == bufferSize {
+            memset(existing, 0, byteLength)
+        } else {
+            deallocateRenderBuffer()
+            bufferSize = newSize
+            renderBuffer = UnsafeMutablePointer<UInt32>.allocate(capacity: bufferSize)
+            renderBuffer?.initialize(repeating: 0, count: bufferSize)
+        }
+
         guard let buffer = renderBuffer else {
             throw PlayerErrors.bufferAllocationError
         }
-
-        if !dotLottiePlayer.setSoftwareTarget(
-            buffer: buffer,
-            width: WIDTH,
-            height: HEIGHT,
-            colorSpace: .abgr8888
-        ) {
+        if !dotLottiePlayer.setSoftwareTarget(buffer: buffer, width: WIDTH, height: HEIGHT, colorSpace: .abgr8888) {
             deallocateRenderBuffer()
             throw PlayerErrors.rendererConfigurationError
         }
     }
 
     private func deallocateRenderBuffer() {
+#if !os(watchOS)
+        if renderBufferIsMetalBacked {
+            // Memory is owned by the MTLBuffer; releasing it frees the backing.
+            renderMTLBuffer = nil
+            renderBuffer = nil
+            bufferSize = 0
+            renderBufferIsMetalBacked = false
+            return
+        }
+#endif
         if let buffer = renderBuffer {
             buffer.deinitialize(count: bufferSize)
             buffer.deallocate()
@@ -166,7 +228,37 @@ class Player: ObservableObject {
 
         return nil
     }
-    
+
+#if !os(watchOS)
+    /// Zero-copy counterpart to `tick(dt:)`: advances the animation and, when the frame
+    /// changed, returns the GPU-visible `MTLBuffer` the core rendered into (premultiplied
+    /// RGBA8, tightly packed). The Metal render path reads it directly in a shader, avoiding
+    /// both the per-frame `CGImage` copy and Core Image.
+    ///
+    /// Returns `nil` when the frame is unchanged or the buffer is not Metal-backed.
+    func tickMetalBuffer(dt: Float) -> (buffer: MTLBuffer, width: Int, height: Int)? {
+        if !self.isLoaded() {
+            return nil
+        }
+
+        let tick = dotLottiePlayer.tick(dt: dt)
+
+        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
+            self.currFrame = dotLottiePlayer.currentFrame()
+            hasRenderedFirstFrame = true
+            hasResized = false
+
+            guard let mtlBuffer = renderMTLBuffer else {
+                return nil
+            }
+
+            return (mtlBuffer, Int(self.WIDTH), Int(self.HEIGHT))
+        }
+
+        return nil
+    }
+#endif
+
     public func subscribe(observer: Observer) {
         dotLottiePlayer.subscribe(observer: observer)
     }
