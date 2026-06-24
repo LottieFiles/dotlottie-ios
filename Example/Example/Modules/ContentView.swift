@@ -12,13 +12,23 @@ import DotLottie
 
 struct ContentView: View {
     var body: some View {
-        DotLottieAnimation(
-            fileName: "pigeon",
-            config: AnimationConfig(
-                autoplay: true,
-                loop: true
-            )
-        ).view()
+        // Use NavigationSplitView where available (macOS 13+/iOS 16+) — the modern
+        // replacement for the deprecated NavigationView, which on macOS can collapse
+        // its sidebar to nothing and leave the window blank. Fall back to
+        // NavigationView on older macOS (deployment target goes down to 12.5).
+        if #available(macOS 13.0, iOS 16.0, *) {
+            NavigationSplitView {
+                exampleList
+            } detail: {
+                Text("Select an example")
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+            }
+        } else {
+            NavigationView {
+                exampleList
+            }
+        }
     }
     
     @ViewBuilder
@@ -36,39 +46,39 @@ struct ContentView: View {
                     UIKitExampleViewWrapper()
                 }
 #endif
-                    
-                    NavigationLink("SwiftUI Example (DotLottiePlayerView)") {
-                        SwiftUIExampleView()
+                
+                NavigationLink("SwiftUI Example (DotLottiePlayerView)") {
+                    SwiftUIExampleView()
+                }
+            }
+            
+            Section(header: Text("URL Loading")) {
+                NavigationLink("Load from URL") {
+                    ScrollView {
+                        VStack(spacing: 24) {
+                            Text("URL Loading")
+                                .font(.headline)
+                                .padding(.top)
+                            Example8_URLLoading()
+                            Spacer(minLength: 24)
+                        }
                     }
+                    .navigationTitle("URL Loading")
+                }
+            }
+            
+            Section(header: Text("Layout")) {
+                NavigationLink("Dynamic Layout (Fit & Alignment)") {
+                    ScrollView { Example12_DynamicLayout() }
+                        .navigationTitle("Dynamic Layout")
+                }
+            }
+            
+            Section(header: Text("State Machine & Interactivity")) {
+                NavigationLink("SwiftUI State Machine Example") {
+                    Example7_StateMachine()
                 }
                 
-                Section(header: Text("URL Loading")) {
-                    NavigationLink("Load from URL") {
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                Text("URL Loading")
-                                    .font(.headline)
-                                    .padding(.top)
-                                Example8_URLLoading()
-                                Spacer(minLength: 24)
-                            }
-                        }
-                        .navigationTitle("URL Loading")
-                    }
-                }
-
-                Section(header: Text("Layout")) {
-                    NavigationLink("Dynamic Layout (Fit & Alignment)") {
-                        ScrollView { Example12_DynamicLayout() }
-                            .navigationTitle("Dynamic Layout")
-                    }
-                }
-
-                Section(header: Text("State Machine & Interactivity")) {
-                    NavigationLink("SwiftUI State Machine Example") {
-                        Example7_StateMachine()
-                    }
-                    
 #if canImport(UIKit)
                 NavigationLink("UIKit State Machine Example") {
                     UIKitStateMachineViewWrapper()
@@ -82,7 +92,7 @@ struct ContentView: View {
                 NavigationLink("Test (CPU vs WebGPU)") {
                     Example10_StressTest()
                 }
-
+                
                 NavigationLink("Many Animations (CPU vs WebGPU)") {
                     Example11_ManyAnimations()
                 }

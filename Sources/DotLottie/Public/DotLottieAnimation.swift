@@ -296,7 +296,6 @@ public final class DotLottieAnimation: ObservableObject {
     /// Passes the .lottie Data to the Core
     private func loadDotLottie(data: Data) throws {
         do {
-            print("LOADING DOTLOTTIE DATA: \(self.animationModel.width), \(self.animationModel.height)")
             try player.loadDotlottieData(data: data, width: self.animationModel.width, height: self.animationModel.height)
             
             if config.stateMachineId != "" {
@@ -804,7 +803,6 @@ public final class DotLottieAnimation: ObservableObject {
         self.animationModel.width = width
         self.animationModel.height = height
         
-        print("Resize \(width) \(height)")
         do {
             try player.resize(width: width, height: height)
             
