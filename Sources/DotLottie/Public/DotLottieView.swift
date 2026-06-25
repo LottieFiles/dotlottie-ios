@@ -57,8 +57,8 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
         }
 #endif
         
-        self.mtkView.framebufferOnly = false
-        
+        self.mtkView.framebufferOnly = true
+
         self.mtkView.delegate = context.coordinator
         
         self.mtkView.preferredFramesPerSecond = self.dotLottieViewModel.framerate

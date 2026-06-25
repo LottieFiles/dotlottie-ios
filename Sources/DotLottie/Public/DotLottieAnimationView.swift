@@ -68,8 +68,8 @@ public class DotLottieAnimationView: PlatformViewBase, DotLottie {
         mtkView.layer?.backgroundColor = NSColor.clear.cgColor
 #endif
         
-        mtkView.framebufferOnly = false
-        
+        mtkView.framebufferOnly = true
+
         mtkView.delegate = self.coordinator
         
         mtkView.preferredFramesPerSecond = self.dotLottieViewModel.framerate

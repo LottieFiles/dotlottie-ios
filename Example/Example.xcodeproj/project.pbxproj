@@ -34,14 +34,15 @@
 		0A579CD02EB913310062BA6E /* Example7_StateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A579CCF2EB913310062BA6E /* Example7_StateMachine.swift */; };
 		0A579CD22EB9244D0062BA6E /* adding-guests.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 0A579CD12EB9244D0062BA6E /* adding-guests.lottie */; };
 		223E64DD2FD83CD600D7D310 /* BrandToggle.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 223E64DC2FD83CD600D7D310 /* BrandToggle.lottie */; };
+		2263DBCA2FEACE1300722774 /* ob1.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 2263DBC92FEACE1300722774 /* ob1.lottie */; };
 		226C88B02AFE98FC00A72D3A /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C88AF2AFE98FC00A72D3A /* ExampleApp.swift */; };
 		226C88B22AFE98FC00A72D3A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226C88B12AFE98FC00A72D3A /* ContentView.swift */; };
-		22F05B0B2EB8D53A0062BA6E /* ContentView_tvOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F05A0A2EB8D53A0062BA6E /* ContentView_tvOS.swift */; };
 		226C88B42AFE98FD00A72D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 226C88B32AFE98FD00A72D3A /* Assets.xcassets */; };
 		226C88B82AFE98FD00A72D3A /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 226C88B72AFE98FD00A72D3A /* Preview Assets.xcassets */; };
 		227EF5372FE2E5A30050FC5E /* Example11_ManyAnimations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227EF5392FE2E5A30050FC5E /* Example11_ManyAnimations.swift */; };
 		227EF5382FE2E5A30050FC5E /* Example10_WebGPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 227EF53A2FE2E5A30050FC5E /* Example10_WebGPU.swift */; };
 		22BF20552FC82BFF00316B28 /* Example8_URLLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BF20542FC82BFF00316B28 /* Example8_URLLoading.swift */; };
+		22F05B0B2EB8D53A0062BA6E /* ContentView_tvOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F05A0A2EB8D53A0062BA6E /* ContentView_tvOS.swift */; };
 		6C6F39FC2DCC9C28006D144D /* loadingAnimation.json in Resources */ = {isa = PBXBuildFile; fileRef = 6C6F39FB2DCC9C28006D144D /* loadingAnimation.json */; };
 		6C83FFF92DD33026003F78FD /* confetti.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 6C83FFF82DD33026003F78FD /* confetti.lottie */; };
 		6CD9E1882E0AAB2D007A17E9 /* Flow 1.json in Resources */ = {isa = PBXBuildFile; fileRef = 6CD9E1872E0AAB2D007A17E9 /* Flow 1.json */; };
@@ -87,10 +88,10 @@
 		0A579CCF2EB913310062BA6E /* Example7_StateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example7_StateMachine.swift; sourceTree = "<group>"; };
 		0A579CD12EB9244D0062BA6E /* adding-guests.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "adding-guests.lottie"; sourceTree = "<group>"; };
 		223E64DC2FD83CD600D7D310 /* BrandToggle.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = BrandToggle.lottie; sourceTree = "<group>"; };
+		2263DBC92FEACE1300722774 /* ob1.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = ob1.lottie; sourceTree = "<group>"; };
 		226C88AC2AFE98FC00A72D3A /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		226C88AF2AFE98FC00A72D3A /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
 		226C88B12AFE98FC00A72D3A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		22F05A0A2EB8D53A0062BA6E /* ContentView_tvOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView_tvOS.swift; sourceTree = "<group>"; };
 		226C88B32AFE98FD00A72D3A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		226C88B52AFE98FD00A72D3A /* Example.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Example.entitlements; sourceTree = "<group>"; };
 		226C88B72AFE98FD00A72D3A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -98,6 +99,7 @@
 		227EF53A2FE2E5A30050FC5E /* Example10_WebGPU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example10_WebGPU.swift; sourceTree = "<group>"; };
 		22BF20542FC82BFF00316B28 /* Example8_URLLoading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example8_URLLoading.swift; sourceTree = "<group>"; };
 		22ED4A8B2F4C7D9300BEEB42 /* DotLottieTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DotLottieTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		22F05A0A2EB8D53A0062BA6E /* ContentView_tvOS.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView_tvOS.swift; sourceTree = "<group>"; };
 		6C6F39FB2DCC9C28006D144D /* loadingAnimation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = loadingAnimation.json; sourceTree = "<group>"; };
 		6C78CDE52B0B4A8F008E9D26 /* Thorvg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Thorvg.framework; path = "../dotlottie-ios/Sources/Thorvg/Thorvg/artifacts/ios-simulator-aarch64/Thorvg.framework"; sourceTree = "<group>"; };
 		6C83FFF82DD33026003F78FD /* confetti.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = confetti.lottie; sourceTree = "<group>"; };
@@ -152,6 +154,7 @@
 		0A579CAD2EB90F980062BA6E /* Animations */ = {
 			isa = PBXGroup;
 			children = (
+				2263DBC92FEACE1300722774 /* ob1.lottie */,
 				223E64DC2FD83CD600D7D310 /* BrandToggle.lottie */,
 				6C83FFF82DD33026003F78FD /* confetti.lottie */,
 				6CD9E1872E0AAB2D007A17E9 /* Flow 1.json */,
@@ -341,6 +344,7 @@
 				0A579CBC2EB90FD60062BA6E /* button.json in Resources */,
 				0A579CBD2EB90FD60062BA6E /* theming.lottie in Resources */,
 				0A579CBE2EB90FD60062BA6E /* idle.json in Resources */,
+				2263DBCA2FEACE1300722774 /* ob1.lottie in Resources */,
 				0A579CBF2EB90FD60062BA6E /* pigeon.lottie in Resources */,
 				0A579CC02EB90FD60062BA6E /* click-button.json in Resources */,
 				0A579CC12EB90FD60062BA6E /* loader.json in Resources */,

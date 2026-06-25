@@ -9,6 +9,7 @@ import Foundation
 import CoreGraphics
 #if !os(watchOS)
 import CoreImage
+import Metal
 #endif
 
 #if os(iOS)
@@ -250,6 +251,19 @@ public final class DotLottieAnimation: ObservableObject {
     public func tick(dt: Float) -> CGImage? {
         player.tick(dt: dt)
     }
+
+#if !os(watchOS)
+    /// Advances the animation and returns the GPU-visible `MTLBuffer` the core rendered into
+    /// for the current frame (Metal render path). Returns `nil` when the frame is unchanged.
+    func tickMetalBuffer(dt: Float) -> (buffer: MTLBuffer, width: Int, height: Int)? {
+        player.tickMetalBuffer(dt: dt)
+    }
+
+    /// Supplies the Metal device so the render buffer can be allocated GPU-visible (zero-copy).
+    func setMetalDevice(_ device: MTLDevice?) {
+        player.setMetalDevice(device)
+    }
+#endif
 
     /// Renders the current frame without advancing time.
     public func frameImage() -> CGImage? {
