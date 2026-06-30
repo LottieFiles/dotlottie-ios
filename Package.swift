@@ -31,7 +31,8 @@ let package = Package(
             path: "Sources/DotLottie/"),
         .testTarget(
             name: "DotLottieTests",
-            dependencies: ["DotLottie"]),
+            dependencies: ["DotLottie"],
+            resources: [.process("Fixtures")]),
         .binaryTarget(
             name: "DotLottiePlayer",
             path: "./Sources/DotLottieCore/DotLottiePlayer.xcframework"

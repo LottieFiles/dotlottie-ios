@@ -105,7 +105,9 @@ open class DotLottiePlayerUIView: PlatformView {
     
     /// Duration of the animation in seconds
     public var duration: TimeInterval {
-        TimeInterval(dotLottieAnimation?.duration() ?? 0.0)
+        // `DotLottieAnimation.duration()` is reported in milliseconds; TimeInterval
+        // is seconds.
+        TimeInterval((dotLottieAnimation?.duration() ?? 0.0) / 1000.0)
     }
     
     /// A closure that is called when the animation is loaded
