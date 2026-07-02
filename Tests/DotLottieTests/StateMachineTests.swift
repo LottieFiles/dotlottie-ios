@@ -42,7 +42,8 @@ final class StateMachineTests: XCTestCase {
     func testCurrentStateAfterStart() throws {
         let animation = try loadedSMAnimation(Fixtures.smToggleJSON)
         XCTAssertTrue(animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false)))
-        XCTAssertFalse(animation.stateMachineCurrentState().isEmpty, "a running SM should report a current state")
+        // sm-toggle's initial state is "initial-wait".
+        XCTAssertEqual(animation.stateMachineCurrentState(), "initial-wait")
     }
 
     // MARK: - Inputs
@@ -92,11 +93,10 @@ final class StateMachineTests: XCTestCase {
 
     // MARK: - Framework setup flags
 
-    func testFrameworkSetupReturnsEventList() throws {
+    func testFrameworkSetupReflectsPointerInteraction() throws {
         let animation = try loadedSMAnimation(Fixtures.smToggleJSON)
         XCTAssertTrue(animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false)))
-        // sm-toggle declares a PointerDown interaction; framework setup should be non-empty.
-        let events = animation.stateMachineFrameworkSetup()
-        XCTAssertNotNil(events)
+        // sm-toggle declares a PointerDown interaction, so the framework registers it.
+        XCTAssertTrue(animation.stateMachineFrameworkSetup().contains("pointerdown"))
     }
 }

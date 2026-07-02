@@ -38,11 +38,16 @@ final class SegmentsMarkersThemesTests: XCTestCase {
         XCTAssertTrue(animation.markers().isEmpty, "minimal fixture defines no markers")
     }
 
-    func testMarkersAreReadableFromFixtures() {
-        // Markers depend on the asset; just assert the call is safe and returns an array.
-        let animation = DotLottieAnimation(dotLottieData: Fixtures.coffeeLottie, config: AnimationConfig())
+    func testMarkersFromFixture() {
+        // pigeon.lottie declares three markers: bird (0, 22), explosion (22, 11), feather (33, 77).
+        let animation = DotLottieAnimation(dotLottieData: Fixtures.pigeonLottie, config: AnimationConfig())
         _ = waitUntilLoaded(animation)
-        XCTAssertNotNil(animation.markers())
+        let markers = animation.markers()
+        XCTAssertEqual(Set(markers.map(\.name)), ["bird", "explosion", "feather"])
+
+        let bird = try? XCTUnwrap(markers.first(where: { $0.name == "bird" }))
+        XCTAssertEqual(bird?.time ?? -1, 0, accuracy: 0.5)
+        XCTAssertEqual(bird?.duration ?? -1, 22, accuracy: 0.5)
     }
 
     // MARK: - Themes

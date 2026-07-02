@@ -35,10 +35,9 @@ public class DotLottieAnimationView: PlatformViewBase, DotLottie {
         
         super.init(frame: .zero)
         
-        dotLottieViewModel.$framerate.sink { value in
-            if self.mtkView != nil {
-                self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
-            }
+        dotLottieViewModel.$framerate.sink { [weak self] _ in
+            guard let self, self.mtkView != nil else { return }
+            self.mtkView.preferredFramesPerSecond = self.dotLottieViewModel.framerate
         }.store(in: &cancellableBag)
         
         
@@ -52,7 +51,7 @@ public class DotLottieAnimationView: PlatformViewBase, DotLottie {
     private func setupMetalView() {
         mtkView = MTKView(frame: bounds)
         
-        self.coordinator = Coordinator(self, mtkView: mtkView)
+        self.coordinator = Coordinator(self.dotLottieViewModel, mtkView: mtkView)
         
         if let metalDevice = MTLCreateSystemDefaultDevice() {
             mtkView.device = metalDevice

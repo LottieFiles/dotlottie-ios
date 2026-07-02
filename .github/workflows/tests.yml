@@ -1,0 +1,37 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: swift test (macOS)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - name: swift test
+        run: swift test
+    # Runs the full suite on the host, including the AnimationView / Coordinator
+    # leak guard. The iOS-only CADisplayLink guard is compiled out here.
+
+  ios-simulator:
+    name: xcodebuild test (iOS Simulator)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      # Bump the device name if the runner image stops shipping it
+      # (`xcrun simctl list devices available`).
+      - name: xcodebuild test
+        run: >
+          xcodebuild test
+          -scheme DotLottie
+          -destination 'platform=iOS Simulator,name=iPhone 15'
+          -skipPackagePluginValidation
+          CODE_SIGNING_ALLOWED=NO

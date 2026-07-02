@@ -36,11 +36,11 @@ public struct DotLottieView: ViewRepresentable, DotLottie {
     
     public func makeCoordinator() -> Coordinator {
 #if os(iOS)
-        return Coordinator(self, mtkView: self.mtkView)
+        return Coordinator(self.dotLottieViewModel, mtkView: self.mtkView)
 #elseif os(macOS)
-        return Coordinator(self, mtkView: self.mtkView)
+        return Coordinator(self.dotLottieViewModel, mtkView: self.mtkView)
 #else
-        return Coordinator(self, mtkView: self.mtkView)
+        return Coordinator(self.dotLottieViewModel, mtkView: self.mtkView)
 #endif
     }
     

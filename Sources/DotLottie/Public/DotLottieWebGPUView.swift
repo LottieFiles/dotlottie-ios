@@ -51,6 +51,8 @@ public class DotLottieWebGPUView: PlatformBase {
 
 #if os(iOS)
     private var displayLink: CADisplayLink?
+    /// Weak proxy target for `displayLink` (see `startDisplayLink`).
+    private var displayLinkProxy: DisplayLinkProxy?
     /// Custom recognizer that feeds touches to the state machine (same one the
     /// software-rendering path uses), so tap-vs-drag and double-tap behaviour match.
     private var gestureManager: GestureManager?
@@ -186,17 +188,22 @@ public class DotLottieWebGPUView: PlatformBase {
 
 #if os(iOS)
     private func startDisplayLink() {
-        displayLink = CADisplayLink(target: self, selector: #selector(onDisplayLink))
-        displayLink?.add(to: .main, forMode: .common)
+        // Route the CADisplayLink through a weak proxy. CADisplayLink retains its
+        // target and the run loop retains the link, so `target: self` would pin the
+        // view alive forever (run loop → link → self), and `deinit` (which
+        // invalidates the link) could never run. The proxy holds `self` weakly, so
+        // the view can deallocate and its deinit tears the link down.
+        let proxy = DisplayLinkProxy { [weak self] in self?.performTick() }
+        let link = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.handleDisplayLink(_:)))
+        link.add(to: .main, forMode: .common)
+        displayLinkProxy = proxy
+        displayLink = link
     }
 
     private func stopDisplayLink() {
         displayLink?.invalidate()
         displayLink = nil
-    }
-
-    @objc private func onDisplayLink(_ link: CADisplayLink) {
-        performTick()
+        displayLinkProxy = nil
     }
 
 #elseif os(macOS)
@@ -523,5 +530,21 @@ extension DotLottieWebGPUView: GestureManagerDelegate {
     }
 #endif
 }
+
+#if os(iOS)
+/// Forwards `CADisplayLink` callbacks to a weakly-held owner so the link — retained
+/// by the run loop — never keeps the view alive. See `DotLottieWebGPUView.startDisplayLink`.
+private final class DisplayLinkProxy {
+    private let onTick: () -> Void
+
+    init(_ onTick: @escaping () -> Void) {
+        self.onTick = onTick
+    }
+
+    @objc func handleDisplayLink(_ link: CADisplayLink) {
+        onTick()
+    }
+}
+#endif
 
 #endif
