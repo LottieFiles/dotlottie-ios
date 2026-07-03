@@ -35,12 +35,12 @@ public class DotLottieAnimationView: PlatformViewBase, DotLottie {
         
         super.init(frame: .zero)
         
-        dotLottieViewModel.$framerate.sink { value in
+        dotLottieViewModel.$framerate.sink { [weak self] value in
+            guard let self else { return }
             if self.mtkView != nil {
                 self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
             }
         }.store(in: &cancellableBag)
-        
         
         setupMetalView()
     }

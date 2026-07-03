@@ -186,7 +186,8 @@ public class DotLottieWebGPUView: PlatformBase {
 
 #if os(iOS)
     private func startDisplayLink() {
-        displayLink = CADisplayLink(target: self, selector: #selector(onDisplayLink))
+        let proxy = DisplayLinkProxy(target: self)
+        displayLink = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.onDisplayLink(_:)))
         displayLink?.add(to: .main, forMode: .common)
     }
 
@@ -195,7 +196,7 @@ public class DotLottieWebGPUView: PlatformBase {
         displayLink = nil
     }
 
-    @objc private func onDisplayLink(_ link: CADisplayLink) {
+    @objc fileprivate func onDisplayLink(_ link: CADisplayLink) {
         performTick()
     }
 
@@ -523,5 +524,20 @@ extension DotLottieWebGPUView: GestureManagerDelegate {
     }
 #endif
 }
+
+#if os(iOS)
+/// Weak proxy used as the CADisplayLink target to avoid a retain cycle.
+private final class DisplayLinkProxy {
+    private weak var target: DotLottieWebGPUView?
+
+    init(target: DotLottieWebGPUView) {
+        self.target = target
+    }
+
+    @objc func onDisplayLink(_ link: CADisplayLink) {
+        target?.onDisplayLink(link)
+    }
+}
+#endif
 
 #endif
