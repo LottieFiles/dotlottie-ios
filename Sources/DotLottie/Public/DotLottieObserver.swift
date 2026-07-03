@@ -8,7 +8,8 @@
 import Foundation
 
 class DotLottieObserver: Observer {
-    var observedPlayer: Player?
+    
+    weak var observedPlayer: Player?
     
     init(_ observedPlayer: Player) {
         self.observedPlayer = observedPlayer
