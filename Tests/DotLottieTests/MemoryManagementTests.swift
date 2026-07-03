@@ -31,6 +31,23 @@ final class MemoryManagementTests: XCTestCase {
             "DotLottieAnimationView leaked – a view/coordinator or $framerate-sink retain cycle was reintroduced"
         )
     }
+
+    /// The high-level wrapper embeds a `DotLottieAnimationView`, a gesture manager,
+    /// and a Combine loading observer. None should retain the wrapper: the loading
+    /// observer captures `[weak self]` and the gesture delegate is `weak`.
+    func testPlayerUIViewDeallocatesWhileViewModelStaysAlive() throws {
+        try XCTSkipIf(MTLCreateSystemDefaultDevice() == nil, "No Metal device available – skipping")
+
+        let viewModel = makeMinimalAnimation()
+        weak var weakView: DotLottiePlayerUIView?
+
+        autoreleasepool {
+            let view = DotLottiePlayerUIView(dotLottieAnimation: viewModel)
+            weakView = view
+        }
+
+        XCTAssertNil(weakView, "DotLottiePlayerUIView leaked – a retain cycle was introduced in the wrapper")
+    }
 #endif
 
 #if os(iOS)
