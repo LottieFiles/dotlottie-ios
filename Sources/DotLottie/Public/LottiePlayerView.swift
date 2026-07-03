@@ -44,7 +44,8 @@ public struct DotLottiePlayerView<Placeholder: View>: View {
                     currentProgress: currentProgress,
                     currentFrame: currentFrame,
                     playbackMode: playbackMode,
-                    configurations: configurations
+                    configurations: configurations,
+                    animationDidLoad: animationDidLoad
                 )
             } else {
                 placeholder?()
@@ -200,7 +201,6 @@ public struct DotLottiePlayerView<Placeholder: View>: View {
                 let animation = try await loadAnimation()
                 await MainActor.run {
                     remoteAnimation = animation
-                    animationDidLoad?(animation)
                 }
             } catch {
                 print("Failed to load dotlottie animation: \(error)")
@@ -244,7 +244,28 @@ private struct DotLottiePlayerViewRepresentable: PlatformViewRepresentable {
     let currentFrame: Double?
     let playbackMode: DotLottiePlaybackMode
     let configurations: [(DotLottiePlayerUIView) -> Void]
-    
+    let animationDidLoad: ((DotLottieAnimation?) -> Void)?
+
+    final class Coordinator {
+        private var hasFired = false
+        private var loadedAnimation: DotLottieAnimation?
+
+        func animationDidLoad(
+            _ animation: DotLottieAnimation?,
+            callback: ((DotLottieAnimation?) -> Void)?)
+        {
+            // Fire once per loaded animation; re-fire if a different animation loads (reload).
+            guard !hasFired || loadedAnimation !== animation else { return }
+            hasFired = true
+            loadedAnimation = animation
+            callback?(animation)
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+
     #if canImport(UIKit)
     func makeUIView(context: Context) -> PlatformViewType {
         makePlatformView(context: context)
@@ -274,6 +295,13 @@ private struct DotLottiePlayerViewRepresentable: PlatformViewRepresentable {
         let view = DotLottiePlayerUIView(dotLottieAnimation: animation, config: config)
         view.loopMode = loopMode
         view.animationSpeed = CGFloat(animationSpeed)
+
+        if animationDidLoad != nil {
+            let coordinator = context.coordinator
+            view.animationLoaded = { [weak coordinator] _, animation in
+                coordinator?.animationDidLoad(animation, callback: animationDidLoad)
+            }
+        }
         
         view.translatesAutoresizingMaskIntoConstraints = false
         

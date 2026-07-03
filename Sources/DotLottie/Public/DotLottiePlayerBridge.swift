@@ -897,8 +897,34 @@ public class DotLottiePlayer {
     @discardableResult
     public func setTextSlot(slotId: String, text: String) -> Bool {
         guard let ptr = playerPtr else { return false }
+
+        // Merge the new text value over the existing text document
+        // so properties like font, size and colour are preserved, only
+        // overriding the text content ("t").
+        var mergedTextDoc: [String: Any] = ["t": text]
+
+        if let existingStr = slotId.withCString({ idPtr in
+                stringFromBufferAPI { dotlottie_get_slot_str(ptr, idPtr, $0, $1) }
+            }),
+           let existingData = existingStr.data(using: .utf8),
+           let existingValue = try? JSONSerialization.jsonObject(with: existingData) as? [String: Any],
+           let keyframes = existingValue["k"] as? [[String: Any]],
+           let firstSlot = keyframes.first?["s"] as? [String: Any] {
+            mergedTextDoc = firstSlot.merging(["t": text]) { _, new in new }
+        }
+
+        let slot: [String: Any] = [
+            "a": 0,
+            "k": [["t": 0, "s": mergedTextDoc]],
+        ]
+
+        guard let slotData = try? JSONSerialization.data(withJSONObject: slot),
+              let slotJson = String(data: slotData, encoding: .utf8) else {
+            return false
+        }
+
         return slotId.withCString { idPtr in
-            text.withCString { dotlottie_set_text_slot(ptr, idPtr, $0) == Success }
+            slotJson.withCString { dotlottie_set_slot_str(ptr, idPtr, $0) == Success }
         }
     }
 

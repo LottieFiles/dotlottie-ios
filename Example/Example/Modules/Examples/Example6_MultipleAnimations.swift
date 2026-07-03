@@ -50,7 +50,6 @@ struct Example6_MultipleAnimations: View {
         "button",
         "click-button",
         "clipped-traffic-lights",
-        "confettiSRFK2025",
         "hold-button",
         "idle",
         "loader",

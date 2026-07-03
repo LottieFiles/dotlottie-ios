@@ -52,8 +52,6 @@ struct Example12_DynamicLayout: View {
 
             // Fit mode
             VStack(alignment: .leading, spacing: 4) {
-                Text("Fit")
-                    .font(.caption)
                 Picker("Fit", selection: $fit) {
                     ForEach(fits, id: \.0) { item in
                         Text(item.1).tag(item.0)
