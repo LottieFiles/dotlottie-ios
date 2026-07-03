@@ -1,4 +1,0 @@
-module WgpuNative {
-  header "webgpu/wgpu.h"
-  export *
-}
