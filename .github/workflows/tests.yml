@@ -1,37 +1,61 @@
 name: Tests
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
 
+# Cancel superseded runs for the same PR (or branch) so only the latest counts.
 concurrency:
-  group: tests-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   macos:
-    name: swift test (macOS)
+    name: Test (macOS)
     runs-on: macos-14
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - run: swift --version
-      - name: swift test
+        # The tests use the prebuilt XCFrameworks in Sources/DotLottieCore. The
+        # git submodules are only needed for *custom* framework builds and one
+        # uses an SSH URL, so we deliberately do NOT check them out.
+      - name: Swift version
+        run: swift --version
+      - name: Run tests
         run: swift test
-    # Runs the full suite on the host, including the AnimationView / Coordinator
-    # leak guard. The iOS-only CADisplayLink guard is compiled out here.
+      # Runs the whole suite on the host, including the AnimationView / Coordinator
+      # deallocation guard. The iOS-only CADisplayLink guard is compiled out here.
 
-  ios-simulator:
-    name: xcodebuild test (iOS Simulator)
+  ios:
+    name: Test (iOS Simulator)
     runs-on: macos-14
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      # Bump the device name if the runner image stops shipping it
-      # (`xcrun simctl list devices available`).
-      - name: xcodebuild test
-        run: >
-          xcodebuild test
-          -scheme DotLottie
-          -destination 'platform=iOS Simulator,name=iPhone 15'
-          -skipPackagePluginValidation
-          CODE_SIGNING_ALLOWED=NO
+      - name: Select an available iPhone simulator
+        id: sim
+        run: |
+          set -euo pipefail
+          # Resolve a device that actually exists on the runner image, instead of
+          # hardcoding a name that breaks when the image is updated.
+          name="$(xcrun simctl list devices available | grep -oE 'iPhone [0-9][^(]*' | head -1 | xargs)"
+          if [ -z "$name" ]; then
+            echo "::error::No available iPhone simulator found on the runner"
+            xcrun simctl list devices available
+            exit 1
+          fi
+          echo "Using simulator: $name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+      - name: Run tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -scheme DotLottie \
+            -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
+            -skipPackagePluginValidation \
+            CODE_SIGNING_ALLOWED=NO
+        # Includes the iOS-only DotLottieWebGPUView CADisplayLink leak guard.
