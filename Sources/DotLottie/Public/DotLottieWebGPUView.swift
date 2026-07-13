@@ -51,8 +51,6 @@ public class DotLottieWebGPUView: PlatformBase {
 
 #if os(iOS)
     private var displayLink: CADisplayLink?
-    /// Weak proxy target for `displayLink` (see `startDisplayLink`).
-    private var displayLinkProxy: DisplayLinkProxy?
     /// Custom recognizer that feeds touches to the state machine (same one the
     /// software-rendering path uses), so tap-vs-drag and double-tap behaviour match.
     private var gestureManager: GestureManager?
@@ -188,22 +186,18 @@ public class DotLottieWebGPUView: PlatformBase {
 
 #if os(iOS)
     private func startDisplayLink() {
-        // Route the CADisplayLink through a weak proxy. CADisplayLink retains its
-        // target and the run loop retains the link, so `target: self` would pin the
-        // view alive forever (run loop → link → self), and `deinit` (which
-        // invalidates the link) could never run. The proxy holds `self` weakly, so
-        // the view can deallocate and its deinit tears the link down.
-        let proxy = DisplayLinkProxy { [weak self] in self?.performTick() }
-        let link = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.handleDisplayLink(_:)))
-        link.add(to: .main, forMode: .common)
-        displayLinkProxy = proxy
-        displayLink = link
+        let proxy = DisplayLinkProxy(target: self)
+        displayLink = CADisplayLink(target: proxy, selector: #selector(DisplayLinkProxy.onDisplayLink(_:)))
+        displayLink?.add(to: .main, forMode: .common)
     }
 
     private func stopDisplayLink() {
         displayLink?.invalidate()
         displayLink = nil
-        displayLinkProxy = nil
+    }
+
+    @objc fileprivate func onDisplayLink(_ link: CADisplayLink) {
+        performTick()
     }
 
 #elseif os(macOS)
@@ -532,17 +526,16 @@ extension DotLottieWebGPUView: GestureManagerDelegate {
 }
 
 #if os(iOS)
-/// Forwards `CADisplayLink` callbacks to a weakly-held owner so the link — retained
-/// by the run loop — never keeps the view alive. See `DotLottieWebGPUView.startDisplayLink`.
+/// Weak proxy used as the CADisplayLink target to avoid a retain cycle.
 private final class DisplayLinkProxy {
-    private let onTick: () -> Void
+    private weak var target: DotLottieWebGPUView?
 
-    init(_ onTick: @escaping () -> Void) {
-        self.onTick = onTick
+    init(target: DotLottieWebGPUView) {
+        self.target = target
     }
 
-    @objc func handleDisplayLink(_ link: CADisplayLink) {
-        onTick()
+    @objc func onDisplayLink(_ link: CADisplayLink) {
+        target?.onDisplayLink(link)
     }
 }
 #endif

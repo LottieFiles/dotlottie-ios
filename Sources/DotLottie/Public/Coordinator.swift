@@ -86,10 +86,7 @@ class InteractiveMTKView: MTKView {
 
 // Unified Coordinator for all platforms
 public class Coordinator: NSObject, MTKViewDelegate {
-    // Holds the view-model (a standalone object), not the view. Holding the view
-    // here would create a `view → coordinator → view` retain cycle, because the
-    // view owns the coordinator via a strong stored property.
-    private var dotLottieViewModel: DotLottieAnimation
+    private let viewModel: DotLottieAnimation
     private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
@@ -102,10 +99,11 @@ public class Coordinator: NSObject, MTKViewDelegate {
     private var dpr: CGFloat = 1.0
     private var gestureManager: GestureManager!
     private var observerSetup = false
+    private var screenChangeObserver: NSObjectProtocol?
 #endif
     
-    init(_ dotLottieViewModel: DotLottieAnimation, mtkView: MTKView) {
-        self.dotLottieViewModel = dotLottieViewModel
+    init(_ parent: DotLottie, mtkView: MTKView) {
+        self.viewModel = parent.dotLottieViewModel
 #if os(macOS)
         self.mtkView = mtkView
 #endif
@@ -119,7 +117,8 @@ public class Coordinator: NSObject, MTKViewDelegate {
     
 #if os(macOS)
     private func setupScreenChangeObserver() {
-        NotificationCenter.default.addObserver(
+        // Keep the returned token so deinit can remove this block-based observer.
+        screenChangeObserver = NotificationCenter.default.addObserver(
             forName: NSWindow.didChangeScreenNotification,
             object: self.mtkView?.window,
             queue: .main
@@ -164,8 +163,8 @@ public class Coordinator: NSObject, MTKViewDelegate {
 #else
         self.viewSize = size
 #endif
-        if (!self.dotLottieViewModel.sizeOverrideActive) {
-            self.dotLottieViewModel.resize(width: Int(size.width), height: Int(size.height))
+        if (!self.viewModel.sizeOverrideActive) {
+            self.viewModel.resize(width: Int(size.width), height: Int(size.height))
         }
         
 #if os(macOS)
@@ -190,7 +189,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
             return
         }
         
-        guard !dotLottieViewModel.error() else {
+        guard !viewModel.error() else {
             return
         }
 
@@ -198,7 +197,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
         let dt = lastDrawTime == 0 ? Float(0) : Float((now - lastDrawTime) * 1000)
         lastDrawTime = now
 
-        if let frame = dotLottieViewModel.tick(dt: dt) {
+        if let frame = viewModel.tick(dt: dt) {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
             let inputImage = CIImage(cgImage: frame)
@@ -228,7 +227,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
             
             // Blend the image over an opaque background image.
             // This is needed if the image is smaller than the view, or if it has transparent
-            filteredImage = filteredImage.composited(over: dotLottieViewModel.backgroundColor())
+            filteredImage = filteredImage.composited(over: viewModel.backgroundColor())
             
             self.mtlTexture = drawable.texture
             
@@ -247,8 +246,8 @@ public class Coordinator: NSObject, MTKViewDelegate {
     
     private func calculateCoordinates(location: CGPoint) -> CGPoint {
         // Animation dimensions are in pixels (drawable size)
-        let animationWidth = CGFloat(self.dotLottieViewModel.animationModel.width)
-        let animationHeight = CGFloat(self.dotLottieViewModel.animationModel.height)
+        let animationWidth = CGFloat(self.viewModel.animationModel.width)
+        let animationHeight = CGFloat(self.viewModel.animationModel.height)
 
         // Calculate scale ratio: animation pixels / view points
         // Note: viewSize is in points, animation dimensions are in pixels
@@ -294,11 +293,16 @@ public class Coordinator: NSObject, MTKViewDelegate {
     // MARK: - Event Posting (Shared)
     
     private func postEvent(_ event: Event) {
-        let _ = self.dotLottieViewModel.stateMachinePostEvent(event)
+        let _ = self.viewModel.stateMachinePostEvent(event)
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
+#if os(macOS)
+        if let screenChangeObserver {
+            NotificationCenter.default.removeObserver(screenChangeObserver)
+        }
+#endif
     }
 }
 
