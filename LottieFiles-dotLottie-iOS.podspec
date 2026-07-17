@@ -27,7 +27,7 @@ This is a temporary pod name until we regain ownership of dotLottie-iOS. Use thi
   spec.source_files = 'Sources/DotLottie/**/*.{swift,h,m}'
   spec.vendored_frameworks = [
     'Sources/DotLottieCore/cocoapods/DotLottiePlayer.xcframework',
-    'Sources/DotLottieCore/cocoapods/WgpuNative.xcframework'
+    'Sources/DotLottieCore/WgpuNative.xcframework'
   ]
 
   spec.requires_arc = true
