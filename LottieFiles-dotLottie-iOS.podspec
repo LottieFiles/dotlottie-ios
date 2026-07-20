@@ -1,7 +1,7 @@
 Pod::Spec.new do |spec|
 
   spec.name         = "LottieFiles-dotLottie-iOS"
-  spec.version      = "0.16.4"
+  spec.version      = "0.16.5"
   spec.summary      = "iOS player for .lottie and .json files."
 
   spec.description  = <<-DESC
@@ -27,7 +27,7 @@ This is a temporary pod name until we regain ownership of dotLottie-iOS. Use thi
   spec.source_files = 'Sources/DotLottie/**/*.{swift,h,m}'
   spec.vendored_frameworks = [
     'Sources/DotLottieCore/cocoapods/DotLottiePlayer.xcframework',
-    'Sources/DotLottieCore/cocoapods/WgpuNative.xcframework'
+    'Sources/DotLottieCore/WgpuNative.xcframework'
   ]
 
   spec.requires_arc = true

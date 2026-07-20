@@ -1,25 +1,21 @@
 #!/bin/bash
 #
-# Prepares the xcframeworks for CocoaPods distribution.
+# Prepares DotLottiePlayer.xcframework for CocoaPods distribution: re-packaged
+# from the SPM xcframework with the watchOS slices removed (CocoaPods
+# integration doesn't need them).
 #
-#  * DotLottiePlayer: re-packaged from the SPM xcframework with the watchOS
-#    slices removed (CocoaPods integration doesn't need them).
-#  * WgpuNative: the SPM xcframework ships raw .dylib slices, which CocoaPods
-#    rejects ("contains dynamic libraries which are not supported"). Each slice
-#    is wrapped into a proper WgpuNative.framework before assembling the
-#    xcframework.
+# WgpuNative needs no preparation — it ships as a framework-based xcframework,
+# which CocoaPods vendors directly from Sources/DotLottieCore/.
 #
-# Outputs land in Sources/DotLottieCore/cocoapods/.
+# Output lands in Sources/DotLottieCore/cocoapods/.
 
 set -euo pipefail
 
 ROOT="Sources/DotLottieCore"
-WGPU_SRC="$ROOT/WgpuNative.xcframework"
 COCOAPODS_DIR="$ROOT/cocoapods"
-BUILD_DIR="$COCOAPODS_DIR/.wgpu-frameworks"
 
 # ---------------------------------------------------------------------------
-# DotLottiePlayer — framework-based, just drop the watchOS slices.
+# DotLottiePlayer — drop the watchOS slices.
 # ---------------------------------------------------------------------------
 rm -rf "$COCOAPODS_DIR/DotLottiePlayer.xcframework"
 xcodebuild -create-xcframework \
@@ -34,16 +30,15 @@ xcodebuild -create-xcframework \
     -output "$COCOAPODS_DIR/DotLottiePlayer.xcframework"
 
 # ---------------------------------------------------------------------------
-# Re-point DotLottiePlayer at the wrapped WgpuNative.framework.
+# Fix stale libwgpu_native references.
 #
-# The prebuilt DotLottiePlayer slices link the raw wgpu dylib by its original
-# name — most via "@rpath/libwgpu_native.dylib", and the iOS arm64 *simulator*
-# slice via an absolute CI build path (.../libwgpu_native.dylib). For CocoaPods
-# we ship wgpu wrapped as WgpuNative.framework (below), so none of those
-# references resolve at runtime: the app crashes at launch with
-# "Library not loaded: .../libwgpu_native.dylib". Rewrite every libwgpu_native
-# reference, across all arch slices, to the framework's install name.
-# (SPM is unaffected — it ships the raw dylib, so the original name still matches.)
+# Most DotLottiePlayer slices already link wgpu as
+# "@rpath/WgpuNative.framework/WgpuNative", but the iOS arm64 *simulator* slice
+# still points at the absolute CI build path it was linked against
+# (.../deps/libwgpu_native.dylib), which resolves nowhere at runtime: the app
+# crashes at launch with "Library not loaded: .../libwgpu_native.dylib".
+# Rewrite any surviving libwgpu_native reference, across all arch slices, to the
+# framework's install name.
 # ---------------------------------------------------------------------------
 WGPU_INSTALL_NAME="@rpath/WgpuNative.framework/WgpuNative"
 while IFS= read -r dlp_bin; do
@@ -51,108 +46,7 @@ while IFS= read -r dlp_bin; do
         otool -arch "$arch" -L "$dlp_bin"
     done | awk '/libwgpu_native\.dylib/ { print $1 }' | sort -u)
     for ref in $refs; do
-        [ "$ref" = "$WGPU_INSTALL_NAME" ] && continue
         install_name_tool -change "$ref" "$WGPU_INSTALL_NAME" "$dlp_bin"
     done
 done < <(find "$COCOAPODS_DIR/DotLottiePlayer.xcframework" \
     -type f -name DotLottiePlayer -path '*/DotLottiePlayer.framework/*')
-
-# ---------------------------------------------------------------------------
-# WgpuNative — wrap each .dylib slice into a WgpuNative.framework.
-# ---------------------------------------------------------------------------
-
-write_modulemap() {
-    cat > "$1" <<'EOF'
-framework module WgpuNative {
-  header "webgpu/wgpu.h"
-  export *
-}
-EOF
-}
-
-# write_plist <path> <ios|macos>
-write_plist() {
-    local plist="$1" platform="$2"
-    cat > "$plist" <<'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleExecutable</key>
-	<string>WgpuNative</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.lottiefiles.WgpuNative</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>WgpuNative</string>
-	<key>CFBundlePackageType</key>
-	<string>FMWK</string>
-	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
-	<key>CFBundleVersion</key>
-	<string>1</string>
-EOF
-    if [ "$platform" = "ios" ]; then
-        cat >> "$plist" <<'EOF'
-	<key>MinimumOSVersion</key>
-	<string>13.0</string>
-EOF
-    else
-        cat >> "$plist" <<'EOF'
-	<key>LSMinimumSystemVersion</key>
-	<string>11.0</string>
-EOF
-    fi
-    cat >> "$plist" <<'EOF'
-</dict>
-</plist>
-EOF
-}
-
-# make_framework <slice> <ios|macos>
-make_framework() {
-    local slice="$1" platform="$2"
-    local src="$WGPU_SRC/$slice"
-    local fw="$BUILD_DIR/$slice/WgpuNative.framework"
-    rm -rf "$fw"
-
-    if [ "$platform" = "macos" ]; then
-        # Deep / versioned bundle layout required for macOS frameworks.
-        local ver="$fw/Versions/A"
-        mkdir -p "$ver/Headers" "$ver/Modules" "$ver/Resources"
-        cp "$src/libwgpu_native.dylib" "$ver/WgpuNative"
-        install_name_tool -id "@rpath/WgpuNative.framework/Versions/A/WgpuNative" "$ver/WgpuNative"
-        cp -R "$src/Headers/webgpu" "$ver/Headers/webgpu"
-        write_modulemap "$ver/Modules/module.modulemap"
-        write_plist "$ver/Resources/Info.plist" macos
-        ln -sf A "$fw/Versions/Current"
-        ln -sf Versions/Current/WgpuNative "$fw/WgpuNative"
-        ln -sf Versions/Current/Headers "$fw/Headers"
-        ln -sf Versions/Current/Modules "$fw/Modules"
-        ln -sf Versions/Current/Resources "$fw/Resources"
-    else
-        # Flat bundle layout for iOS / simulator frameworks.
-        mkdir -p "$fw/Headers" "$fw/Modules"
-        cp "$src/libwgpu_native.dylib" "$fw/WgpuNative"
-        install_name_tool -id "@rpath/WgpuNative.framework/WgpuNative" "$fw/WgpuNative"
-        cp -R "$src/Headers/webgpu" "$fw/Headers/webgpu"
-        write_modulemap "$fw/Modules/module.modulemap"
-        write_plist "$fw/Info.plist" ios
-    fi
-}
-
-rm -rf "$BUILD_DIR" "$COCOAPODS_DIR/WgpuNative.xcframework"
-make_framework "ios-arm64" ios
-make_framework "ios-arm64_x86_64-simulator" ios
-make_framework "macos-arm64_x86_64" macos
-
-xcodebuild -create-xcframework \
-    -framework "$BUILD_DIR/ios-arm64/WgpuNative.framework" \
-    -framework "$BUILD_DIR/ios-arm64_x86_64-simulator/WgpuNative.framework" \
-    -framework "$BUILD_DIR/macos-arm64_x86_64/WgpuNative.framework" \
-    -output "$COCOAPODS_DIR/WgpuNative.xcframework"
-
-rm -rf "$BUILD_DIR"

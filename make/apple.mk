@@ -49,26 +49,11 @@ LIPO := lipo
 PLISTBUDDY_EXEC := /usr/libexec/PlistBuddy
 INSTALL_NAME_TOOL := install_name_tool
 XCODEBUILD := xcodebuild
-CODESIGN := codesign
 
 # Get version information
 CRATE_VERSION = $(shell grep -m 1 'version =' $(DOTLOTTIE_RS)/Cargo.toml | grep -o '[0-9][0-9.]*')
 
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
-
-# Code signing function
-define perform_codesigning
-	@if [ -n "$(CODESIGN_IDENTITY)" ]; then \
-		echo "→ Unlocking keychain for signing..."; \
-		security unlock-keychain -p "$(KEYCHAIN_PASSWORD)" build.keychain; \
-		echo "→ Signing XCFramework with identity: $(CODESIGN_IDENTITY)"; \
-		$(CODESIGN) --sign "$(CODESIGN_IDENTITY)" --timestamp --options runtime $(1); \
-		$(CODESIGN) --verify --verbose $(1); \
-		echo "✓ Code signing completed"; \
-	else \
-		echo "→ Skipping code signing (no identity provided)"; \
-	fi
-endef
 
 # Helper function to create framework structure and Info.plist
 define create_framework_structure
@@ -134,7 +119,7 @@ TVOS_SIMULATOR_FRAMEWORK_DIR := $(FRAMEWORK_BUILD_DIR)/tvos-simulator
         apple-maccatalyst-arm64 apple-maccatalyst-x86_64 \
         apple-visionos-arm64 apple-visionos-sim-arm64 \
         apple-tvos-arm64 apple-tvos-sim-arm64 \
-        apple-setup apple-clean apple-check-xcode apple-code-sign apple-package apple-frameworks \
+        apple-setup apple-clean apple-check-xcode apple-package apple-frameworks \
         apple-fetch
 
 # Pre-fetch Cargo dependencies (fast no-op if already cached)
@@ -554,11 +539,6 @@ apple-frameworks: \
 	$(TVOS_SIMULATOR_FRAMEWORK_DIR)/$(DOTLOTTIE_PLAYER_FRAMEWORK)
 	@echo "✓ All Apple frameworks created"
 
-# Code signing target
-apple-code-sign:
-	@echo "→ Code signing XCFramework..."
-	$(call perform_codesigning,$(APPLE_RELEASE_DIR)/$(DOTLOTTIE_PLAYER_XCFRAMEWORK))
-
 # Package Apple release
 apple-package: apple-frameworks
 	@echo "→ Creating Apple release package..."
@@ -604,8 +584,6 @@ apple-package: apple-frameworks
 			ln -s Versions/Current/Resources Resources \
 		) || exit 1; \
 	done
-
-	$(call perform_codesigning,$(APPLE_RELEASE_DIR)/$(DOTLOTTIE_PLAYER_XCFRAMEWORK))
 
 	@echo "dlplayer-version=$(CRATE_VERSION)-$(COMMIT_HASH)" > $(APPLE_RELEASE_DIR)/version.txt
 	@echo "✓ Apple release package created: $(APPLE_RELEASE_DIR)/"
