@@ -9,7 +9,7 @@ Currently this package supports a mimimum iOS version of 13+ for iPhone and iPad
 This is a temporary pod name until we regain ownership of dotLottie-iOS. Use this pod for the latest updates from LottieFiles.
                    DESC
 
-  spec.homepage     = "https://github.com/LottieFiles/dotlottie-ios"
+  spec.homepage     = "https://docs.lottiefiles.com/en/runtimes/distributions/ios"
   spec.source       = { :git => "https://github.com/LottieFiles/dotlottie-ios.git", :tag => "v#{spec.version}" }
   spec.license      = { :type => 'MIT', :file => 'LICENSE' }
   spec.authors      = {
