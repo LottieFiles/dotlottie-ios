@@ -14,14 +14,21 @@ MIN_MACCATALYST_VERSION ?= 13.1
 MIN_WATCHOS_VERSION ?= 7.0
 
 # Base features shared by all Apple platforms
-APPLE_BASE_FEATURES ?= tvg-webp,tvg-png,tvg-jpg,tvg-ttf,tvg-lottie-expressions,tvg-threads
-APPLE_DEFAULT_FEATURES = tvg,tvg-sw,c_api,dotlottie,state-machines,theming
-# WebGPU: base features + tvg-wg (macOS, iOS, Mac Catalyst only)
-APPLE_WEBGPU_FEATURES = tvg-wg,$(APPLE_BASE_FEATURES)
+APPLE_BASE_FEATURES ?= tvg-webp,tvg-png,tvg-jpg,tvg-ttf,tvg-otf,tvg-lottie-expressions,tvg-threads
+# Default features without audio
+APPLE_DEFAULT_FEATURES_NO_AUDIO = tvg,tvg-cpu,c_api,dotlottie,state-machines,theming
+
+# Uncomment for audio
+# APPLE_DEFAULT_FEATURES = $(APPLE_DEFAULT_FEATURES_NO_AUDIO),audio
+
+APPLE_DEFAULT_FEATURES = $(APPLE_DEFAULT_FEATURES_NO_AUDIO)
 
 # Active feature set — defaults to base (software-only)
 APPLE_FEATURES ?= $(APPLE_BASE_FEATURES)
 
+# WebGPU variant: adds tvg-wg (Metal/WebGPU path) alongside tvg-cpu, so both the
+# software and WebGPU renderers are available at runtime.
+APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-cpu,tvg-wg,c_api,dotlottie,state-machines,theming
 
 ifdef FEATURES
 	APPLE_FEATURES = $(FEATURES)
@@ -33,7 +40,7 @@ endif
 # renderer option uses, since upstream doesn't need that distinction (it
 # always ships both) but our custom-build story does.
 WEBGPU ?= 1
-APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-sw,tvg-wg,c_api,dotlottie,state-machines,theming
+APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-cpu,tvg-wg,c_api,dotlottie,state-machines,theming
 
 # Mac Catalyst, tvOS, visionOS, and watchOS don't support wgpu-native — always
 # software-only regardless of WEBGPU. wgpu-native ships no macabi artifact at

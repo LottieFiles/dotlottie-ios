@@ -14,9 +14,6 @@ let package = Package(
         .library(
             name: "DotLottiePlayer",
             targets: ["DotLottiePlayer"]),
-        .library(
-            name: "WgpuNative",
-            targets: ["WgpuNative"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -38,8 +35,8 @@ let package = Package(
         .binaryTarget(
             name: "DotLottiePlayer",
             path: "./Sources/DotLottieCore/DotLottiePlayer.xcframework"
-            // Use custom build
-            //            path: "./Sources/DotLottieCore/Custom/DotLottiePlayer.xcframework"
+                // Use custom build
+                //            path: "./Sources/DotLottieCore/Custom/DotLottiePlayer.xcframework"
         ),
         .binaryTarget(name: "WgpuNative", path: "./Sources/DotLottieCore/WgpuNative.xcframework"),
         // Custom Framework Builder Plugin
@@ -57,6 +54,6 @@ let package = Package(
                 ]
             ),
             path: "Plugins/BuildCustomFramework"
-        )
+        ),
     ]
 )

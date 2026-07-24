@@ -13,13 +13,13 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.55</string>
+	<string>0.1.58</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>WatchOS</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.1.55</string>
+	<string>0.1.58</string>
 	<key>MinimumOSVersion</key>
 	<string>7.0</string>
 </dict>
