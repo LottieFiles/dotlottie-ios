@@ -1,3 +1,23 @@
+## Building the vendored XCFramework
+
+This repo owns the Apple XCFramework build for `deps/dotlottie-rs` (a git submodule). `make apple` builds every supported platform slice — iOS, macOS, Mac Catalyst, tvOS, visionOS, and watchOS — and installs the result directly into source control:
+
+```bash
+git submodule update --init --recursive
+make apple-setup   # one-time: Rust targets, nightly rust-src, pre-warm Cargo + wgpu-native caches (requires network)
+make apple         # builds + installs into Sources/DotLottieCore/ and Sources/DotLottie/Public/
+```
+
+WebGPU (the `tvg-wg` Metal-backed renderer, macOS/iOS/Mac Catalyst only) ships by default alongside the software renderer, which also produces and installs `Sources/DotLottieCore/WgpuNative.xcframework` (the wgpu-native shared library `DotLottiePlayer` links against). Pass `WEBGPU=0` for a leaner, wgpu-free build:
+
+```bash
+make apple WEBGPU=0
+```
+
+Run `./cocoapods-release.sh` afterward to refresh the CocoaPods-facing copy in `Sources/DotLottieCore/cocoapods/`.
+
+See `make help` for the full target list (per-platform builds, `apple-clean`, etc.).
+
 ## Custom Builds
 
 By default, dotLottie-iOS uses a prebuilt XCFramework with all standard features enabled. This works great for most use cases and requires no additional setup.
@@ -23,6 +43,8 @@ swift package plugin --allow-writing-to-package-directory build-custom-framework
 # 5. Update Package.swift to use custom build
 # Change path to: "./Sources/DotLottieCore/Custom/DotLottiePlayer.xcframework"
 ```
+
+Custom builds always include WebGPU — Xcode requires it — so `WgpuNative.xcframework` is also built and copied into `Sources/DotLottieCore/Custom/` alongside `DotLottiePlayer.xcframework`; both must ship together.
 
 ### Prerequisites
 

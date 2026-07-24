@@ -14,6 +14,9 @@ let package = Package(
         .library(
             name: "DotLottiePlayer",
             targets: ["DotLottiePlayer"]),
+        .library(
+            name: "WgpuNative",
+            targets: ["WgpuNative"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.

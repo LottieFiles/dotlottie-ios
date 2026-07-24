@@ -91,16 +91,20 @@ public enum ColorSpace: UInt32 {
 // MARK: - PlaybackStatus
 
 public enum PlaybackStatus: UInt32 {
-    case playing = 0
-    case paused = 1
-    case stopped = 2
+    case idle = 0
+    case playing = 1
+    case paused = 2
+    case stopped = 3
+    case tweening = 4
 
-    internal init(cStatus: dotlottiePlaybackStatus) {
+    internal init(cStatus: dotlottieStatus) {
         switch cStatus {
+        case Idle: self = .idle
         case Playing: self = .playing
         case Paused: self = .paused
         case Stopped: self = .stopped
-        default: self = .stopped
+        case Tweening: self = .tweening
+        default: self = .idle
         }
     }
 }
@@ -516,7 +520,7 @@ public class DotLottiePlayer {
 
     public func isLoaded() -> Bool {
         guard let ptr = playerPtr else { return false }
-        return dotlottie_is_loaded(ptr)
+        return dotlottie_status(ptr) != Idle
     }
 
     public func isComplete() -> Bool {
@@ -525,8 +529,8 @@ public class DotLottiePlayer {
     }
 
     public func playbackStatus() -> PlaybackStatus {
-        guard let ptr = playerPtr else { return .stopped }
-        return PlaybackStatus(cStatus: dotlottie_get_playback_status(ptr))
+        guard let ptr = playerPtr else { return .idle }
+        return PlaybackStatus(cStatus: dotlottie_status(ptr))
     }
 
     public func isPlaying() -> Bool { playbackStatus() == .playing }
@@ -940,11 +944,15 @@ public class DotLottiePlayer {
         return slotId.withCString { dotlottie_set_position_slot(ptr, $0, x, y) == Success }
     }
 
+    // dotlottie-rs consolidated the path/data-URL setters into a single
+    // `dotlottie_set_image_slot_src` (it accepts a `data:` URI, an
+    // `http(s)://` URL, or a package-relative file name) — both Swift entry
+    // points below now call it, keeping the existing public API shape.
     @discardableResult
     public func setImageSlotPath(slotId: String, path: String) -> Bool {
         guard let ptr = playerPtr else { return false }
         return slotId.withCString { idPtr in
-            path.withCString { dotlottie_set_image_slot_path(ptr, idPtr, $0) == Success }
+            path.withCString { dotlottie_set_image_slot_src(ptr, idPtr, $0) == Success }
         }
     }
 
@@ -952,7 +960,7 @@ public class DotLottiePlayer {
     public func setImageSlotDataUrl(slotId: String, dataUrl: String) -> Bool {
         guard let ptr = playerPtr else { return false }
         return slotId.withCString { idPtr in
-            dataUrl.withCString { dotlottie_set_image_slot_data_url(ptr, idPtr, $0) == Success }
+            dataUrl.withCString { dotlottie_set_image_slot_src(ptr, idPtr, $0) == Success }
         }
     }
 

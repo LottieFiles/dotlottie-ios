@@ -549,7 +549,7 @@ open class DotLottiePlayerUIView: PlatformView {
     
     private func resizeAnimationIfNeeded() {
         #if canImport(UIKit)
-        let scale = UIScreen.main.scale
+        let scale = traitCollection.displayScale > 0 ? traitCollection.displayScale : 2.0
         #else
         let scale: CGFloat = 1.0
         #endif
@@ -845,7 +845,7 @@ open class DotLottiePlayerUIView: PlatformView {
         #if canImport(UIKit)
         // For iOS, Coordinator uses drawableSize (in pixels) which equals bounds.size * screenScale
         // This is what viewSize represents in Coordinator's calculateCoordinates for iOS
-        let screenScale = UIScreen.main.scale
+        let screenScale = traitCollection.displayScale > 0 ? traitCollection.displayScale : 2.0
         let viewSize = CGSize(width: bounds.size.width * screenScale, height: bounds.size.height * screenScale)
         
         guard viewSize.width > 0, viewSize.height > 0 else { return point }
@@ -964,7 +964,7 @@ open class DotLottiePlayerUIView: PlatformView {
     }
 }
 
-#if os(iOS) || os(tvOS)
+#if os(iOS) || os(tvOS) || os(visionOS)
 extension DotLottiePlayerUIView: UIGestureRecognizerDelegate, GestureManagerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         true

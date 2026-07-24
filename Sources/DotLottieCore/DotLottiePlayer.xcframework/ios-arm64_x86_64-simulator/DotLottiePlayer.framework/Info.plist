@@ -13,13 +13,13 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.58</string>
+	<string>0.1.55</string>
 	<key>CFBundleSupportedPlatforms</key>
 	<array>
 		<string>iPhoneSimulator</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.1.58</string>
+	<string>0.1.55</string>
 	<key>MinimumOSVersion</key>
 	<string>13.0</string>
 </dict>

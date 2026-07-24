@@ -54,16 +54,6 @@ fi
 # Parse JSON configuration
 echo "📖 Reading configuration..."
 
-# Extract renderer type
-RENDERER=$(grep -o '"renderer"[[:space:]]*:[[:space:]]*"[^"]*"' "$CONFIG_FILE" | sed 's/.*"renderer"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
-
-if [ -z "$RENDERER" ]; then
-    echo -e "${RED}❌ Failed to parse renderer from configuration${NC}"
-    exit 1
-fi
-
-echo "   Renderer: $RENDERER"
-
 # Extract enabled features dynamically from all keys in the "features" block
 FEATURES=""
 while IFS= read -r line; do
@@ -82,14 +72,13 @@ if [ -z "$FEATURES" ]; then
     echo -e "${YELLOW}⚠️  No features enabled. Building with defaults.${NC}"
 fi
 
-# Determine Make target
-if [ "$RENDERER" = "webgpu" ]; then
-    MAKE_TARGET="apple-webgpu"
-    echo -e "   ${BLUE}🎮 Using WebGPU renderer${NC}"
-else
-    MAKE_TARGET="apple"
-    echo "   Using software renderer"
-fi
+# `apple-build` stages the xcframework(s) under build/apple/ without
+# installing into Sources/ — installing there would clobber the repo's main
+# vendored copy with a custom-features build. WebGPU is required (Xcode
+# builds fail without it), so it always ships.
+MAKE_TARGET="apple-build"
+WEBGPU=1
+echo -e "   ${BLUE}🎮 Including WebGPU renderer${NC}"
 
 echo ""
 
@@ -117,11 +106,12 @@ START_TIME=$(date +%s)
 echo -e "${BLUE}⚙️  Building framework...${NC}"
 echo "   Target: $MAKE_TARGET"
 echo "   Features: $FEATURES"
+echo "   WebGPU: $WEBGPU"
 echo ""
 
 export FEATURES="$FEATURES"
 
-if make -C "$REPO_ROOT" "$MAKE_TARGET"; then
+if make -C "$REPO_ROOT" "$MAKE_TARGET" WEBGPU="$WEBGPU"; then
     echo ""
     echo -e "${GREEN}✅ Build completed successfully!${NC}"
 else
@@ -162,6 +152,20 @@ fi
 cp -R "$BUILT_FRAMEWORK" "$OUTPUT_DIR/"
 
 echo -e "   ${GREEN}✓${NC} Framework copied to: $OUTPUT_DIR/DotLottiePlayer.xcframework"
+
+# WebGPU builds also produce WgpuNative.xcframework (the wgpu-native shared
+# library DotLottiePlayer dynamically links against on macOS/iOS/iOS
+# Simulator). Without it, a "webgpu" custom build crashes at launch with a
+# missing-library error, since the .xcframework alone doesn't carry it.
+BUILT_WGPU_FRAMEWORK="$REPO_ROOT/build/apple/WgpuNative.xcframework"
+if [ -d "$BUILT_WGPU_FRAMEWORK" ]; then
+    if [ -d "$OUTPUT_DIR/WgpuNative.xcframework" ]; then
+        echo "   Removing old WgpuNative.xcframework..."
+        rm -rf "$OUTPUT_DIR/WgpuNative.xcframework"
+    fi
+    cp -R "$BUILT_WGPU_FRAMEWORK" "$OUTPUT_DIR/"
+    echo -e "   ${GREEN}✓${NC} Framework copied to: $OUTPUT_DIR/WgpuNative.xcframework"
+fi
 
 # Validate framework structure
 echo ""

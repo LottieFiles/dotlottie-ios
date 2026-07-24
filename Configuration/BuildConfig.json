@@ -5,11 +5,11 @@
         "tvg-png": true,
         "tvg-jpg": true,
         "tvg-ttf": true,
+        "tvg-otf": true,
         "tvg-lottie-expressions": true,
         "tvg-threads": true,
         "dotlottie": true,
         "state-machines": true,
         "theming": true
-    },
-    "renderer": "software"
+    }
 }
