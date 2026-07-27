@@ -187,7 +187,7 @@ public final class DotLottieAnimation: ObservableObject {
         errorMessage: @escaping @Sendable (Error) -> String
     ) {
         self.init(config: config, threads: threads) { `self` in
-            Task {
+            Task { @MainActor in
                 do {
                     try await load(self)
                 } catch {

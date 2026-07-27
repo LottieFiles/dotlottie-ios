@@ -8,6 +8,9 @@
 
 <h1 align="center">dotLottie iOS</h1>
 
+> [!TIP]
+> Looking for animations to use with this player? Browse **[100,000+ free Lottie animations](https://lottiefiles.com/free-animations?utm_source=npm&utm_medium=readme)** and grab any of them as `.lottie` or `.json`, or create your own with [Lottie Creator](https://lottiefiles.com/lottie-creator?utm_source=npm&utm_medium=readme).
+
 ## Supported Devices
 
 - Currently this package supports a mimimum iOS version of 13.0+ for iPhone and iPad.
@@ -18,7 +21,7 @@
 
 ## Usage
 
-> Full documentation available [on the developer portal](https://developers.lottiefiles.com/docs/dotlottie-ios/).
+> Full documentation available [on the developer portal](https://docs.lottiefiles.com/en/runtimes/distributions/ios).
 
 1. Install the dependancy
 
