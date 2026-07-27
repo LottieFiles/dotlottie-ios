@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import DotLottie
 
 /// `AnimationConfig` defaults plus the config-backed getters/setters on
@@ -95,8 +96,9 @@ final class ConfigAndPropertiesTests: XCTestCase {
     /// 1000. Pinned so the unit cannot change silently.
     func testDurationIsReportedInMilliseconds() {
         let animation = makeMinimalAnimation()
-        XCTAssertEqual(animation.duration(), 2000, accuracy: 2.0,
-                       "minimal fixture: 120 frames @ 60fps == 2000ms")
+        XCTAssertEqual(
+            animation.duration(), 2000, accuracy: 2.0,
+            "minimal fixture: 120 frames @ 60fps == 2000ms")
     }
 
     func testDurationConsistentWithFramesAndFps() {
@@ -109,7 +111,8 @@ final class ConfigAndPropertiesTests: XCTestCase {
     // MARK: - Error surface
 
     func testErrorFlagAndMessageForInvalidData() {
-        let animation = DotLottieAnimation(animationData: "{ not lottie }", config: AnimationConfig())
+        let animation = DotLottieAnimation(
+            animationData: "{ not lottie }", config: AnimationConfig())
         XCTAssertTrue(animation.error())
         XCTAssertFalse(animation.isLoaded())
     }

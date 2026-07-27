@@ -11,7 +11,7 @@ The original API where you create a `DotLottieAnimation` and call methods direct
 
 ```swift
 let animation = DotLottieAnimation(
-    fileName: "Flow 1",
+    fileName: "Flow",
     config: AnimationConfig(autoplay: false, loop: true)
 )
 
@@ -32,7 +32,7 @@ A UIKit view similar to `LottieAnimationView` from lottie-ios. This provides a f
 ```swift
 // Initialize
 let playerView = DotLottiePlayerUIView(
-    name: "Flow 1",
+    name: "Flow",
     bundle: .main,
     config: AnimationConfig()
 ) { view, error in

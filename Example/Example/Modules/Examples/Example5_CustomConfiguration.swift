@@ -5,8 +5,8 @@
 //  Custom configuration example
 //
 
-import SwiftUI
 import DotLottie
+import SwiftUI
 
 struct Example5_CustomConfiguration: View {
     var body: some View {
@@ -14,10 +14,10 @@ struct Example5_CustomConfiguration: View {
             Text("Example 5: Custom Configuration")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
-            
+
             DotLottiePlayerView {
                 DotLottieAnimation(
-                    fileName: "Flow 1",
+                    fileName: "Flow",
                     config: AnimationConfig(
                         autoplay: true,
                         loop: true,
@@ -32,7 +32,7 @@ struct Example5_CustomConfiguration: View {
             .frame(height: 200)
             .background(Color.gray.opacity(0.1))
             .cornerRadius(12)
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("• Mode: Bounce")
                     .font(.caption)
@@ -46,4 +46,3 @@ struct Example5_CustomConfiguration: View {
         .padding(.horizontal)
     }
 }
-

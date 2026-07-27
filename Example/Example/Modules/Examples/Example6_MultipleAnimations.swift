@@ -5,19 +5,19 @@
 //  Multiple animations with memory management
 //
 
-import SwiftUI
 import DotLottie
+import SwiftUI
 
 /// Wrapper to hold an animation that can be loaded/unloaded
 class AnimationHolder: ObservableObject {
     let name: String
     @Published var animation: DotLottieAnimation?
     @Published var isVisible = false
-    
+
     init(name: String) {
         self.name = name
     }
-    
+
     func load() {
         guard animation == nil else { return }
         print("📦 Loading animation: \(name)")
@@ -30,7 +30,7 @@ class AnimationHolder: ObservableObject {
             )
         )
     }
-    
+
     func unload() {
         guard animation != nil else { return }
         print("🗑️ Unloading animation: \(name)")
@@ -42,9 +42,9 @@ class AnimationHolder: ObservableObject {
 struct Example6_MultipleAnimations: View {
     @State private var animationHolders: [AnimationHolder] = []
     @State private var showStats = false
-    
+
     let availableAnimations = [
-        "Flow 1",
+        "Flow",
         "adding-guests",
         "analytics",
         "button",
@@ -59,24 +59,24 @@ struct Example6_MultipleAnimations: View {
         "star-marked",
         "sync-to-cursor",
         "theming",
-        "toggle"
+        "toggle",
     ]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Example 6: Multiple Animations (Memory Management)")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .padding(.horizontal)
-            
+
             Text("Animations load when visible and unload when scrolled away")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.horizontal)
-            
+
             Toggle("Show Stats", isOn: $showStats)
                 .padding(.horizontal)
-            
+
             ScrollView(.horizontal, showsIndicators: true) {
                 LazyHStack(spacing: 16) {
                     ForEach(animationHolders.indices, id: \.self) { index in
@@ -102,7 +102,7 @@ struct Example6_MultipleAnimations: View {
                 .padding(.horizontal)
             }
             .frame(height: 280)
-            
+
             if showStats {
                 StatsView(holders: animationHolders)
                     .padding(.horizontal)
@@ -123,7 +123,7 @@ struct Example6_MultipleAnimations: View {
 struct AnimationCard: View {
     @ObservedObject var holder: AnimationHolder
     let showStats: Bool
-    
+
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
@@ -141,13 +141,13 @@ struct AnimationCard: View {
             }
             .background(Color.gray.opacity(0.1))
             .cornerRadius(12)
-            
+
             VStack(spacing: 4) {
                 Text(holder.name)
                     .font(.caption)
                     .fontWeight(.medium)
                     .lineLimit(1)
-                
+
                 if showStats {
                     HStack(spacing: 8) {
                         StatusIndicator(
@@ -196,7 +196,7 @@ struct UnloadedPlaceholder: View {
 struct StatusIndicator: View {
     let isOn: Bool
     let label: String
-    
+
     var body: some View {
         HStack(spacing: 4) {
             Circle()
@@ -209,27 +209,31 @@ struct StatusIndicator: View {
 
 struct StatsView: View {
     let holders: [AnimationHolder]
-    
+
     var loadedCount: Int {
         holders.filter { $0.animation != nil }.count
     }
-    
+
     var visibleCount: Int {
         holders.filter { $0.isVisible }.count
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Memory Stats")
                 .font(.caption)
                 .fontWeight(.semibold)
-            
+
             HStack {
                 StatItem(label: "Total", value: "\(holders.count)")
                 Divider().frame(height: 20)
-                StatItem(label: "Loaded", value: "\(loadedCount)", color: loadedCount > 0 ? .green : .gray)
+                StatItem(
+                    label: "Loaded", value: "\(loadedCount)",
+                    color: loadedCount > 0 ? .green : .gray)
                 Divider().frame(height: 20)
-                StatItem(label: "Visible", value: "\(visibleCount)", color: visibleCount > 0 ? .blue : .gray)
+                StatItem(
+                    label: "Visible", value: "\(visibleCount)",
+                    color: visibleCount > 0 ? .blue : .gray)
                 Divider().frame(height: 20)
                 StatItem(label: "Unloaded", value: "\(holders.count - loadedCount)", color: .orange)
             }
@@ -244,7 +248,7 @@ struct StatItem: View {
     let label: String
     let value: String
     var color: Color = .primary
-    
+
     var body: some View {
         VStack(spacing: 2) {
             Text(value)
@@ -258,4 +262,3 @@ struct StatItem: View {
         .frame(maxWidth: .infinity)
     }
 }
-

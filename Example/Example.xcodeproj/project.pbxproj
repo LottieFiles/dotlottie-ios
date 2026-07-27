@@ -44,7 +44,7 @@
 		22BF20552FC82BFF00316B28 /* Example8_URLLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22BF20542FC82BFF00316B28 /* Example8_URLLoading.swift */; };
 		6C6F39FC2DCC9C28006D144D /* loadingAnimation.json in Resources */ = {isa = PBXBuildFile; fileRef = 6C6F39FB2DCC9C28006D144D /* loadingAnimation.json */; };
 		6C83FFF92DD33026003F78FD /* confetti.lottie in Resources */ = {isa = PBXBuildFile; fileRef = 6C83FFF82DD33026003F78FD /* confetti.lottie */; };
-		6CD9E1882E0AAB2D007A17E9 /* Flow 1.json in Resources */ = {isa = PBXBuildFile; fileRef = 6CD9E1872E0AAB2D007A17E9 /* Flow 1.json */; };
+		6CD9E1882E0AAB2D007A17E9 /* Flow.json in Resources */ = {isa = PBXBuildFile; fileRef = 6CD9E1872E0AAB2D007A17E9 /* Flow.json */; };
 		FE12000000000000000012B1 /* Example12_DynamicLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE12000000000000000012A1 /* Example12_DynamicLayout.swift */; };
 		FE20000000000000000020B1 /* PerformanceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE20000000000000000020A1 /* PerformanceMonitor.swift */; };
 		FE21000000000000000021B1 /* MetricsOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE21000000000000000021A1 /* MetricsOverlay.swift */; };
@@ -101,7 +101,7 @@
 		6C6F39FB2DCC9C28006D144D /* loadingAnimation.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = loadingAnimation.json; sourceTree = "<group>"; };
 		6C78CDE52B0B4A8F008E9D26 /* Thorvg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Thorvg.framework; path = "../dotlottie-ios/Sources/Thorvg/Thorvg/artifacts/ios-simulator-aarch64/Thorvg.framework"; sourceTree = "<group>"; };
 		6C83FFF82DD33026003F78FD /* confetti.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = confetti.lottie; sourceTree = "<group>"; };
-		6CD9E1872E0AAB2D007A17E9 /* Flow 1.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Flow 1.json"; sourceTree = "<group>"; };
+		6CD9E1872E0AAB2D007A17E9 /* Flow.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Flow.json"; sourceTree = "<group>"; };
 		FE12000000000000000012A1 /* Example12_DynamicLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Example12_DynamicLayout.swift; sourceTree = "<group>"; };
 		FE20000000000000000020A1 /* PerformanceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceMonitor.swift; sourceTree = "<group>"; };
 		FE21000000000000000021A1 /* MetricsOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsOverlay.swift; sourceTree = "<group>"; };
@@ -154,7 +154,7 @@
 			children = (
 				223E64DC2FD83CD600D7D310 /* BrandToggle.lottie */,
 				6C83FFF82DD33026003F78FD /* confetti.lottie */,
-				6CD9E1872E0AAB2D007A17E9 /* Flow 1.json */,
+				6CD9E1872E0AAB2D007A17E9 /* Flow.json */,
 				6C6F39FB2DCC9C28006D144D /* loadingAnimation.json */,
 				0A579CAE2EB90FD60062BA6E /* analytics.json */,
 				0A579CAF2EB90FD60062BA6E /* button.json */,
@@ -352,7 +352,7 @@
 				0A579CC72EB90FD60062BA6E /* clipped-traffic-lights.lottie in Resources */,
 				0A579CC82EB90FD60062BA6E /* hold-button.json in Resources */,
 				0A579CC92EB90FD60062BA6E /* toggle.json in Resources */,
-				6CD9E1882E0AAB2D007A17E9 /* Flow 1.json in Resources */,
+				6CD9E1882E0AAB2D007A17E9 /* Flow.json in Resources */,
 				6C83FFF92DD33026003F78FD /* confetti.lottie in Resources */,
 				0A579CD22EB9244D0062BA6E /* adding-guests.lottie in Resources */,
 				226C88B82AFE98FD00A72D3A /* Preview Assets.xcassets in Resources */,
