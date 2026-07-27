@@ -50,7 +50,6 @@ struct BuildCustomFramework: CommandPlugin {
 
         // Display configuration
         print("⚙️  Build Configuration:")
-        print("   Renderer: \(config.renderer)")
         print("   Features:")
         for (feature, enabled) in config.features.sorted(by: { $0.key < $1.key }) {
             let status = enabled ? "✓" : "✗"
@@ -272,7 +271,6 @@ struct BuildCustomFramework: CommandPlugin {
 struct BuildConfig: Codable {
     let version: String
     let features: [String: Bool]
-    let renderer: String
 }
 
 // MARK: - Errors
