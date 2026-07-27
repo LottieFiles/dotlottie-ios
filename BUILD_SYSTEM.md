@@ -8,11 +8,7 @@ make apple-setup   # one-time: Rust targets, nightly rust-src, pre-warm Cargo + 
 make apple         # builds + installs into Sources/DotLottieCore/ and Sources/DotLottie/Public/
 ```
 
-WebGPU (the `tvg-wg` Metal-backed renderer, macOS/iOS/Mac Catalyst only) ships by default alongside the software renderer, which also produces and installs `Sources/DotLottieCore/WgpuNative.xcframework` (the wgpu-native shared library `DotLottiePlayer` links against). Pass `WEBGPU=0` for a leaner, wgpu-free build:
-
-```bash
-make apple WEBGPU=0
-```
+WebGPU (the `tvg-wg` Metal-backed renderer, macOS/iOS/Mac Catalyst only) always ships alongside the software renderer, which also produces and installs `Sources/DotLottieCore/WgpuNative.xcframework` (the wgpu-native shared library `DotLottiePlayer` links against). `Package.swift` unconditionally depends on `WgpuNative.xcframework`, so a wgpu-free build is not supported — both frameworks must always be built and shipped together.
 
 Run `./cocoapods-release.sh` afterward to refresh the CocoaPods-facing copy in `Sources/DotLottieCore/cocoapods/`.
 

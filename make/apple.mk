@@ -34,13 +34,14 @@ ifdef FEATURES
 	APPLE_FEATURES = $(FEATURES)
 endif
 
-# WebGPU ships by default in the standard `apple` build (macOS/iOS/Mac
-# Catalyst), matching upstream dotlottie-rs. Pass WEBGPU=0 for a leaner,
-# wgpu-free build — this is what the custom-build plugin's "software"
-# renderer option uses, since upstream doesn't need that distinction (it
-# always ships both) but our custom-build story does.
+# WebGPU always ships in the standard `apple` build (macOS/iOS), matching
+# upstream dotlottie-rs. Package.swift unconditionally depends on
+# WgpuNative.xcframework and the Swift layer imports it, so a wgpu-free
+# package is not supported: WEBGPU=0 is internal plumbing only — it skips the
+# wgpu-native build but leaves the stale vendored WgpuNative in place, and the
+# resulting DotLottiePlayer still exposes (but errors on) the wgpu C API.
+# Never use it for an installed/released build.
 WEBGPU ?= 1
-APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-cpu,tvg-wg,c_api,dotlottie,state-machines,theming
 
 # Mac Catalyst, tvOS, visionOS, and watchOS don't support wgpu-native — always
 # software-only regardless of WEBGPU. wgpu-native ships no macabi artifact at
@@ -320,8 +321,8 @@ apple-wgpu-fetch:
 	$(call ensure_wgpu_artifact,$(WGPU_ARTIFACT_ios_x86_64))
 	@echo "✓ wgpu-native cache ready"
 
-# Build (but do not install) for all Apple platforms. WebGPU (tvg-wg) ships
-# by default — pass WEBGPU=0 for a leaner, wgpu-free build. This is the target
+# Build (but do not install) for all Apple platforms. WebGPU (tvg-wg) always
+# ships (see the WEBGPU note above). This is the target
 # the custom-build plugin uses (via Scripts/build-framework.sh): it stages the
 # xcframework(s) under $(APPLE_RELEASE_DIR) without touching Sources/, since a
 # custom build must land only in Sources/DotLottieCore/Custom/, never
