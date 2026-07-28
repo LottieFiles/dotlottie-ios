@@ -85,22 +85,21 @@ func getAnimationFramerate(filePath: URL) throws -> Int {
 func getAnimationFramerate(animationData: String) throws -> Int {
     do {
         if let data = animationData.data(using: .utf8) {
-            
+
             let decodedData = try JSONSerialization.jsonObject(with: data, options: [.mutableContainers]) as? [String: Any]
-            var framerate: Int? = 0
-            
-            if let fr = decodedData?["fr"] {
-                framerate = fr as? Int
-            }
-            // Check if we managed to get the width and height
-            if let checkedFr = framerate {
-                return checkedFr
+
+            // `fr` may be an integer (30) or fractional (29.97, 59.94) — parse via
+            // NSNumber and round so fractional framerates aren't lost. A plain
+            // `as? Int` fails for fractional values, which previously forced the
+            // caller's 30fps fallback for 23.976/29.97/59.94 content.
+            if let fr = decodedData?["fr"] as? NSNumber {
+                return Int(fr.doubleValue.rounded())
             }
         }
     } catch let error {
         throw error
     }
-    
+
     throw FileErrors.framerateNotFound
 }
 
@@ -126,7 +125,9 @@ func getAnimationWidthHeight(animationData: String) throws -> (UInt32, UInt32) {
             
             // Check if we managed to get the width and height
             if let aH = aHeight, let aW = aWidth {
-                return (aH, aW)
+                // Documented contract is (width, height); previously this returned
+                // them swapped.
+                return (aW, aH)
             }
         }
     } catch let error {

@@ -392,10 +392,10 @@ public final class DotLottieAnimation: ObservableObject {
     /// - Returns: True if animation is playing
     @discardableResult
     public func play(fromProgress progress: Float) -> Bool {
-        guard progress > 0 && progress < 1 else {
+        guard progress >= 0 && progress <= 1 else {
             return false
         }
-        
+
         setProgress(progress: progress)
         return player.play()
     }
@@ -445,7 +445,11 @@ public final class DotLottieAnimation: ObservableObject {
     }
     
     public func segments() -> (Float, Float) {
-        return (player.config().segment[0], player.config().segment[1])
+        let segment = player.config().segment
+        // `segment` is empty when no animation is loaded (or the core reports no
+        // segment); guard against indexing out of bounds rather than crashing.
+        guard segment.count >= 2 else { return (0, 0) }
+        return (segment[0], segment[1])
     }
     
     /// Set the current frame.
@@ -459,11 +463,15 @@ public final class DotLottieAnimation: ObservableObject {
     /// Can return false if the progress is invalid or equal to the current progress.
     @discardableResult
     public func setProgress(progress: Float) -> Bool {
-        guard progress > 0 && progress < 1 else {
+        guard progress >= 0 && progress <= 1 else {
             return false
         }
-        
-        return player.setFrame(no: progress*totalFrames())
+
+        // Map progress to a frame, clamping the top end so progress 1.0 lands on
+        // the last valid frame (totalFrames - 1) rather than overshooting to an
+        // out-of-range frame the core would reject.
+        let frame = min(progress * totalFrames(), max(totalFrames() - 1, 0))
+        return player.setFrame(no: frame)
     }
     
     public func setFrameInterpolation(_ useFrameInterpolation: Bool) {

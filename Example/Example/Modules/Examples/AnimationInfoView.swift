@@ -20,7 +20,8 @@ struct AnimationInfoView: View {
             Text("Total Frames: \(Int(animation.totalFrames()))")
                 .font(.caption)
             
-            Text("Duration: \(String(format: "%.2fs", animation.duration()))")
+            // duration() is reported in milliseconds; convert to seconds for display.
+            Text("Duration: \(String(format: "%.2fs", animation.duration() / 1000.0))")
                 .font(.caption)
             
             Text("Framerate: \(animation.framerate) fps")

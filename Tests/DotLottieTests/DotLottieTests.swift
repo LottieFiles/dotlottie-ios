@@ -1,240 +1,94 @@
 import XCTest
 @testable import DotLottie
 
-// MARK: - Test Fixtures
-
-private let minimalLottieJSON = """
-{"nm": "Bouncy Ball", "v": "5.5.2","ip": 0,"op": 120,"fr": 60,"w": 512,"h": 512,"layers": [{"ddd": 0,"ty": 4,"ind": 0,"st": 0,"ip": 0,"op": 120,"nm": "Layer","ks": {"a": {"a": 0,"k": [0, 0]},"p": {"a": 0,"k": [0, 0]},"s": {"a": 0,"k": [100, 100]},"r": {"a": 0,"k": 0},"o": {"a": 0,"k": 100}},"shapes": [{"ty": "gr","nm": "Ellipse Group", "it": [{"ty": "el","nm": "Ellipse","p": {"a": 0,"k": [204, 169]},"s": {"a": 0,"k": [153, 153]}},{"ty": "fl","nm": "Fill","o": {"a": 0,"k": 100,"sid": "ball_opacity"},"c": {"a": 0,"k": [0.71, 0.192, 0.278], "sid": "ball_color"},"r": 1},{"ty": "tr","a": {"a": 0,"k": [204, 169]},"p": {"a": 1,"sid": "ball_position", "k": [{"t": 0,"s": [235, 106],"h": 0,"o": {"x": [0.333],"y": [0]},"i": {"x": [1],"y": [1]}},{"t": 60,"s": [265, 441],"h": 0,"o": {"x": [0],"y": [0]},"i": {"x": [0.667],"y": [1]}},{"t": 120,"s": [235, 106]}]},"s": {"a": 1,"sid": "ball_scale", "k": [{"t": 55,"s": [100, 100],"h": 0,"o": {"x": [0],"y": [0]},"i": {"x": [1],"y": [1]}},{"t": 60,"s": [136, 59],"h": 0,"o": {"x": [0],"y": [0]},"i": {"x": [1],"y": [1]}},{"t": 65,"s": [100, 100]}]},"r": {"a": 0,"k": 0},"o": {"a": 0,"k": 100}}]}]}]}
-"""
-
-private let minimalStateMachineJSON = """
-{
-        "id": "test-sm",
-        "initial": "playing",
-        "states": [
-          {
-            "type": "PlaybackState",
-            "name": "playing",
-            "animation": "",
-            "loop": true,
-            "autoplay": true,
-            "segment": "bird",
-            "transitions": []
-          }
-        ],
-        "inputs": [
-          {
-            "name": "isActive",
-            "type": "Boolean",
-            "value": false
-          },
-          {
-            "name": "count",
-            "type": "Numeric",
-            "value": 0
-          },
-            {
-            "name": "word",
-            "type": "String",
-            "value": "initial"
-            }
-        ],
-      "interactions": []
-      }
-"""
-
-// MARK: - Test Suite
-
+/// Core smoke + rendering pipeline for `DotLottieAnimation`. Playback, frames,
+/// config, segments/markers/themes, state machine and utils each have their own
+/// focused test file; this one covers load → render → resize.
 final class DotLottieTests: XCTestCase {
-    
-    // MARK: - Helpers
-    
-    private func makeAnimation(autoplay: Bool = false, loop: Bool = false) -> DotLottieAnimation {
-        DotLottieAnimation(
-            animationData: minimalLottieJSON,
-            config: AnimationConfig(autoplay: autoplay, loop: loop)
-        )
-    }
-    
+
     // MARK: - Loading
-    
+
     func testAnimationLoads() {
-        let animation = makeAnimation()
+        let animation = makeMinimalAnimation()
         XCTAssertTrue(animation.isLoaded(), "Animation should be loaded after init")
         XCTAssertFalse(animation.error(), "Animation should not have an error")
         XCTAssertGreaterThan(animation.totalFrames(), 0, "Animation should have at least one frame")
     }
-    
+
     func testInvalidAnimationDataSetsErrorFlag() {
-        let animation = DotLottieAnimation(
-            animationData: "{ not valid lottie }",
-            config: AnimationConfig()
-        )
+        let animation = DotLottieAnimation(animationData: "{ not valid lottie }", config: AnimationConfig())
         XCTAssertTrue(animation.error(), "Invalid animation data should set the error flag")
-    }
-    
-    // MARK: - Rendering
-    
-    /// Verifies the full rendering pipeline: load → tick → CGImage.
-    func testTickReturnsImageWhenLoaded() {
-        let animation = makeAnimation(autoplay: true)
-        XCTAssertTrue(animation.isLoaded())
-        
-        let image = animation.tick()
-        XCTAssertNotNil(image, "tick() should return a CGImage for a loaded animation")
-    }
-    
-    func testTickReturnsNilWhenNotLoaded() {
-        let animation = DotLottieAnimation(
-            animationData: "{ not valid }",
-            config: AnimationConfig(autoplay: true)
-        )
         XCTAssertFalse(animation.isLoaded())
-        XCTAssertNil(animation.tick(), "tick() should return nil when animation is not loaded")
     }
-    
-    // MARK: - Playback Controls
-    
-    func testPlay() {
-        let animation = makeAnimation(autoplay: false)
-        XCTAssertFalse(animation.isPlaying(), "Animation should not be playing before play()")
-        
-        let result = animation.play()
-        XCTAssertTrue(result, "play() should return true")
-        XCTAssertTrue(animation.isPlaying(), "Animation should be playing after play()")
-        XCTAssertFalse(animation.isPaused())
-        XCTAssertFalse(animation.isStopped())
+
+    func testEmptyAnimationDataSetsErrorFlag() {
+        let animation = DotLottieAnimation(animationData: "", config: AnimationConfig())
+        XCTAssertFalse(animation.isLoaded())
     }
-    
-    func testPause() {
-        let animation = makeAnimation(autoplay: true)
-        XCTAssertTrue(animation.isPlaying(), "Animation should be playing with autoplay: true")
-        
-        let result = animation.pause()
-        XCTAssertTrue(result, "pause() should return true")
-        XCTAssertTrue(animation.isPaused(), "Animation should be paused after pause()")
-        XCTAssertFalse(animation.isPlaying())
+
+    // MARK: - Rendering pipeline
+
+    /// Full pipeline: load → tick → CGImage.
+    func testTickReturnsImageWhenLoaded() {
+        let animation = makeMinimalAnimation(autoplay: true)
+        XCTAssertTrue(animation.isLoaded())
+        XCTAssertNotNil(animation.tick(dt: 0.1), "tick() should return a CGImage for a loaded animation")
     }
-    
-    func testStop() {
-        let animation = makeAnimation(autoplay: true)
-        XCTAssertTrue(animation.isPlaying(), "Animation should be playing with autoplay: true")
-        
-        let result = animation.stop()
-        XCTAssertTrue(result, "stop() should return true")
-        XCTAssertTrue(animation.isStopped(), "Animation should be stopped after stop()")
-        XCTAssertFalse(animation.isPlaying())
+
+    func testTickReturnsNilWhenNotLoaded() {
+        let animation = DotLottieAnimation(animationData: "{ not valid }", config: AnimationConfig(autoplay: true))
+        XCTAssertFalse(animation.isLoaded())
+        XCTAssertNil(animation.tick(dt: 0.1), "tick() should return nil when animation is not loaded")
     }
-    
-    func testPlayAfterStop() {
-        let animation = makeAnimation(autoplay: true)
-        _ = animation.stop()
-        XCTAssertTrue(animation.isStopped())
-        
-        let result = animation.play()
-        XCTAssertTrue(result, "play() should return true after stop()")
-        XCTAssertTrue(animation.isPlaying())
+
+    func testFrameImageRendersCurrentFrameWithoutAdvancing() {
+        let animation = makeMinimalAnimation(autoplay: false)
+        XCTAssertTrue(animation.setFrame(frame: 20))
+        let before = animation.currentFrame()
+        XCTAssertNotNil(animation.frameImage(), "frameImage() should render the current frame")
+        XCTAssertEqual(animation.currentFrame(), before, accuracy: 0.001, "frameImage() must not advance time")
     }
-    
-    func testPlayAfterPause() {
-        let animation = makeAnimation(autoplay: true)
-        _ = animation.pause()
-        XCTAssertTrue(animation.isPaused())
-        
-        let result = animation.play()
-        XCTAssertTrue(result, "play() should return true after pause()")
-        XCTAssertTrue(animation.isPlaying())
+
+    /// `render()` reports whether a new frame was drawn: true after the frame
+    /// changes, false on a redundant call with no change.
+    func testRenderReflectsFrameChange() {
+        let animation = makeMinimalAnimation(autoplay: false)
+        XCTAssertTrue(animation.setFrame(frame: 30))
+        XCTAssertTrue(animation.render(), "render() should report true after the frame changed")
+        XCTAssertFalse(animation.render(), "a second render() with no change should report false")
     }
-    
-    // MARK: - Speed
-    
-    func testDefaultSpeedIsOne() {
-        let animation = makeAnimation()
-        XCTAssertEqual(animation.speed(), 1.0, accuracy: 0.001, "Default speed should be 1.0")
+
+    func testRenderFalseWhenNotLoaded() {
+        let animation = DotLottieAnimation(animationData: "{ bad }", config: AnimationConfig())
+        XCTAssertFalse(animation.render())
     }
-    
-    func testSetSpeedUpdatesValue() {
-        let animation = makeAnimation()
-        animation.setSpeed(speed: 2.5)
-        XCTAssertEqual(animation.speed(), 2.5, accuracy: 0.001)
+
+    // MARK: - Resize
+
+    func testResizeUpdatesModelDimensions() {
+        let animation = makeMinimalAnimation()
+        animation.resize(width: 256, height: 128)
+        XCTAssertEqual(animation.animationModel.width, 256)
+        XCTAssertEqual(animation.animationModel.height, 128)
+        XCTAssertFalse(animation.error(), "a valid resize should not set the error flag")
+        XCTAssertNotNil(animation.tick(dt: 0.1), "animation should still render after resize")
     }
-    
-    func testSetSpeedHalf() {
-        let animation = makeAnimation()
-        animation.setSpeed(speed: 0.5)
-        XCTAssertEqual(animation.speed(), 0.5, accuracy: 0.001)
+
+    func testResizeToZeroSetsErrorFlag() {
+        let animation = makeMinimalAnimation()
+        animation.resize(width: 0, height: 0)
+        XCTAssertTrue(animation.error(), "resizing to an invalid (zero) size should set the error flag")
     }
-    
-    // MARK: - State Machine
-    
-    /// Attempts to load inline state machine data.
-    /// The test is skipped if the engine does not accept this format.
-    func testStateMachineLoadData() throws {
-        let animation = makeAnimation()
-        let loaded = animation.stateMachineLoadData(minimalStateMachineJSON)
-        try XCTSkipUnless(loaded, "State machine data format not accepted by engine – skipping")
-        XCTAssertTrue(loaded)
-    }
-    
-    func testStateMachineBooleanInput() throws {
-        let animation = makeAnimation(autoplay: true)
-        
-        let loaded = animation.stateMachineLoadData(minimalStateMachineJSON)
-        try XCTSkipUnless(loaded, "State machine data format not accepted by engine – skipping")
-        
-        let started = animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false))
-        XCTAssertTrue(started, "State machine should start successfully")
-        
-        XCTAssertTrue(animation.stateMachineSetBooleanInput(key: "isActive", value: true))
-        XCTAssertTrue(animation.stateMachineGetBooleanInput(key: "isActive"), "Boolean input should be true after setting it")
-        
-        XCTAssertTrue(animation.stateMachineSetBooleanInput(key: "isActive", value: false))
-        XCTAssertFalse(animation.stateMachineGetBooleanInput(key: "isActive"), "Boolean input should be false after setting it")
-    }
-    
-    func testStateMachineNumericInput() throws {
-        let animation = makeAnimation(autoplay: true)
-        
-        let loaded = animation.stateMachineLoadData(minimalStateMachineJSON)
-        try XCTSkipUnless(loaded, "State machine data format not accepted by engine – skipping")
-        
-        let started = animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false))
-        XCTAssertTrue(started, "State machine should start successfully")
-        
-        XCTAssertTrue(animation.stateMachineSetNumericInput(key: "count", value: 42.0))
-        XCTAssertEqual(
-            animation.stateMachineGetNumericInput(key: "count"),
-            42.0,
-            accuracy: 0.001,
-            "Numeric input should reflect the set value"
+
+    // MARK: - Custom dimensions from config
+
+    func testCustomWidthHeightFromConfig() {
+        let animation = DotLottieAnimation(
+            animationData: Fixtures.minimalLottieJSON,
+            config: AnimationConfig(width: 128, height: 64)
         )
-    }
-    
-    func testStateMachineStringInput() throws {
-        let animation = makeAnimation(autoplay: true)
-        
-        let loaded = animation.stateMachineLoadData(minimalStateMachineJSON)
-        try XCTSkipUnless(loaded, "State machine data format not accepted by engine – skipping")
-        
-        let started = animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false))
-        XCTAssertTrue(started, "State machine should start successfully")
-        
-        XCTAssertTrue(animation.stateMachineSetStringInput(key: "word", value: "new"))
-        XCTAssertEqual(
-            animation.stateMachineGetStringInput(key: "word"),
-            "new",
-            "String input should reflect the set value"
-        )
-    }
-    func testStateMachineGetInputsReturnsCachedValues() throws {
-        let animation = makeAnimation()
-        
-        let loaded = animation.stateMachineLoadData(minimalStateMachineJSON)
-        try XCTSkipUnless(loaded, "State machine data format not accepted by engine – skipping")
-        
-        let inputs = animation.stateMachineGetInputs()
-        XCTAssertFalse(inputs.isEmpty, "Inputs should not be empty after loading state machine")
-        XCTAssertNotNil(inputs["isActive"], "Should have 'isActive' input")
-        XCTAssertNotNil(inputs["count"], "Should have 'count' input")
+        XCTAssertEqual(animation.animationModel.width, 128)
+        XCTAssertEqual(animation.animationModel.height, 64)
+        XCTAssertTrue(animation.sizeOverrideActive)
     }
 }
