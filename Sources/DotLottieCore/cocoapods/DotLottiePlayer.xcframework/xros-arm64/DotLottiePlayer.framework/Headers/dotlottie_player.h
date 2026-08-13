@@ -103,6 +103,23 @@ typedef struct dotlottiePlayer dotlottiePlayer;
 
 typedef struct dotlottieRgba dotlottieRgba;
 
+/**
+ * Loads bytes for an asset `src` the player cannot resolve itself.
+ * Return `true` with `*out_data`/`*out_size` set to supply the asset,
+ * `false` to skip it. The buffer is copied before the finalizer runs.
+ */
+typedef bool (*dotlottieDotLottieAssetResolver)(const char *src,
+                                                const uint8_t **out_data,
+                                                uintptr_t *out_size,
+                                                void *user_data);
+
+/**
+ * Called after the resolver's buffer has been copied, so the caller can free it.
+ */
+typedef void (*dotlottieDotLottieAssetResolverFinalizer)(const uint8_t *data,
+                                                         uintptr_t size,
+                                                         void *user_data);
+
 typedef struct dotlottieLayout {
   enum dotlottieFit fit;
   float align[2];
@@ -285,6 +302,18 @@ enum dotlottieDotLottieResult dotlottie_load_animation(struct dotlottiePlayer *p
 enum dotlottieDotLottieResult dotlottie_load_dotlottie_data(struct dotlottiePlayer *ptr,
                                                             const char *file_data,
                                                             uintptr_t file_size);
+
+/**
+ * Set a resolver for assets outside the dotLottie container (remote URLs,
+ * external paths). Called synchronously when ThorVG first needs the asset;
+ * takes effect on the next load. Pass a NULL `resolver` to clear. Pass a
+ * `finalizer` to free the resolver's buffer after it has been copied, or NULL
+ * if the buffer is static.
+ */
+enum dotlottieDotLottieResult dotlottie_set_asset_resolver(struct dotlottiePlayer *ptr,
+                                                           dotlottieDotLottieAssetResolver resolver,
+                                                           dotlottieDotLottieAssetResolverFinalizer finalizer,
+                                                           void *user_data);
 
 /**
  * Get the manifest as a JSON string.
