@@ -187,7 +187,7 @@ public struct DotLottieView: View, DotLottie {
         let now = ProcessInfo.processInfo.systemUptime
         let dt = lastTickTime == 0 ? Float(0) : Float((now - lastTickTime) * 1000)
         lastTickTime = now
-        return dotLottieViewModel.tick(dt: dt)
+        return dotLottieViewModel.tick(milliseconds: dt)
     }
 
     private struct StateMachineGestureModifier<G: Gesture>: ViewModifier {

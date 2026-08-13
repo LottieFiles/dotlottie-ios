@@ -246,9 +246,17 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: Tick
 
-    /// Advances the animation by `dt` milliseconds and renders if the frame changed.
+    /// Advances the animation by `milliseconds` and renders if the frame changed.
+    public func tick(milliseconds: Float) -> CGImage? {
+        player.tick(dt: milliseconds)
+    }
+
+    /// `dt` has always been interpreted as milliseconds, despite the name
+    /// suggesting a generic delta — the explicit spelling prevents callers
+    /// from passing seconds.
+    @available(*, deprecated, renamed: "tick(milliseconds:)", message: "dt is in milliseconds, not seconds")
     public func tick(dt: Float) -> CGImage? {
-        player.tick(dt: dt)
+        tick(milliseconds: dt)
     }
 
     /// Renders the current frame without advancing time.

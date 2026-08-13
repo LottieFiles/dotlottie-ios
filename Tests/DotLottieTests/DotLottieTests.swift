@@ -32,13 +32,13 @@ final class DotLottieTests: XCTestCase {
     func testTickReturnsImageWhenLoaded() {
         let animation = makeMinimalAnimation(autoplay: true)
         XCTAssertTrue(animation.isLoaded())
-        XCTAssertNotNil(animation.tick(dt: 0.1), "tick() should return a CGImage for a loaded animation")
+        XCTAssertNotNil(animation.tick(milliseconds: 16.7), "tick() should return a CGImage for a loaded animation")
     }
 
     func testTickReturnsNilWhenNotLoaded() {
         let animation = DotLottieAnimation(animationData: "{ not valid }", config: AnimationConfig(autoplay: true))
         XCTAssertFalse(animation.isLoaded())
-        XCTAssertNil(animation.tick(dt: 0.1), "tick() should return nil when animation is not loaded")
+        XCTAssertNil(animation.tick(milliseconds: 16.7), "tick() should return nil when animation is not loaded")
     }
 
     func testFrameImageRendersCurrentFrameWithoutAdvancing() {
@@ -71,7 +71,7 @@ final class DotLottieTests: XCTestCase {
         XCTAssertEqual(animation.animationModel.width, 256)
         XCTAssertEqual(animation.animationModel.height, 128)
         XCTAssertFalse(animation.error(), "a valid resize should not set the error flag")
-        XCTAssertNotNil(animation.tick(dt: 0.1), "animation should still render after resize")
+        XCTAssertNotNil(animation.tick(milliseconds: 16.7), "animation should still render after resize")
     }
 
     func testResizeToZeroSetsErrorFlag() {

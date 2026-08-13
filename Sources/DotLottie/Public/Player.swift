@@ -127,6 +127,8 @@ class Player: ObservableObject {
         }
     }
 
+    /// Advances playback by `dt` **milliseconds** (the core's tick contract)
+    /// and returns the rendered frame, or nil if nothing changed.
     public func tick(dt: Float) -> CGImage? {
         if !self.isLoaded() {
             return nil

@@ -16,7 +16,7 @@ final class ExampleFixturesTests: XCTestCase {
         XCTAssertTrue(waitUntilLoaded(animation), "coffee.lottie should load")
         XCTAssertFalse(animation.error())
         XCTAssertGreaterThan(animation.totalFrames(), 0)
-        XCTAssertNotNil(animation.tick(dt: 0.1), "a loaded .lottie should produce a frame")
+        XCTAssertNotNil(animation.tick(milliseconds: 16.7), "a loaded .lottie should produce a frame")
     }
 
     func testPigeonLottieLoadsAndRenders() {
@@ -24,7 +24,7 @@ final class ExampleFixturesTests: XCTestCase {
             dotLottieData: Fixtures.pigeonLottie, config: AnimationConfig(autoplay: true))
         XCTAssertTrue(waitUntilLoaded(animation), "pigeon.lottie should load")
         XCTAssertGreaterThan(animation.totalFrames(), 0)
-        XCTAssertNotNil(animation.tick(dt: 0.1))
+        XCTAssertNotNil(animation.tick(milliseconds: 16.7))
     }
 
     func testThemingLottieLoadsAndExposesThemes() {
@@ -46,7 +46,7 @@ final class ExampleFixturesTests: XCTestCase {
             animationData: Fixtures.flowJSON, config: AnimationConfig(autoplay: true))
         XCTAssertTrue(waitUntilLoaded(animation), "Flow.json should load")
         XCTAssertGreaterThan(animation.totalFrames(), 0)
-        XCTAssertNotNil(animation.tick(dt: 0.1))
+        XCTAssertNotNil(animation.tick(milliseconds: 16.7))
     }
 
     func testToggleJSONLoads() {

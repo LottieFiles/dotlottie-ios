@@ -26,6 +26,22 @@ final class FrameProgressTests: XCTestCase {
         XCTAssertFalse(animation.setFrame(frame: 10), "setting the current frame again should be a no-op (false)")
     }
 
+    // MARK: - Tick
+
+    /// Regression: `tick(milliseconds:)` must keep advancing playback across
+    /// successive calls — not just render once via the first-frame fallback.
+    /// The minimal fixture is 120 frames at 60fps, so 500ms ≈ 30 frames.
+    func testTickAdvancesFramesAcrossCalls() {
+        let animation = makeMinimalAnimation(autoplay: true)
+        XCTAssertNotNil(animation.tick(milliseconds: 0), "first tick renders the initial frame")
+
+        XCTAssertNotNil(animation.tick(milliseconds: 500), "second tick should render an advanced frame")
+        XCTAssertEqual(animation.currentFrame(), 30, accuracy: 2.0, "500ms at 60fps should advance ~30 frames")
+
+        XCTAssertNotNil(animation.tick(milliseconds: 500))
+        XCTAssertEqual(animation.currentFrame(), 60, accuracy: 2.0)
+    }
+
     // MARK: - Progress
 
     func testCurrentProgressTracksFrame() {

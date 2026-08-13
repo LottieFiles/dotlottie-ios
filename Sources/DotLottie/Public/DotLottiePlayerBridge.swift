@@ -488,6 +488,8 @@ public class DotLottiePlayer {
         return dotlottie_stop(ptr) == Success
     }
 
+    /// Advances playback by `dt` **milliseconds** (mirrors `dotlottie_tick`'s
+    /// contract) and reports whether a new frame was rendered.
     public func tick(dt: Float) -> Bool {
         var rendered: Bool = false
         if isStateMachineRunning, let smPtr = stateMachinePtr {

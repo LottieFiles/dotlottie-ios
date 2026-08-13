@@ -197,7 +197,7 @@ public class Coordinator: NSObject, MTKViewDelegate {
         let dt = lastDrawTime == 0 ? Float(0) : Float((now - lastDrawTime) * 1000)
         lastDrawTime = now
 
-        if let frame = viewModel.tick(dt: dt) {
+        if let frame = viewModel.tick(milliseconds: dt) {
             let commandBuffer = metalCommandQueue.makeCommandBuffer()
             
             let inputImage = CIImage(cgImage: frame)
