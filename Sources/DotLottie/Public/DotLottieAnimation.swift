@@ -246,7 +246,7 @@ public final class DotLottieAnimation: ObservableObject {
     
     // MARK: Tick
 
-    /// Advances the animation by `dt` seconds and renders if the frame changed.
+    /// Advances the animation by `dt` milliseconds and renders if the frame changed.
     public func tick(dt: Float) -> CGImage? {
         player.tick(dt: dt)
     }
