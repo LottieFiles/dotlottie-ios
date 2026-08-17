@@ -319,9 +319,13 @@ class Player: ObservableObject {
     public func stateMachineFrameworkSetup() -> UInt16 {
         dotLottiePlayer.stateMachineFrameworkSetup()
     }
-    
+
     public func stateMachineCurrentState() -> String {
         dotLottiePlayer.stateMachineCurrentState()
+    }
+
+    public func stateMachineGetInputs() -> [String: String] {
+        dotLottiePlayer.stateMachineGetInputs()
     }
     
     public func duration() -> Float32 {

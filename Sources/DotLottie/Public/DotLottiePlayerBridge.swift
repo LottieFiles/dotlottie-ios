@@ -407,6 +407,8 @@ public class DotLottiePlayer {
     private var stateMachineObservers: [StateMachineObserver] = []
     private var stateMachineInternalObservers: [StateMachineInternalObserver] = []
 
+    private var cachedStateMachineInputs: [String: String] = [:]
+
     private var eventPollTimer: Timer?
 
     public init(config: Config, threads: UInt32 = 0) {
@@ -1007,7 +1009,13 @@ public class DotLottiePlayer {
             stateMachinePtr = nil
         }
         stateMachinePtr = stateMachineId.withCString { dotlottie_state_machine_load(ptr, $0) }
-        return stateMachinePtr != nil
+        let ok = stateMachinePtr != nil
+        if ok {
+            cachedStateMachineInputs = Self.parseStateMachineInputs(
+                from: getStateMachine(stateMachineId: stateMachineId)
+            )
+        }
+        return ok
     }
 
     public func stateMachineLoadData(stateMachine: String) -> Bool {
@@ -1020,7 +1028,9 @@ public class DotLottiePlayer {
         stateMachinePtr = mutableBytes.withUnsafeMutableBufferPointer { buffer in
             buffer.baseAddress.flatMap { dotlottie_state_machine_load_data(ptr, $0) }
         }
-        return stateMachinePtr != nil
+        let ok = stateMachinePtr != nil
+        if ok { cachedStateMachineInputs = Self.parseStateMachineInputs(from: stateMachine) }
+        return ok
     }
 
     public func stateMachineStart(openUrlPolicy: OpenUrlPolicy = OpenUrlPolicy()) -> Bool {
@@ -1155,6 +1165,24 @@ public class DotLottiePlayer {
         return stateMachineId.withCString { idPtr in
             stringFromBufferAPI({ dotlottie_get_state_machine(ptr, idPtr, $0, $1) }) ?? ""
         }
+    }
+
+    public func stateMachineGetInputs() -> [String: String] {
+        cachedStateMachineInputs
+    }
+
+    private static func parseStateMachineInputs(from json: String) -> [String: String] {
+        guard !json.isEmpty,
+              let data = json.data(using: .utf8),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let inputs = obj["inputs"] as? [[String: Any]] else { return [:] }
+        var result: [String: String] = [:]
+        for input in inputs {
+            if let name = input["name"] as? String, let type_ = input["type"] as? String {
+                result[name] = type_
+            }
+        }
+        return result
     }
 
     // MARK: - Observers
