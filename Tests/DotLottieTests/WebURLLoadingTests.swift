@@ -34,6 +34,8 @@ final class WebURLLoadingTests: XCTestCase {
     override func tearDown() {
         URLProtocol.unregisterClass(StubURLProtocol.self)
         StubURLProtocol.response = nil
+        DotLottieCache.shared.clearCache()
+        DotLottieCache.shared.cachePolicy = .enabled
         super.tearDown()
     }
 
@@ -50,6 +52,28 @@ final class WebURLLoadingTests: XCTestCase {
         let animation = DotLottieAnimation(webURL: "https://stub.test/animation.lottie", config: AnimationConfig())
         XCTAssertTrue(waitUntilLoaded(animation), "web .lottie should load")
         XCTAssertGreaterThan(animation.totalFrames(), 0)
+    }
+
+    func testWebURLCaching() {
+        let testURL = URL(string: "https://stub.test/cached_animation.lottie")!
+        StubURLProtocol.response = .init(status: 200, data: Fixtures.coffeeLottie)
+
+        // First request: network fetch
+        let animation1 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig())
+        XCTAssertTrue(waitUntilLoaded(animation1))
+
+        // Verify item is cached
+        XCTAssertNotNil(DotLottieCache.shared.get(for: testURL))
+
+        // Set stub to server error (500); if cache works, request succeeds using cached data
+        StubURLProtocol.response = .init(status: 500, data: Data())
+        let animation2 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig())
+        XCTAssertTrue(waitUntilLoaded(animation2), "Cached animation should load even if network returns error")
+        XCTAssertFalse(animation2.error())
+
+        // Test clearing cache
+        DotLottieCache.shared.clearCache()
+        XCTAssertNil(DotLottieCache.shared.get(for: testURL))
     }
 
     func testWebURLServerErrorSetsErrorFlag() {
