@@ -345,12 +345,12 @@ public class DotLottieWebGPUView: PlatformBase {
     ///   load result is delivered through the player's `Observer` (`onLoad` /
     ///   `onLoadError`). Subscribe via `subscribe(observer:)` to observe it.
     @discardableResult
-    public func loadAnimation(webURL: String) -> Bool {
+    public func loadAnimation(webURL: String, shouldCache: Bool = false) -> Bool {
         guard let url = URL(string: webURL) else { return false }
         Task { [weak self] in
             let data: Data
             do {
-                data = try await fetchFileFromURL(url: url)
+                data = try await fetchFileFromURL(url: url, shouldCache: shouldCache)
             } catch {
                 print("[DotLottieWebGPUView] Failed to load animation from URL: \(error)")
                 return

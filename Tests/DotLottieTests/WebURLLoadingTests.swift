@@ -54,22 +54,35 @@ final class WebURLLoadingTests: XCTestCase {
         XCTAssertGreaterThan(animation.totalFrames(), 0)
     }
 
-    func testWebURLCaching() {
+    func testWebURLUncachedByDefault() {
+        let testURL = URL(string: "https://stub.test/uncached_animation.lottie")!
+        StubURLProtocol.response = .init(status: 200, data: Fixtures.coffeeLottie)
+
+        // Default shouldCache is false
+        let animation1 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig())
+        XCTAssertTrue(waitUntilLoaded(animation1))
+
+        // Verify item is NOT cached
+        XCTAssertNil(DotLottieCache.shared.get(for: testURL))
+    }
+
+    func testWebURLCachingWhenShouldCacheIsTrue() {
         let testURL = URL(string: "https://stub.test/cached_animation.lottie")!
         StubURLProtocol.response = .init(status: 200, data: Fixtures.coffeeLottie)
 
-        // First request: network fetch
-        let animation1 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig())
+        // First request with shouldCache: true (network fetch & cache write)
+        let animation1 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig(), shouldCache: true)
         XCTAssertTrue(waitUntilLoaded(animation1))
 
         // Verify item is cached
         XCTAssertNotNil(DotLottieCache.shared.get(for: testURL))
 
-        // Set stub to server error (500); if cache works, request succeeds using cached data
+        // Set stub to server error (500); with shouldCache: true, request succeeds from cache
         StubURLProtocol.response = .init(status: 500, data: Data())
-        let animation2 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig())
+        let animation2 = DotLottieAnimation(webURL: testURL.absoluteString, config: AnimationConfig(), shouldCache: true)
         XCTAssertTrue(waitUntilLoaded(animation2), "Cached animation should load even if network returns error")
         XCTAssertFalse(animation2.error())
+        XCTAssertGreaterThan(animation2.totalFrames(), 0)
 
         // Test clearing cache
         DotLottieCache.shared.clearCache()
