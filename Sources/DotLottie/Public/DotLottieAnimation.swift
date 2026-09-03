@@ -72,6 +72,7 @@ public final class DotLottieAnimation: ObservableObject {
     public convenience init(
         webURL: String,
         config: AnimationConfig,
+        shouldCache: Bool = false,
         threads: Int? = nil
     ) {
         self.init(config: config, threads: threads, task: { _ in }, errorMessage: { error in
@@ -82,7 +83,7 @@ public final class DotLottieAnimation: ObservableObject {
             let data: Data
             do {
                 guard let url = URL(string: urlString) else { return }
-                data = try await fetchFileFromURL(url: url)
+                data = try await fetchFileFromURL(url: url, shouldCache: shouldCache)
             } catch {
                 await MainActor.run { [weak self] in
                     self?.animationModel.error = true
