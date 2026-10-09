@@ -310,10 +310,6 @@ public class Coordinator: NSObject, MTKViewDelegate {
         }
 #endif
         
-        guard let drawable = view.currentDrawable else {
-            return
-        }
-        
         guard !viewModel.error() else {
             return
         }
@@ -328,9 +324,13 @@ public class Coordinator: NSObject, MTKViewDelegate {
             uploadFrame(pixels, width: width, height: height)
         }
         // nil = no new frame (keep the previous drawable content, as before).
+        // Acquire the drawable only once a frame is ready to present: taking it
+        // first blocks the CPU work behind GPU back-pressure, and a tick that
+        // produces no new frame then needs no drawable at all.
         guard uploaded == true,
               let staging = stagingTexture,
               let pipeline = pipelineState,
+              let drawable = view.currentDrawable,
               let passDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = metalCommandQueue.makeCommandBuffer() else {
             return
