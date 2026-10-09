@@ -168,6 +168,11 @@ public class Coordinator: NSObject, MTKViewDelegate {
     /// Reused upload target for the software frame buffer; recreated only when
     /// the animation buffer changes size.
     private var stagingTexture: MTLTexture?
+    private var swapChainStalled = false
+    
+    /// Half a frame at 60 fps: a healthy acquisition returns in well under
+    /// a millisecond, a stalled swap chain blocks for most of the frame.
+    private static let swapChainStallThreshold: CFTimeInterval = 0.008
     private var viewSize: CGSize!
     private var lastDrawTime: CFTimeInterval = 0
     /// Cached MTLClearColor for the view background; recomputed only when the
@@ -324,17 +329,32 @@ public class Coordinator: NSObject, MTKViewDelegate {
             uploadFrame(pixels, width: width, height: height)
         }
         // nil = no new frame (keep the previous drawable content, as before).
+        guard uploaded == true,
+              let staging = stagingTexture,
+              let pipeline = pipelineState else {
+            return
+        }
+        
+        // A drawable wait close to a full vsync means the swap chain is running
+        // one frame behind, and it stays there on its own: every acquisition
+        // then blocks until the compositor returns a drawable at the next
+        // vsync, and the main thread spends the whole frame in this method.
+        // Skipping one present hands the compositor the slack to recover.
+        if swapChainStalled {
+            swapChainStalled = false
+            return
+        }
+        
         // Acquire the drawable only once a frame is ready to present: taking it
         // first blocks the CPU work behind GPU back-pressure, and a tick that
         // produces no new frame then needs no drawable at all.
-        guard uploaded == true,
-              let staging = stagingTexture,
-              let pipeline = pipelineState,
-              let drawable = view.currentDrawable,
+        let acquireStart = CACurrentMediaTime()
+        guard let drawable = view.currentDrawable,
               let passDescriptor = view.currentRenderPassDescriptor,
               let commandBuffer = metalCommandQueue.makeCommandBuffer() else {
             return
         }
+        swapChainStalled = CACurrentMediaTime() - acquireStart > Self.swapChainStallThreshold
 
         passDescriptor.colorAttachments[0].clearColor = currentClearColor()
 
