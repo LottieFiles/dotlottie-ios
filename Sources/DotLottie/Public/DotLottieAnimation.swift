@@ -232,6 +232,13 @@ public final class DotLottieAnimation: ObservableObject {
         player.tick(dt: milliseconds)
     }
 
+    /// Zero-copy variant of `tick(milliseconds:)`: invokes `body` with the raw
+    /// premultiplied-RGBA frame buffer instead of copying it into a `CGImage`.
+    /// The pointer is only valid for the duration of `body`.
+    internal func tickWithBuffer<T>(milliseconds: Float, _ body: (UnsafeRawPointer, _ width: Int, _ height: Int) -> T) -> T? {
+        player.tickWithBuffer(dt: milliseconds, body)
+    }
+
     /// `dt` has always been interpreted as milliseconds, despite the name
     /// suggesting a generic delta — the explicit spelling prevents callers
     /// from passing seconds.
