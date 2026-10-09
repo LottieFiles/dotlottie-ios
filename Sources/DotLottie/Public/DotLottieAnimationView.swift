@@ -38,7 +38,7 @@ public class DotLottieAnimationView: PlatformViewBase, DotLottie {
         dotLottieViewModel.$framerate.sink { [weak self] value in
             guard let self else { return }
             if self.mtkView != nil {
-                self.mtkView.preferredFramesPerSecond = dotLottieViewModel.framerate
+                self.mtkView.preferredFramesPerSecond = value
             }
         }.store(in: &cancellableBag)
         
