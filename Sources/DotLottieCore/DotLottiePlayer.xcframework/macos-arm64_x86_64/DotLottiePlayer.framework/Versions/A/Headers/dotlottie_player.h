@@ -699,6 +699,19 @@ enum dotlottieDotLottieResult dotlottie_set_image_slot_src(struct dotlottiePlaye
                                                            const char *src);
 
 /**
+ * Set a bezier path slot. `vertices`, `in_tangents` and
+ * `out_tangents` each hold `count` interleaved `x, y` pairs. Tangents are
+ * relative to their vertex; pass NULL for zero tangents.
+ */
+enum dotlottieDotLottieResult dotlottie_set_bezier_path_slot(struct dotlottiePlayer *ptr,
+                                                             const char *slot_id,
+                                                             const float *vertices,
+                                                             const float *in_tangents,
+                                                             const float *out_tangents,
+                                                             uintptr_t count,
+                                                             bool closed);
+
+/**
  * Returns the number of slot IDs in the current animation.
  */
 enum dotlottieDotLottieResult dotlottie_get_slot_ids_count(struct dotlottiePlayer *ptr,
