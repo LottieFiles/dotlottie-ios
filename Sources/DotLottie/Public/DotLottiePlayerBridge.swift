@@ -582,6 +582,14 @@ public class DotLottiePlayer {
         return dotlottie_get_speed(ptr)
     }
 
+    /// Volume multiplier for audio layers (0.0 to 1.0, default 1.0).
+    public func getAudioVolume() -> Float {
+        guard let ptr = playerPtr else { return 1.0 }
+        var volume: Float = 1.0
+        guard dotlottie_get_audio_volume(ptr, &volume) == Success else { return 1.0 }
+        return volume
+    }
+
     public func getLoop() -> Bool {
         guard let ptr = playerPtr else { return false }
         return dotlottie_get_loop(ptr)
@@ -642,6 +650,12 @@ public class DotLottiePlayer {
     public func setSpeed(_ speed: Float) -> Bool {
         guard let ptr = playerPtr else { return false }
         return dotlottie_set_speed(ptr, speed) == Success
+    }
+
+    @discardableResult
+    public func setAudioVolume(_ volume: Float) -> Bool {
+        guard let ptr = playerPtr else { return false }
+        return dotlottie_set_audio_volume(ptr, volume) == Success
     }
 
     @discardableResult

@@ -18,17 +18,18 @@ APPLE_BASE_FEATURES ?= tvg-webp,tvg-png,tvg-jpg,tvg-ttf,tvg-otf,tvg-lottie-expre
 # Default features without audio
 APPLE_DEFAULT_FEATURES_NO_AUDIO = tvg,tvg-cpu,c_api,dotlottie,state-machines,theming
 
-# Uncomment for audio
-# APPLE_DEFAULT_FEATURES = $(APPLE_DEFAULT_FEATURES_NO_AUDIO),audio
+# Audio playback (rodio/cpal over CoreAudio). iOS and macOS only: the other
+# Apple platforms override APPLE_DEFAULT_FEATURES back to the no-audio set below.
+APPLE_AUDIO_FEATURES = audio,audio-wav,audio-flac,audio-ogg,audio-m4a
 
-APPLE_DEFAULT_FEATURES = $(APPLE_DEFAULT_FEATURES_NO_AUDIO)
+APPLE_DEFAULT_FEATURES = $(APPLE_DEFAULT_FEATURES_NO_AUDIO),$(APPLE_AUDIO_FEATURES)
 
 # Active feature set — defaults to base (software-only)
 APPLE_FEATURES ?= $(APPLE_BASE_FEATURES)
 
 # WebGPU variant: adds tvg-wg (Metal/WebGPU path) alongside tvg-cpu, so both the
 # software and WebGPU renderers are available at runtime.
-APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-cpu,tvg-wg,c_api,dotlottie,state-machines,theming
+APPLE_WEBGPU_DEFAULT_FEATURES = tvg,tvg-cpu,tvg-wg,c_api,dotlottie,state-machines,theming,$(APPLE_AUDIO_FEATURES)
 
 ifdef FEATURES
 	APPLE_FEATURES = $(FEATURES)

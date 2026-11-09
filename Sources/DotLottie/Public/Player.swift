@@ -203,6 +203,15 @@ class Player: ObservableObject {
     public func totalFrames() -> Float {
         dotLottiePlayer.totalFrames()
     }
+
+    public func audioVolume() -> Float {
+        dotLottiePlayer.getAudioVolume()
+    }
+
+    @discardableResult
+    public func setAudioVolume(volume: Float) -> Bool {
+        dotLottiePlayer.setAudioVolume(volume)
+    }
     
     @discardableResult
     public func setFrame(no: Float32) -> Bool {

@@ -77,6 +77,16 @@ open class DotLottiePlayerUIView: PlatformView {
         }
     }
     
+    /// Volume multiplier for audio layers (0.0 = muted, 1.0 = full)
+    public var audioVolume: CGFloat {
+        get {
+            CGFloat(dotLottieAnimation?.audioVolume() ?? 1.0)
+        }
+        set {
+            dotLottieAnimation?.setAudioVolume(volume: Float(newValue))
+        }
+    }
+    
     /// Current animation progress (0.0 to 1.0)
     public var currentProgress: CGFloat {
         get {

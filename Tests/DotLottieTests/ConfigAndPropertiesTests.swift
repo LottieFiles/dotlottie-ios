@@ -33,6 +33,20 @@ final class ConfigAndPropertiesTests: XCTestCase {
         XCTAssertEqual(animation.speed(), 0.5, accuracy: 0.001)
     }
 
+    // MARK: - Audio volume
+
+    func testDefaultAudioVolumeIsOne() {
+        XCTAssertEqual(makeMinimalAnimation().audioVolume(), 1.0, accuracy: 0.001)
+    }
+
+    func testSetAudioVolumeRoundTrips() {
+        let animation = makeMinimalAnimation()
+        animation.setAudioVolume(volume: 0.25)
+        XCTAssertEqual(animation.audioVolume(), 0.25, accuracy: 0.001)
+        animation.setAudioVolume(volume: 0)
+        XCTAssertEqual(animation.audioVolume(), 0, accuracy: 0.001)
+    }
+
     func testSpeedFromConfig() {
         let animation = makeMinimalAnimation(speed: 3.0)
         XCTAssertEqual(animation.speed(), 3.0, accuracy: 0.001)
