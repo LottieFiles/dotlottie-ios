@@ -203,6 +203,10 @@ public final class DotLottieAnimation: ObservableObject {
         
         self.player = Player(config: self.config, threads: threads)
 
+        if let assetResolver = config.assetResolver {
+            self.player.setAssetResolver(assetResolver)
+        }
+
         if (config.width != nil || config.height != nil) {
             self.sizeOverrideActive = true
         }
@@ -432,6 +436,15 @@ public final class DotLottieAnimation: ObservableObject {
         
         player.setConfig(config: config)
     }
+
+    /// Sets how many times the animation plays when looping is on. 0 loops forever.
+    public func setLoopCount(_ loopCount: Int) {
+        var config = player.config()
+
+        config.loopCount = UInt32(max(0, loopCount))
+
+        player.setConfig(config: config)
+    }
     
     public func segments() -> (Float, Float) {
         let segment = player.config().segment
@@ -592,6 +605,56 @@ public final class DotLottieAnimation: ObservableObject {
         player.clearSlot(slotId: slotId)
     }
 
+    /// Replaces the geometry of a path tagged with `slotId`. Tangents are relative to the vertex
+    /// at the same index; nil means zero tangents (straight segments).
+    @discardableResult
+    public func setBezierPathSlot(
+        slotId: String,
+        vertices: [CGPoint],
+        closed: Bool,
+        inTangents: [CGPoint]? = nil,
+        outTangents: [CGPoint]? = nil
+    ) -> Bool {
+        player.setBezierPathSlot(slotId: slotId, vertices: vertices, closed: closed, inTangents: inTangents, outTangents: outTangents)
+    }
+
+    /// Sets a single slot from its Lottie JSON value, e.g. `{"a":0,"k":[1,0,0,1]}`.
+    @discardableResult
+    public func setSlot(slotId: String, json: String) -> Bool {
+        player.setSlot(slotId: slotId, json: json)
+    }
+
+    public func getSlotIds() -> [String] {
+        player.getSlotIds()
+    }
+
+    /// Returns the slot type (e.g. "color", "scalar", "bezier_path"), or nil if it does not exist.
+    public func getSlotType(slotId: String) -> String? {
+        player.getSlotType(slotId: slotId)
+    }
+
+    /// Returns the slot's current value as JSON, or nil if it does not exist.
+    public func getSlot(slotId: String) -> String? {
+        player.getSlot(slotId: slotId)
+    }
+
+    /// Returns every slot's current value as a JSON object keyed by slot ID.
+    public func getSlots() -> String {
+        player.getSlots()
+    }
+
+    /// Restores a slot to the value from the animation.
+    @discardableResult
+    public func resetSlot(slotId: String) -> Bool {
+        player.resetSlot(slotId: slotId)
+    }
+
+    /// Restores every slot to the value from the animation.
+    @discardableResult
+    public func resetSlots() -> Bool {
+        player.resetSlots()
+    }
+
     @discardableResult
     public func setColorSlot(slotId: String, r: Float, g: Float, b: Float) -> Bool {
         player.setColorSlot(slotId: slotId, r: r, g: g, b: b)
@@ -722,6 +785,30 @@ public final class DotLottieAnimation: ObservableObject {
     
     public func stateMachineCurrentState() -> String {
         player.stateMachineCurrentState()
+    }
+
+    /// Returns the state machine status: "Running", "Tweening" or "Stopped".
+    public func stateMachineStatus() -> String {
+        player.stateMachineStatus()
+    }
+
+    /// Forces the state machine into `state`, skipping transitions and guards. With `immediate`,
+    /// the state's pipeline runs right away instead of on the next tick or input change.
+    @discardableResult
+    public func stateMachineOverrideCurrentState(_ state: String, immediate: Bool = false) -> Bool {
+        player.stateMachineOverrideCurrentState(state, immediate: immediate)
+    }
+
+    /// Puts an input back to the initial value from the state machine definition.
+    @discardableResult
+    public func stateMachineResetInput(key: String) -> Bool {
+        player.stateMachineResetInput(key: key)
+    }
+
+    /// Seeds the state machine's random number generator, making random transitions repeatable.
+    @discardableResult
+    public func stateMachineSetSeed(_ seed: UInt64) -> Bool {
+        player.stateMachineSetSeed(seed)
     }
     
     public func getStateMachine(_ id: String) -> String {

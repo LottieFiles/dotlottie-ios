@@ -28,6 +28,9 @@ public struct AnimationConfig {
     public var themeId: String? = ""
     public var stateMachineId: String? = ""
     public var animationId: String? = ""
+    /// Supplies bytes for assets the player cannot load itself, such as images referenced by a
+    /// remote URL. Called synchronously while the animation loads or renders.
+    public var assetResolver: AssetResolver? = nil
 
     #if !os(watchOS)
     public init(

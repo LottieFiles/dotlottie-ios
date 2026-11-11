@@ -341,6 +341,7 @@ struct AnimationView: View {
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
 | `setAudioVolume(volume: Float)` | Sets the volume multiplier for audio layers (0.0 muted to 1.0 full). |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
+| `setLoopCount(_ loopCount: Int)` | Sets how many times the animation plays when looping is on. 0 loops forever. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
 | `setProgress(progress: Float)` | Directly navigates the animation to a specified progress (0...1). |
 | `loadAnimationById(_ animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |
@@ -352,6 +353,18 @@ struct AnimationView: View {
 | `setTheme(_ themeId: String)` | Loads a theme. Only available with .lottie files. |
 | `setThemeData(_ themeData: String)` | Loads the passed theming data. |
 | `resetTheme()` | Removes the currently loaded theme. Only available with .lottie files. |
+| `getSlotIds()` | Lists the slot IDs in the loaded animation. |
+| `getSlotType(slotId: String)` | Returns a slot's type, such as `"color"`, `"scalar"` or `"bezier_path"`. |
+| `getSlot(slotId: String)` / `getSlots()` | Returns one slot, or all slots, as Lottie JSON. |
+| `setSlot(slotId: String, json: String)` | Sets one slot from its Lottie JSON value. |
+| `setBezierPathSlot(slotId:vertices:closed:inTangents:outTangents:)` | Replaces the geometry of a path slot. Tangents are optional. |
+| `resetSlot(slotId: String)` / `resetSlots()` | Restores slots to the values from the animation. |
+| `stateMachineStatus()` | Returns the state machine status (`"Running"`, `"Tweening"` or `"Stopped"`). |
+| `stateMachineSetSeed(_ seed: UInt64)` | Seeds the state machine's random number generator. |
+| `stateMachineResetInput(key: String)` | Puts an input back to its initial value. |
+| `stateMachineOverrideCurrentState(_ state: String, immediate: Bool)` | Forces the state machine into a state, skipping transitions and guards. |
+
+To load assets the player cannot resolve itself, such as images referenced by a remote URL, set `assetResolver` on `AnimationConfig`. It receives the asset's `src` and returns its `Data`, or `nil` to skip it. It runs synchronously while the animation loads or renders, so return bytes you already have.
 
 ### Event callbacks
 

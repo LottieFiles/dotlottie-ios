@@ -396,6 +396,18 @@ private func stringFromBufferAPI(
     return String(cString: buffer)
 }
 
+// MARK: - Asset Resolver
+
+/// Supplies bytes for an asset the player cannot resolve itself, such as an image referenced
+/// by a remote URL or an external path. Return nil to skip the asset.
+public typealias AssetResolver = (_ src: String) -> Data?
+
+/// Carries a resolver closure through the C API as `user_data`.
+private final class AssetResolverBox {
+    let resolve: AssetResolver
+    init(_ resolve: @escaping AssetResolver) { self.resolve = resolve }
+}
+
 // MARK: - DotLottiePlayer
 
 public class DotLottiePlayer {
@@ -408,6 +420,8 @@ public class DotLottiePlayer {
     private var stateMachineInternalObservers: [StateMachineInternalObserver] = []
 
     private var eventPollTimer: Timer?
+
+    private var assetResolverBoxes: [AssetResolverBox] = []
 
     public init(config: Config, threads: UInt32 = 0) {
         playerPtr = dotlottie_new_player(threads)
@@ -875,10 +889,10 @@ public class DotLottiePlayer {
         var result: [Marker] = []
         for i in 0..<count {
             var namePtr: UnsafePointer<CChar>? = nil
-            var time: Float = 0
-            var duration: Float = 0
-            if dotlottie_get_marker(ptr, i, &namePtr, &time, &duration) == Success, let namePtr = namePtr {
-                result.append(Marker(name: String(cString: namePtr), time: time, duration: duration))
+            var start: Float = 0
+            var end: Float = 0
+            if dotlottie_get_marker(ptr, i, &namePtr, &start, &end) == Success, let namePtr = namePtr {
+                result.append(Marker(name: String(cString: namePtr), time: start, duration: end - start))
             }
         }
         return result
@@ -1012,6 +1026,128 @@ public class DotLottiePlayer {
         }
     }
 
+    /// Replaces the geometry of a path tagged with `slotId`. Tangents are relative to the vertex
+    /// at the same index; nil means zero tangents (straight segments).
+    @discardableResult
+    public func setBezierPathSlot(
+        slotId: String,
+        vertices: [CGPoint],
+        closed: Bool,
+        inTangents: [CGPoint]? = nil,
+        outTangents: [CGPoint]? = nil
+    ) -> Bool {
+        guard let ptr = playerPtr, !vertices.isEmpty else { return false }
+        if let inTangents = inTangents, inTangents.count != vertices.count { return false }
+        if let outTangents = outTangents, outTangents.count != vertices.count { return false }
+
+        func flatten(_ points: [CGPoint]) -> [Float] {
+            points.flatMap { [Float($0.x), Float($0.y)] }
+        }
+        // The C API takes NULL for zero tangents, and Swift passes nil for an optional array.
+        let flatVertices = flatten(vertices)
+        let flatIn = inTangents.map(flatten)
+        let flatOut = outTangents.map(flatten)
+
+        return slotId.withCString { idPtr in
+            dotlottie_set_bezier_path_slot(ptr, idPtr, flatVertices, flatIn, flatOut, UInt(vertices.count), closed) == Success
+        }
+    }
+
+    /// Sets a single slot from its Lottie JSON value, e.g. `{"a":0,"k":[1,0,0,1]}`.
+    @discardableResult
+    public func setSlotStr(slotId: String, json: String) -> Bool {
+        guard let ptr = playerPtr else { return false }
+        return slotId.withCString { idPtr in
+            json.withCString { dotlottie_set_slot_str(ptr, idPtr, $0) == Success }
+        }
+    }
+
+    public func getSlotIds() -> [String] {
+        guard let ptr = playerPtr else { return [] }
+        var count: UInt32 = 0
+        guard dotlottie_get_slot_ids_count(ptr, &count) == Success else { return [] }
+        return (0..<count).compactMap { index in
+            stringFromBufferAPI { dotlottie_get_slot_id(ptr, index, $0, $1) }
+        }
+    }
+
+    /// Returns the slot type (e.g. "color", "scalar", "bezier_path"), or nil if it does not exist.
+    public func getSlotType(slotId: String) -> String? {
+        guard let ptr = playerPtr else { return nil }
+        let type = slotId.withCString { idPtr in
+            stringFromBufferAPI { dotlottie_get_slot_type(ptr, idPtr, $0, $1) }
+        }
+        return type?.isEmpty == false ? type : nil
+    }
+
+    /// Returns the slot's current value as JSON, or nil if it does not exist.
+    public func getSlotStr(slotId: String) -> String? {
+        guard let ptr = playerPtr else { return nil }
+        let json = slotId.withCString { idPtr in
+            stringFromBufferAPI { dotlottie_get_slot_str(ptr, idPtr, $0, $1) }
+        }
+        return json?.isEmpty == false ? json : nil
+    }
+
+    /// Returns every slot's current value as a JSON object keyed by slot ID.
+    public func getSlotsStr() -> String {
+        guard let ptr = playerPtr else { return "{}" }
+        return stringFromBufferAPI { dotlottie_get_slots_str(ptr, $0, $1) } ?? "{}"
+    }
+
+    /// Restores a slot to the value from the animation.
+    @discardableResult
+    public func resetSlot(slotId: String) -> Bool {
+        guard let ptr = playerPtr else { return false }
+        return slotId.withCString { dotlottie_reset_slot(ptr, $0) == Success }
+    }
+
+    /// Restores every slot to the value from the animation.
+    @discardableResult
+    public func resetSlots() -> Bool {
+        guard let ptr = playerPtr else { return false }
+        return dotlottie_reset_slots(ptr) == Success
+    }
+
+    // MARK: - Asset Resolver
+
+    /// Sets the resolver for assets the player cannot load itself (remote URLs, external paths).
+    /// It is called synchronously while an animation loads or renders, on the thread doing that
+    /// work. Takes effect on the next load. Pass nil to clear it.
+    @discardableResult
+    public func setAssetResolver(_ resolver: AssetResolver?) -> Bool {
+        guard let ptr = playerPtr else { return false }
+        guard let resolver = resolver else {
+            return dotlottie_set_asset_resolver(ptr, nil, nil, nil) == Success
+        }
+
+        let box = AssetResolverBox(resolver)
+        let installed = dotlottie_set_asset_resolver(
+            ptr,
+            { src, outData, outSize, userData in
+                guard let src = src, let outData = outData, let outSize = outSize, let userData = userData else {
+                    return false
+                }
+                let box = Unmanaged<AssetResolverBox>.fromOpaque(userData).takeUnretainedValue()
+                guard let data = box.resolve(String(cString: src)), !data.isEmpty,
+                      let buffer = malloc(data.count) else {
+                    return false
+                }
+                data.copyBytes(to: buffer.assumingMemoryBound(to: UInt8.self), count: data.count)
+                outData.pointee = UnsafePointer(buffer.assumingMemoryBound(to: UInt8.self))
+                outSize.pointee = UInt(data.count)
+                return true
+            },
+            { data, _, _ in free(UnsafeMutableRawPointer(mutating: data)) },
+            Unmanaged.passUnretained(box).toOpaque()
+        ) == Success
+
+        // The player can still call a replaced resolver until its next load, so every box
+        // stays alive until deinit.
+        if installed { assetResolverBoxes.append(box) }
+        return installed
+    }
+
     // MARK: - State Machine
 
     public func stateMachineLoad(stateMachineId: String) -> Bool {
@@ -1125,6 +1261,13 @@ public class DotLottiePlayer {
         return key.withCString { dotlottie_state_machine_set_boolean_input(smPtr, $0, value) == Success }
     }
 
+    /// Seeds the state machine's random number generator, making random transitions repeatable.
+    @discardableResult
+    public func stateMachineSetSeed(_ seed: UInt64) -> Bool {
+        guard let smPtr = stateMachinePtr else { return false }
+        return dotlottie_state_machine_set_seed(smPtr, seed) == Success
+    }
+
     public func stateMachineGetNumericInput(key: String) -> Float {
         guard let smPtr = stateMachinePtr else { return 0 }
         var result: Float = 0
@@ -1154,6 +1297,36 @@ public class DotLottiePlayer {
     public func stateMachineStatus() -> String {
         guard let smPtr = stateMachinePtr else { return "" }
         return stringFromBufferAPI({ dotlottie_state_machine_get_status(smPtr, $0, $1) }) ?? ""
+    }
+
+    /// Forces the state machine into `state`, skipping transitions and guards. With `immediate`,
+    /// the state's pipeline runs right away instead of on the next tick or input change.
+    @discardableResult
+    public func stateMachineOverrideCurrentState(_ state: String, immediate: Bool = false) -> Bool {
+        guard let smPtr = stateMachinePtr else { return false }
+        return state.withCString { dotlottie_state_machine_override_current_state(smPtr, $0, immediate) == Success }
+    }
+
+    /// Puts an input back to the initial value from the state machine definition.
+    @discardableResult
+    public func stateMachineResetInput(key: String) -> Bool {
+        guard let smPtr = stateMachinePtr else { return false }
+        return key.withCString { dotlottie_state_machine_reset_input(smPtr, $0) == Success }
+    }
+
+    /// Returns every input name mapped to its type: "Numeric", "Boolean", "String" or "Event".
+    public func stateMachineGetInputs() -> [String: String] {
+        guard let smPtr = stateMachinePtr else { return [:] }
+        var count: UInt32 = 0
+        guard dotlottie_state_machine_get_inputs_count(smPtr, &count) == Success else { return [:] }
+        var inputs: [String: String] = [:]
+        for index in 0..<count {
+            if let name = stringFromBufferAPI({ dotlottie_state_machine_get_input_name(smPtr, index, $0, $1) }),
+               let type = stringFromBufferAPI({ dotlottie_state_machine_get_input_type(smPtr, index, $0, $1) }) {
+                inputs[name] = type
+            }
+        }
+        return inputs
     }
 
     /// Returns raw bit flags indicating which interaction types are needed.
