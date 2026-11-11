@@ -747,6 +747,15 @@ public final class DotLottieAnimation: ObservableObject {
         
         player.setConfig(config: config)
     }
+
+    /// Volume multiplier applied to the animation's audio layers (0.0 to 1.0, default 1.0).
+    public func audioVolume() -> Float {
+        return player.audioVolume()
+    }
+
+    public func setAudioVolume(volume: Float) {
+        player.setAudioVolume(volume: volume)
+    }
     
     public func duration() -> Float {
         return player.duration()

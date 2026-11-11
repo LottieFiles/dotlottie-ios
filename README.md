@@ -192,6 +192,7 @@ DotLottiePlayerView(animation: animation)
     .playbackMode(.playing)       // Set playback mode
     .loopMode(.loop)              // Set loop mode
     .animationSpeed(2.0)          // Set playback speed
+    .audioVolume(0.5)             // Set audio volume (0.0-1.0)
     .currentProgress(0.5)         // Set progress (0.0-1.0)
     .currentFrame(100)            // Set specific frame
     .mode(.bounce)                // Set playback mode
@@ -210,6 +211,28 @@ DotLottiePlayerView(animation: animation)
 - **Use `DotLottiePlayerUIView` / `DotLottiePlayerView`**: When you're familiar with lottie-ios APIs or want a more view-centric approach with properties and modifiers similar to `LottieAnimationView` and `LottieView`.
 
 Both APIs are fully featured and support all dotlottie capabilities including state machines, interactivity, and theming.
+
+## Audio
+
+.lottie files with embedded audio layers play their sound automatically on iOS and macOS. Volume is a multiplier on every player API:
+
+```swift
+animation.setAudioVolume(volume: 0.5)      // DotLottieAnimation
+playerView.audioVolume = 0.5               // DotLottiePlayerUIView
+DotLottiePlayerView(animation: animation)
+    .audioVolume(0.5)                      // SwiftUI
+```
+
+The player does not change the app's `AVAudioSession`. With the default `.soloAmbient` category iOS mutes playback while the ring/silent switch is on, so apps that need sound regardless should set the category themselves, for example at launch:
+
+```swift
+import AVFoundation
+
+try? AVAudioSession.sharedInstance().setCategory(.playback)
+try? AVAudioSession.sharedInstance().setActive(true)
+```
+
+MP3, WAV, FLAC, OGG and M4A are supported. Audio is not built for tvOS, visionOS, watchOS or Mac Catalyst.
 
 ## WebGPU renderer (experimental)
 
@@ -292,6 +315,7 @@ struct AnimationView: View {
 | `totalFrames()`     | Float  | Denotes the total count of individual frames within the animation.                                                    |
 | `loop()`            | Bool | Indicates if the animation is set to play in a continuous loop.                                                       |
 | `speed()`           | Float  | Represents the playback speed factor; e.g., 2 would mean double speed.                                                |
+| `audioVolume()`     | Float  | Volume multiplier applied to the animation's audio layers (0.0 to 1.0, default 1.0).                                  |
 | `loopCount()`       | Int  | Tracks how many times the animation has completed its loop.                                                           |
 | `mode()`            | Mode  | Reflects the current playback mode.                                                                                   |
 | `isPaused()`        | Bool | Reflects whether the animation is paused or not.                                                                      |
@@ -315,6 +339,7 @@ struct AnimationView: View {
 | `pause()` | Pauses the animation without resetting its position. |
 | `stop()` | Halts playback and returns the animation to its initial frame. |
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
+| `setAudioVolume(volume: Float)` | Sets the volume multiplier for audio layers (0.0 muted to 1.0 full). |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
 | `setProgress(progress: Float)` | Directly navigates the animation to a specified progress (0...1). |

@@ -41,6 +41,7 @@ public struct DotLottiePlayerView<Placeholder: View>: View {
                     config: config,
                     loopMode: loopMode,
                     animationSpeed: animationSpeed,
+                    audioVolume: audioVolume,
                     currentProgress: currentProgress,
                     currentFrame: currentFrame,
                     playbackMode: playbackMode,
@@ -107,6 +108,13 @@ public struct DotLottiePlayerView<Placeholder: View>: View {
     public func animationSpeed(_ speed: Double) -> Self {
         var copy = self
         copy.animationSpeed = speed
+        return copy
+    }
+    
+    /// Returns a copy of this view with the given audio volume (0.0 to 1.0)
+    public func audioVolume(_ volume: Double) -> Self {
+        var copy = self
+        copy.audioVolume = volume
         return copy
     }
     
@@ -181,6 +189,7 @@ public struct DotLottiePlayerView<Placeholder: View>: View {
     private var config = AnimationConfig()
     private var loopMode: DotLottieLoopMode = .playOnce
     private var animationSpeed: Double = 1.0
+    private var audioVolume: Double = 1.0
     private var currentProgress: Double?
     private var currentFrame: Double?
     private var playbackMode: DotLottiePlaybackMode = .paused
@@ -240,6 +249,7 @@ private struct DotLottiePlayerViewRepresentable: PlatformViewRepresentable {
     let config: AnimationConfig
     let loopMode: DotLottieLoopMode
     let animationSpeed: Double
+    let audioVolume: Double
     let currentProgress: Double?
     let currentFrame: Double?
     let playbackMode: DotLottiePlaybackMode
@@ -295,6 +305,7 @@ private struct DotLottiePlayerViewRepresentable: PlatformViewRepresentable {
         let view = DotLottiePlayerUIView(dotLottieAnimation: animation, config: config)
         view.loopMode = loopMode
         view.animationSpeed = CGFloat(animationSpeed)
+        view.audioVolume = CGFloat(audioVolume)
 
         if animationDidLoad != nil {
             let coordinator = context.coordinator
@@ -356,6 +367,12 @@ private struct DotLottiePlayerViewRepresentable: PlatformViewRepresentable {
         let newSpeed = CGFloat(animationSpeed)
         if abs(currentSpeed - newSpeed) > 0.01 {
             view.animationSpeed = newSpeed
+        }
+        
+        let currentVolume = view.audioVolume
+        let newVolume = CGFloat(audioVolume)
+        if abs(currentVolume - newVolume) > 0.001 {
+            view.audioVolume = newVolume
         }
         
         // Update current progress or frame only if provided
