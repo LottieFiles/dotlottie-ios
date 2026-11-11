@@ -813,6 +813,19 @@ public final class DotLottieAnimation: ObservableObject {
         player.stateMachineStatus()
     }
 
+    /// Forces the state machine into `state`, skipping transitions and guards. With `immediate`,
+    /// the state's pipeline runs right away instead of on the next tick or input change.
+    @discardableResult
+    public func stateMachineOverrideCurrentState(_ state: String, immediate: Bool = false) -> Bool {
+        player.stateMachineOverrideCurrentState(state, immediate: immediate)
+    }
+
+    /// Puts an input back to the initial value from the state machine definition.
+    @discardableResult
+    public func stateMachineResetInput(key: String) -> Bool {
+        player.stateMachineResetInput(key: key)
+    }
+
     /// Seeds the state machine's random number generator, making random transitions repeatable.
     @discardableResult
     public func stateMachineSetSeed(_ seed: UInt64) -> Bool {

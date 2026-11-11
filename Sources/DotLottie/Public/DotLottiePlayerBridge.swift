@@ -857,10 +857,10 @@ public class DotLottiePlayer {
         var result: [Marker] = []
         for i in 0..<count {
             var namePtr: UnsafePointer<CChar>? = nil
-            var time: Float = 0
-            var duration: Float = 0
-            if dotlottie_get_marker(ptr, i, &namePtr, &time, &duration) == Success, let namePtr = namePtr {
-                result.append(Marker(name: String(cString: namePtr), time: time, duration: duration))
+            var start: Float = 0
+            var end: Float = 0
+            if dotlottie_get_marker(ptr, i, &namePtr, &start, &end) == Success, let namePtr = namePtr {
+                result.append(Marker(name: String(cString: namePtr), time: start, duration: end - start))
             }
         }
         return result
@@ -1265,6 +1265,36 @@ public class DotLottiePlayer {
     public func stateMachineStatus() -> String {
         guard let smPtr = stateMachinePtr else { return "" }
         return stringFromBufferAPI({ dotlottie_state_machine_get_status(smPtr, $0, $1) }) ?? ""
+    }
+
+    /// Forces the state machine into `state`, skipping transitions and guards. With `immediate`,
+    /// the state's pipeline runs right away instead of on the next tick or input change.
+    @discardableResult
+    public func stateMachineOverrideCurrentState(_ state: String, immediate: Bool = false) -> Bool {
+        guard let smPtr = stateMachinePtr else { return false }
+        return state.withCString { dotlottie_state_machine_override_current_state(smPtr, $0, immediate) == Success }
+    }
+
+    /// Puts an input back to the initial value from the state machine definition.
+    @discardableResult
+    public func stateMachineResetInput(key: String) -> Bool {
+        guard let smPtr = stateMachinePtr else { return false }
+        return key.withCString { dotlottie_state_machine_reset_input(smPtr, $0) == Success }
+    }
+
+    /// Returns every input name mapped to its type: "Numeric", "Boolean", "String" or "Event".
+    public func stateMachineGetInputs() -> [String: String] {
+        guard let smPtr = stateMachinePtr else { return [:] }
+        var count: UInt32 = 0
+        guard dotlottie_state_machine_get_inputs_count(smPtr, &count) == Success else { return [:] }
+        var inputs: [String: String] = [:]
+        for index in 0..<count {
+            if let name = stringFromBufferAPI({ dotlottie_state_machine_get_input_name(smPtr, index, $0, $1) }),
+               let type = stringFromBufferAPI({ dotlottie_state_machine_get_input_type(smPtr, index, $0, $1) }) {
+                inputs[name] = type
+            }
+        }
+        return inputs
     }
 
     /// Returns raw bit flags indicating which interaction types are needed.

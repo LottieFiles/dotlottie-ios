@@ -48,6 +48,11 @@ final class SegmentsMarkersThemesTests: XCTestCase {
         let bird = try? XCTUnwrap(markers.first(where: { $0.name == "bird" }))
         XCTAssertEqual(bird?.time ?? -1, 0, accuracy: 0.5)
         XCTAssertEqual(bird?.duration ?? -1, 22, accuracy: 0.5)
+
+        // A marker that does not start at 0 tells a duration apart from an end frame.
+        let explosion = try? XCTUnwrap(markers.first(where: { $0.name == "explosion" }))
+        XCTAssertEqual(explosion?.time ?? -1, 22, accuracy: 0.5)
+        XCTAssertEqual(explosion?.duration ?? -1, 11, accuracy: 0.5)
     }
 
     // MARK: - Themes

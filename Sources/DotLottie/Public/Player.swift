@@ -491,6 +491,20 @@ class Player: ObservableObject {
         dotLottiePlayer.stateMachineStatus()
     }
 
+    @discardableResult
+    public func stateMachineOverrideCurrentState(_ state: String, immediate: Bool = false) -> Bool {
+        dotLottiePlayer.stateMachineOverrideCurrentState(state, immediate: immediate)
+    }
+
+    @discardableResult
+    public func stateMachineResetInput(key: String) -> Bool {
+        dotLottiePlayer.stateMachineResetInput(key: key)
+    }
+
+    public func stateMachineGetInputs() -> [String: String] {
+        dotLottiePlayer.stateMachineGetInputs()
+    }
+
     deinit {
         deallocateRenderBuffer()
     }

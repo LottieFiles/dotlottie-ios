@@ -125,6 +125,41 @@ final class SlotsAndAssetResolverTests: XCTestCase {
 
     // MARK: - State machine
 
+    func testStateMachineOverrideResetAndInputs() throws {
+        let definition = """
+            {
+              "initial": "first",
+              "states": [
+                {"name": "first", "type": "PlaybackState", "animation": "", "transitions": []},
+                {"name": "second", "type": "PlaybackState", "animation": "", "transitions": []}
+              ],
+              "inputs": [
+                {"type": "Numeric", "name": "rating", "value": 3.0},
+                {"type": "Boolean", "name": "on", "value": false},
+                {"type": "String", "name": "label", "value": "hello"},
+                {"type": "Event", "name": "tap"}
+              ],
+              "interactions": []
+            }
+            """
+        let animation = makeMinimalAnimation(autoplay: true)
+        try XCTSkipUnless(animation.stateMachineLoadData(definition), "Engine did not accept this state machine JSON – skipping")
+        XCTAssertTrue(animation.stateMachineStart(openUrlPolicy: OpenUrlPolicy(requireUserInteraction: false)))
+
+        let inputs = animation.stateMachineGetInputs().filter { !$0.key.hasPrefix("@") }
+        XCTAssertEqual(inputs, ["rating": "Numeric", "on": "Boolean", "label": "String", "tap": "Event"])
+
+        XCTAssertEqual(animation.stateMachineCurrentState(), "first")
+        XCTAssertTrue(animation.stateMachineOverrideCurrentState("second", immediate: true))
+        XCTAssertEqual(animation.stateMachineCurrentState(), "second")
+        XCTAssertFalse(animation.stateMachineOverrideCurrentState("missing", immediate: true))
+
+        XCTAssertTrue(animation.stateMachineSetNumericInput(key: "rating", value: 5))
+        XCTAssertEqual(animation.stateMachineGetNumericInput(key: "rating"), 5)
+        XCTAssertTrue(animation.stateMachineResetInput(key: "rating"))
+        XCTAssertEqual(animation.stateMachineGetNumericInput(key: "rating"), 3)
+    }
+
     func testStateMachineSeedAndStatus() throws {
         let animation = makeMinimalAnimation(autoplay: true)
         try XCTSkipUnless(animation.stateMachineLoadData(Fixtures.minimalStateMachineJSON), "Engine did not accept this state machine JSON – skipping")

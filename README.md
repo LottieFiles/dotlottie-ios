@@ -361,6 +361,8 @@ struct AnimationView: View {
 | `resetSlot(slotId: String)` / `resetSlots()` | Restores slots to the values from the animation. |
 | `stateMachineStatus()` | Returns the state machine status (`"Running"`, `"Tweening"` or `"Stopped"`). |
 | `stateMachineSetSeed(_ seed: UInt64)` | Seeds the state machine's random number generator. |
+| `stateMachineResetInput(key: String)` | Puts an input back to its initial value. |
+| `stateMachineOverrideCurrentState(_ state: String, immediate: Bool)` | Forces the state machine into a state, skipping transitions and guards. |
 
 To load assets the player cannot resolve itself, such as images referenced by a remote URL, set `assetResolver` on `AnimationConfig`. It receives the asset's `src` and returns its `Data`, or `nil` to skip it. It runs synchronously while the animation loads or renders, so return bytes you already have.
 

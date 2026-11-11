@@ -1070,6 +1070,57 @@ enum dotlottieDotLottieResult dotlottie_state_machine_get_current_state(struct d
                                                                         uintptr_t *size_out);
 
 /**
+ * Force the state machine into `state_name`, skipping transitions and guards.
+ *
+ * With `immediate` set, the new state's pipeline runs right away; otherwise it
+ * runs on the next tick or input change.
+ *
+ * # Returns
+ * - `DotLottieResult::Success` on success
+ * - `DotLottieResult::Error` if the state does not exist
+ * - `DotLottieResult::FeatureNotEnabled` if built without the `state-machines` feature
+ * - `DotLottieResult::InvalidParameter` if a pointer is invalid
+ */
+enum dotlottieDotLottieResult dotlottie_state_machine_override_current_state(struct dotlottieDotLottieStateMachine *sm,
+                                                                             const char *state_name,
+                                                                             bool immediate);
+
+/**
+ * Reset an input to the initial value from the state machine definition.
+ *
+ * Does nothing while the state machine is stopped or when the input does not exist.
+ */
+enum dotlottieDotLottieResult dotlottie_state_machine_reset_input(struct dotlottieDotLottieStateMachine *sm,
+                                                                  const char *key);
+
+/**
+ * Get the number of inputs the state machine has, including the built-in ones.
+ */
+enum dotlottieDotLottieResult dotlottie_state_machine_get_inputs_count(struct dotlottieDotLottieStateMachine *sm,
+                                                                       uint32_t *count);
+
+/**
+ * Get the name of the input at `index`.
+ *
+ * Call `dotlottie_state_machine_get_inputs_count` first to know how many exist.
+ * Pass `buffer = NULL` to query the required size via `size_out`.
+ */
+enum dotlottieDotLottieResult dotlottie_state_machine_get_input_name(struct dotlottieDotLottieStateMachine *sm,
+                                                                     uint32_t index,
+                                                                     char *buffer,
+                                                                     uintptr_t *size_out);
+
+/**
+ * Get the type of the input at `index`: "Numeric", "Boolean", "String" or "Event".
+ *
+ * Pass `buffer = NULL` to query the required size via `size_out`.
+ */
+enum dotlottieDotLottieResult dotlottie_state_machine_get_input_type(struct dotlottieDotLottieStateMachine *sm,
+                                                                     uint32_t index,
+                                                                     char *buffer,
+                                                                     uintptr_t *size_out);
+
+/**
  * Get state machine status.
  *
  * # Parameters
