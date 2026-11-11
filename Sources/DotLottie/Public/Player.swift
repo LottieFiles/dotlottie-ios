@@ -435,6 +435,62 @@ class Player: ObservableObject {
         dotLottiePlayer.getStateMachine(stateMachineId: id)
     }
 
+    @discardableResult
+    public func setBezierPathSlot(
+        slotId: String,
+        vertices: [CGPoint],
+        closed: Bool,
+        inTangents: [CGPoint]? = nil,
+        outTangents: [CGPoint]? = nil
+    ) -> Bool {
+        dotLottiePlayer.setBezierPathSlot(slotId: slotId, vertices: vertices, closed: closed, inTangents: inTangents, outTangents: outTangents)
+    }
+
+    @discardableResult
+    public func setSlot(slotId: String, json: String) -> Bool {
+        dotLottiePlayer.setSlotStr(slotId: slotId, json: json)
+    }
+
+    public func getSlotIds() -> [String] {
+        dotLottiePlayer.getSlotIds()
+    }
+
+    public func getSlotType(slotId: String) -> String? {
+        dotLottiePlayer.getSlotType(slotId: slotId)
+    }
+
+    public func getSlot(slotId: String) -> String? {
+        dotLottiePlayer.getSlotStr(slotId: slotId)
+    }
+
+    public func getSlots() -> String {
+        dotLottiePlayer.getSlotsStr()
+    }
+
+    @discardableResult
+    public func resetSlot(slotId: String) -> Bool {
+        dotLottiePlayer.resetSlot(slotId: slotId)
+    }
+
+    @discardableResult
+    public func resetSlots() -> Bool {
+        dotLottiePlayer.resetSlots()
+    }
+
+    @discardableResult
+    public func setAssetResolver(_ resolver: AssetResolver?) -> Bool {
+        dotLottiePlayer.setAssetResolver(resolver)
+    }
+
+    @discardableResult
+    public func stateMachineSetSeed(_ seed: UInt64) -> Bool {
+        dotLottiePlayer.stateMachineSetSeed(seed)
+    }
+
+    public func stateMachineStatus() -> String {
+        dotLottiePlayer.stateMachineStatus()
+    }
+
     deinit {
         deallocateRenderBuffer()
     }
