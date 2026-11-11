@@ -341,6 +341,7 @@ struct AnimationView: View {
 | `setSpeed(speed: Int)` | Sets the playback speed with the given multiplier. |
 | `setAudioVolume(volume: Float)` | Sets the volume multiplier for audio layers (0.0 muted to 1.0 full). |
 | `setLoop(loop: Bool)` | Configures whether the animation should loop continuously. |
+| `setLoopCount(_ loopCount: Int)` | Sets how many times the animation plays when looping is on. 0 loops forever. |
 | `setFrame(frame: Float)` | Directly navigates the animation to a specified frame. |
 | `setProgress(progress: Float)` | Directly navigates the animation to a specified progress (0...1). |
 | `loadAnimationById(_ animationId: String)` | Loads the animation by id. Animation id's are visible inside the manifest, recoverable via the manifest() method. |

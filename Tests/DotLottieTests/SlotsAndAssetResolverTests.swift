@@ -113,6 +113,16 @@ final class SlotsAndAssetResolverTests: XCTestCase {
         XCTAssertEqual(calls, 2)
     }
 
+    // MARK: - Playback
+
+    func testSetLoopCount() {
+        let animation = makeMinimalAnimation(loop: true)
+
+        animation.setLoopCount(3)
+
+        XCTAssertEqual(animation.player.config().loopCount, 3)
+    }
+
     // MARK: - State machine
 
     func testStateMachineSeedAndStatus() throws {

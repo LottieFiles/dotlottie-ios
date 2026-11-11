@@ -455,6 +455,15 @@ public final class DotLottieAnimation: ObservableObject {
         
         player.setConfig(config: config)
     }
+
+    /// Sets how many times the animation plays when looping is on. 0 loops forever.
+    public func setLoopCount(_ loopCount: Int) {
+        var config = player.config()
+
+        config.loopCount = UInt32(max(0, loopCount))
+
+        player.setConfig(config: config)
+    }
     
     public func segments() -> (Float, Float) {
         let segment = player.config().segment
