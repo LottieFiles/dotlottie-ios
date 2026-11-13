@@ -84,15 +84,101 @@ class InteractiveMTKView: MTKView {
 }
 #endif
 
+/// Blits the player's software frame buffer to the drawable through a small
+/// cached pipeline. Replaces the former CoreImage path, which re-uploaded the
+/// frame as a brand-new Metal texture every frame (CoreImage cannot cache a
+/// texture for a CGImage whose identity changes each frame).
+private enum FrameBlitter {
+    static let shaderSource = """
+    #include <metal_stdlib>
+    using namespace metal;
+
+    struct VSOut {
+        float4 position [[position]];
+        float2 uv;
+    };
+
+    // rect = aspect-fit destination rect as NDC (x0, y0Bottom, x1, y1Top).
+    vertex VSOut dotlottieQuadVertex(uint vid [[vertex_id]],
+                                     constant float4 &rect [[buffer(0)]]) {
+        float2 positions[4] = {
+            float2(rect.x, rect.y), float2(rect.z, rect.y),
+            float2(rect.x, rect.w), float2(rect.z, rect.w)
+        };
+        // v=0 is the top row of the frame buffer; NDC +y is up.
+        float2 uvs[4] = {
+            float2(0, 1), float2(1, 1),
+            float2(0, 0), float2(1, 0)
+        };
+        VSOut out;
+        out.position = float4(positions[vid], 0, 1);
+        out.uv = uvs[vid];
+        return out;
+    }
+
+    fragment float4 dotlottieQuadFragment(VSOut in [[stage_in]],
+                                          texture2d<float> frame [[texture(0)]]) {
+        constexpr sampler s(mag_filter::linear, min_filter::linear);
+        return frame.sample(s, in.uv);
+    }
+    """
+
+    private static var cache: [ObjectIdentifier: [UInt: MTLRenderPipelineState]] = [:]
+    private static let cacheLock = NSLock()
+
+    /// One compiled pipeline per (device, pixel format) — shared by every view.
+    static func pipeline(device: MTLDevice, pixelFormat: MTLPixelFormat) -> MTLRenderPipelineState? {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+
+        let deviceKey = ObjectIdentifier(device)
+        if let state = cache[deviceKey]?[pixelFormat.rawValue] {
+            return state
+        }
+
+        guard let library = try? device.makeLibrary(source: shaderSource, options: nil) else {
+            return nil
+        }
+        let descriptor = MTLRenderPipelineDescriptor()
+        descriptor.vertexFunction = library.makeFunction(name: "dotlottieQuadVertex")
+        descriptor.fragmentFunction = library.makeFunction(name: "dotlottieQuadFragment")
+        let attachment = descriptor.colorAttachments[0]!
+        attachment.pixelFormat = pixelFormat
+        // Frame buffer is premultiplied alpha; blend over the clear color.
+        attachment.isBlendingEnabled = true
+        attachment.sourceRGBBlendFactor = .one
+        attachment.sourceAlphaBlendFactor = .one
+        attachment.destinationRGBBlendFactor = .oneMinusSourceAlpha
+        attachment.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+
+        guard let state = try? device.makeRenderPipelineState(descriptor: descriptor) else {
+            return nil
+        }
+        cache[deviceKey, default: [:]][pixelFormat.rawValue] = state
+        return state
+    }
+}
+
 // Unified Coordinator for all platforms
 public class Coordinator: NSObject, MTKViewDelegate {
     private let viewModel: DotLottieAnimation
-    private var ciContext: CIContext!
     private var metalDevice: MTLDevice!
     private var metalCommandQueue: MTLCommandQueue!
-    private var mtlTexture: MTLTexture!
+    private var pipelineState: MTLRenderPipelineState?
+    /// Reused upload target for the software frame buffer; recreated only when
+    /// the animation buffer changes size.
+    private var stagingTexture: MTLTexture?
+    private var swapChainStalled = false
+    
+    /// Half a frame at 60 fps: a healthy acquisition returns in well under
+    /// a millisecond, a stalled swap chain blocks for most of the frame.
+    private static let swapChainStallThreshold: CFTimeInterval = 0.008
     private var viewSize: CGSize!
-    private var lastDrawTime: CFTimeInterval = 0    
+    private var lastDrawTime: CFTimeInterval = 0
+    /// Cached MTLClearColor for the view background; recomputed only when the
+    /// model's background image identity changes.
+    private var cachedClearColor = MTLClearColorMake(0, 0, 0, 0)
+    private var cachedBackground: CIImage?
     
 #if os(macOS)
     weak var mtkView: MTKView?
@@ -133,9 +219,53 @@ public class Coordinator: NSObject, MTKViewDelegate {
             mtkView.device = metalDevice
             self.metalDevice = metalDevice
         }
-        
-        self.ciContext = CIContext(mtlDevice: metalDevice, options: [.cacheIntermediates: false, .allowLowPower: true])
+
         self.metalCommandQueue = metalDevice.makeCommandQueue()!
+        self.pipelineState = FrameBlitter.pipeline(device: metalDevice, pixelFormat: mtkView.colorPixelFormat)
+    }
+
+    /// Uploads the frame into the reused staging texture, recreating it only
+    /// on size changes.
+    private func uploadFrame(_ pixels: UnsafeRawPointer, width: Int, height: Int) -> Bool {
+        if stagingTexture == nil || stagingTexture!.width != width || stagingTexture!.height != height {
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+                pixelFormat: .rgba8Unorm, width: width, height: height, mipmapped: false)
+            descriptor.usage = .shaderRead
+            #if os(macOS)
+            descriptor.storageMode = .managed
+            #else
+            descriptor.storageMode = .shared
+            #endif
+            stagingTexture = metalDevice.makeTexture(descriptor: descriptor)
+        }
+        guard let texture = stagingTexture else { return false }
+        texture.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: pixels,
+            bytesPerRow: 4 * width)
+        return true
+    }
+
+    /// Resolves the model's background CIImage to a clear color, cached until
+    /// the background image identity changes.
+    private func currentClearColor() -> MTLClearColor {
+        let background = viewModel.backgroundColor()
+        if background !== cachedBackground {
+            cachedBackground = background
+            var rgba = [UInt8](repeating: 0, count: 4)
+            let context = CIContext(options: [.useSoftwareRenderer: true])
+            context.render(background,
+                           toBitmap: &rgba,
+                           rowBytes: 4,
+                           bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+                           format: .RGBA8,
+                           colorSpace: CGColorSpaceCreateDeviceRGB())
+            cachedClearColor = MTLClearColorMake(
+                Double(rgba[0]) / 255, Double(rgba[1]) / 255,
+                Double(rgba[2]) / 255, Double(rgba[3]) / 255)
+        }
+        return cachedClearColor
     }
     
     // iOS gestures are managed through the delegate
@@ -185,10 +315,6 @@ public class Coordinator: NSObject, MTKViewDelegate {
         }
 #endif
         
-        guard let drawable = view.currentDrawable else {
-            return
-        }
-        
         guard !viewModel.error() else {
             return
         }
@@ -197,49 +323,63 @@ public class Coordinator: NSObject, MTKViewDelegate {
         let dt = lastDrawTime == 0 ? Float(0) : Float((now - lastDrawTime) * 1000)
         lastDrawTime = now
 
-        if let frame = viewModel.tick(milliseconds: dt) {
-            let commandBuffer = metalCommandQueue.makeCommandBuffer()
-            
-            let inputImage = CIImage(cgImage: frame)
-            var size = view.bounds
-            
-            size.size = view.drawableSize
-            size = AVMakeRect(aspectRatio: inputImage.extent.size, insideRect: size)
-            
-            var filteredImage = inputImage.transformed(by: CGAffineTransform(
-                scaleX: size.size.width / inputImage.extent.size.width,
-                y: size.size.height / inputImage.extent.size.height))
-#if os(iOS)
-            // Fix coordinate system for iOS 16.0 only
-            if #available(iOS 16.0, *) {
-                if #available(iOS 17.0, *) {
-                    // iOS 17+ - do nothing
-                } else {
-                    // iOS 16.x only
-                    let flipTransform = CGAffineTransform(scaleX: 1, y: -1)
-                    let translateTransform = CGAffineTransform(translationX: 0, y: view.drawableSize.height)
-                    filteredImage = filteredImage.transformed(by: flipTransform).transformed(by: translateTransform)
-                }
-            }
-#endif
-            let x = -size.origin.x
-            let y = -size.origin.y
-            
-            // Blend the image over an opaque background image.
-            // This is needed if the image is smaller than the view, or if it has transparent
-            filteredImage = filteredImage.composited(over: viewModel.backgroundColor())
-            
-            self.mtlTexture = drawable.texture
-            
-            ciContext.render(filteredImage,
-                             to: drawable.texture,
-                             commandBuffer: commandBuffer,
-                             bounds: CGRect(origin:CGPoint(x:x, y:y), size: view.drawableSize),
-                             colorSpace: CGColorSpaceCreateDeviceRGB())
-            
-            commandBuffer?.present(drawable)
-            commandBuffer?.commit()
+        // Zero-copy: the frame buffer goes straight into the reused staging
+        // texture — no CGImage, no CoreImage graph, no per-frame texture churn.
+        let uploaded = viewModel.tickWithBuffer(milliseconds: dt) { pixels, width, height in
+            uploadFrame(pixels, width: width, height: height)
         }
+        // nil = no new frame (keep the previous drawable content, as before).
+        guard uploaded == true,
+              let staging = stagingTexture,
+              let pipeline = pipelineState else {
+            return
+        }
+        
+        // A drawable wait close to a full vsync means the swap chain is running
+        // one frame behind, and it stays there on its own: every acquisition
+        // then blocks until the compositor returns a drawable at the next
+        // vsync, and the main thread spends the whole frame in this method.
+        // Skipping one present hands the compositor the slack to recover.
+        if swapChainStalled {
+            swapChainStalled = false
+            return
+        }
+        
+        // Acquire the drawable only once a frame is ready to present: taking it
+        // first blocks the CPU work behind GPU back-pressure, and a tick that
+        // produces no new frame then needs no drawable at all.
+        let acquireStart = CACurrentMediaTime()
+        guard let drawable = view.currentDrawable,
+              let passDescriptor = view.currentRenderPassDescriptor,
+              let commandBuffer = metalCommandQueue.makeCommandBuffer() else {
+            return
+        }
+        swapChainStalled = CACurrentMediaTime() - acquireStart > Self.swapChainStallThreshold
+
+        passDescriptor.colorAttachments[0].clearColor = currentClearColor()
+
+        // Aspect-fit the frame in the drawable, expressed in NDC.
+        let drawableSize = view.drawableSize
+        let fit = AVMakeRect(
+            aspectRatio: CGSize(width: staging.width, height: staging.height),
+            insideRect: CGRect(origin: .zero, size: drawableSize))
+        var rect = SIMD4<Float>(
+            Float(fit.minX / drawableSize.width * 2 - 1),       // x0
+            Float(1 - fit.maxY / drawableSize.height * 2),      // y bottom
+            Float(fit.maxX / drawableSize.width * 2 - 1),       // x1
+            Float(1 - fit.minY / drawableSize.height * 2))      // y top
+
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor) else {
+            return
+        }
+        encoder.setRenderPipelineState(pipeline)
+        encoder.setVertexBytes(&rect, length: MemoryLayout<SIMD4<Float>>.size, index: 0)
+        encoder.setFragmentTexture(staging, index: 0)
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+        encoder.endEncoding()
+
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
     }
     
     // MARK: - Coordinate Calculation (Shared with platform-specific scaling)
