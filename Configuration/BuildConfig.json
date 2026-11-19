@@ -10,6 +10,7 @@
         "tvg-threads": true,
         "dotlottie": true,
         "state-machines": true,
-        "theming": true
+        "theming": true,
+        "webgpu": false
     }
 }

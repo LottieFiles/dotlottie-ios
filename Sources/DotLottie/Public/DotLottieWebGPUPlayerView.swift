@@ -1,4 +1,4 @@
-#if canImport(SwiftUI) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
+#if canImport(SwiftUI) && canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
 import SwiftUI
 
 /// A SwiftUI view that renders a Lottie animation via WebGPU (Metal backend).

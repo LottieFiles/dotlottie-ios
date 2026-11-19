@@ -4,9 +4,6 @@
 # from the SPM xcframework with the watchOS slices removed (CocoaPods
 # integration doesn't need them).
 #
-# WgpuNative needs no preparation — it ships as a framework-based xcframework,
-# which CocoaPods vendors directly from Sources/DotLottieCore/.
-#
 # Output lands in Sources/DotLottieCore/cocoapods/.
 
 set -euo pipefail
@@ -30,7 +27,7 @@ xcodebuild -create-xcframework \
     -output "$COCOAPODS_DIR/DotLottiePlayer.xcframework"
 
 # ---------------------------------------------------------------------------
-# Fix stale libwgpu_native references.
+# Fix stale libwgpu_native references (WEBGPU=1 builds only; no-op otherwise).
 #
 # Most DotLottiePlayer slices already link wgpu as
 # "@rpath/WgpuNative.framework/WgpuNative", but the iOS arm64 *simulator* slice

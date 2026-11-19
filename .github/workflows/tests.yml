@@ -58,4 +58,3 @@ jobs:
             -destination "platform=iOS Simulator,name=${{ steps.sim.outputs.name }}" \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO
-        # Includes the iOS-only DotLottieWebGPUView CADisplayLink leak guard.

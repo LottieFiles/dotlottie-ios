@@ -15,7 +15,7 @@
 //  tvOS/watchOS/visionOS (software renderer only).
 //
 
-#if (os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS)
+#if canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
 
 import Foundation
 import QuartzCore

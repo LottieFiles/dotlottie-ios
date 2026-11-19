@@ -50,7 +50,7 @@ final class MemoryManagementTests: XCTestCase {
     }
 #endif
 
-#if os(iOS)
+#if os(iOS) && canImport(WgpuNative)
     /// Regression guard for the CADisplayLink retain-cycle fix (`DisplayLinkProxy`).
     /// `init` calls `startDisplayLink()`; with a strong `target: self` the run loop
     /// retains the link which retains the view, so the view can never deallocate.

@@ -4,11 +4,11 @@ This repo owns the Apple XCFramework build for `deps/dotlottie-rs` (a git submod
 
 ```bash
 git submodule update --init --recursive
-make apple-setup   # one-time: Rust targets, nightly rust-src, pre-warm Cargo + wgpu-native caches (requires network)
+make apple-setup   # one-time: Rust targets, nightly rust-src, pre-warm the Cargo cache (requires network)
 make apple         # builds + installs into Sources/DotLottieCore/ and Sources/DotLottie/Public/
 ```
 
-WebGPU (the `tvg-wg` Metal-backed renderer, macOS/iOS/Mac Catalyst only) always ships alongside the software renderer, which also produces and installs `Sources/DotLottieCore/WgpuNative.xcframework` (the wgpu-native shared library `DotLottiePlayer` links against). `Package.swift` unconditionally depends on `WgpuNative.xcframework`, so a wgpu-free build is not supported — both frameworks must always be built and shipped together.
+The default build is software-only. `make apple WEBGPU=1` also builds the WebGPU renderer (`tvg-wg`, Metal-backed, macOS/iOS only) and installs `Sources/DotLottieCore/WgpuNative.xcframework`, the wgpu-native shared library `DotLottiePlayer` then links against. `WgpuNative` adds about 6.6 MB to an iOS app, so it is not part of the published package: to use a WebGPU build, enable the two commented-out `WgpuNative` lines in `Package.swift` (and add the xcframework to `vendored_frameworks` for CocoaPods). The `DotLottieWebGPUView` / `DotLottieWebGPUPlayerView` sources compile only when `WgpuNative` is importable.
 
 Run `./cocoapods-release.sh` afterward to refresh the CocoaPods-facing copy in `Sources/DotLottieCore/cocoapods/`.
 
@@ -40,7 +40,7 @@ swift package plugin --allow-writing-to-package-directory build-custom-framework
 # Change path to: "./Sources/DotLottieCore/Custom/DotLottiePlayer.xcframework"
 ```
 
-Custom builds always include WebGPU — Xcode requires it — so `WgpuNative.xcframework` is also built and copied into `Sources/DotLottieCore/Custom/` alongside `DotLottiePlayer.xcframework`; both must ship together.
+To include the WebGPU renderer, set `"webgpu": true` in `Configuration/BuildConfig.json`. `WgpuNative.xcframework` is then built and copied into `Sources/DotLottieCore/Custom/` alongside `DotLottiePlayer.xcframework`; both must ship together, and the two commented-out `WgpuNative` lines in `Package.swift` must be enabled.
 
 ### Prerequisites
 
