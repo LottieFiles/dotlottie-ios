@@ -236,7 +236,9 @@ MP3, WAV, FLAC, OGG and M4A are supported. Audio is not built for tvOS, visionOS
 
 ## WebGPU renderer (experimental)
 
-In addition to the default software renderer, dotLottie iOS ships a GPU-accelerated renderer backed by WebGPU (Metal). Pixels are written directly to a `CAMetalLayer` — the CPU pixel buffer and `CGImage` conversion used by the software path are bypassed entirely. This can be a significant win for large or heavy animations.
+In addition to the default software renderer, dotLottie iOS has a GPU-accelerated renderer backed by WebGPU (Metal). Pixels are written directly to a `CAMetalLayer` — the CPU pixel buffer and `CGImage` conversion used by the software path are bypassed entirely. This can be a significant win for large or heavy animations.
+
+The WebGPU renderer is not included in the published package, because the wgpu-native library it needs adds about 6.6 MB to an iOS app. To use it, build the framework yourself with WebGPU enabled; see [Custom Builds](BUILD_SYSTEM.md#custom-builds). The views below are only available in such a build.
 
 ### SwiftUI - DotLottieWebGPUPlayerView
 

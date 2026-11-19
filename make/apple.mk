@@ -35,14 +35,11 @@ ifdef FEATURES
 	APPLE_FEATURES = $(FEATURES)
 endif
 
-# WebGPU always ships in the standard `apple` build (macOS/iOS), matching
-# upstream dotlottie-rs. Package.swift unconditionally depends on
-# WgpuNative.xcframework and the Swift layer imports it, so a wgpu-free
-# package is not supported: WEBGPU=0 is internal plumbing only — it skips the
-# wgpu-native build but leaves the stale vendored WgpuNative in place, and the
-# resulting DotLottiePlayer still exposes (but errors on) the wgpu C API.
-# Never use it for an installed/released build.
-WEBGPU ?= 1
+# WebGPU is off by default: the standard `apple` build is software-only and
+# ships no WgpuNative.xcframework. `make apple WEBGPU=1` adds tvg-wg on
+# macOS/iOS and packages WgpuNative.xcframework next to DotLottiePlayer; the
+# Swift WebGPU views compile in once Package.swift depends on WgpuNative.
+WEBGPU ?= 0
 
 # Mac Catalyst, tvOS, visionOS, and watchOS don't support wgpu-native — always
 # software-only regardless of WEBGPU. wgpu-native ships no macabi artifact at
@@ -322,13 +319,15 @@ apple-wgpu-fetch:
 	$(call ensure_wgpu_artifact,$(WGPU_ARTIFACT_ios_x86_64))
 	@echo "✓ wgpu-native cache ready"
 
-# Build (but do not install) for all Apple platforms. WebGPU (tvg-wg) always
-# ships (see the WEBGPU note above). This is the target
+# Build (but do not install) for all Apple platforms. WebGPU (tvg-wg) is only
+# included with WEBGPU=1 (see the WEBGPU note above). This is the target
 # the custom-build plugin uses (via Scripts/build-framework.sh): it stages the
 # xcframework(s) under $(APPLE_RELEASE_DIR) without touching Sources/, since a
 # custom build must land only in Sources/DotLottieCore/Custom/, never
 # overwrite the main vendored copy.
-apple-build: APPLE_DEFAULT_FEATURES = $(if $(filter 0,$(WEBGPU)),$(APPLE_DEFAULT_FEATURES_NO_AUDIO),$(APPLE_WEBGPU_DEFAULT_FEATURES))
+ifneq ($(WEBGPU),0)
+apple-build: APPLE_DEFAULT_FEATURES = $(APPLE_WEBGPU_DEFAULT_FEATURES)
+endif
 apple-build: apple-fetch $(addprefix apple-,macos ios maccatalyst visionos tvos watchos) $(if $(filter 0,$(WEBGPU)),apple-package,apple-wgpu-package)
 	@echo "✓ Apple build complete (staged under $(APPLE_RELEASE_DIR)/, not yet installed)"
 
@@ -337,10 +336,9 @@ apple-build: apple-fetch $(addprefix apple-,macos ios maccatalyst visionos tvos 
 apple: apple-build apple-install
 	@echo "✓ Apple build + install complete"
 
-# Backward-compatible alias: WebGPU now ships as part of the default `apple`
-# build, so this is equivalent to `make apple`.
-apple-webgpu: apple
-	@echo "✓ apple-webgpu is an alias for 'make apple' — WebGPU ships by default"
+# Build + install with the WebGPU renderer (equivalent to `make apple WEBGPU=1`).
+apple-webgpu:
+	@$(MAKE) apple WEBGPU=1
 
 # Build for all macOS architectures
 apple-macos: $(addprefix apple-macos-,arm64 x86_64) $(MACOS_FRAMEWORK_DIR)/$(DOTLOTTIE_PLAYER_FRAMEWORK)
@@ -990,7 +988,7 @@ apple-install: apple-build
 		cp -R $(APPLE_RELEASE_DIR)/$(WGPU_NATIVE_XCFRAMEWORK) $(SOURCES_CORE_DIR)/; \
 		echo "  ✓ $(WGPU_NATIVE_XCFRAMEWORK) installed to $(SOURCES_CORE_DIR)/"; \
 	else \
-		echo "  ℹ $(WGPU_NATIVE_XCFRAMEWORK) not built this run (WEBGPU=0) — leaving existing vendored copy untouched"; \
+		rm -rf $(SOURCES_CORE_DIR)/$(WGPU_NATIVE_XCFRAMEWORK); \
 	fi
 	@echo "✓ Install complete"
 
@@ -1010,7 +1008,7 @@ apple-check-xcode:
 # Install Rust targets required for Apple builds and pre-warm both the Cargo
 # registry and the wgpu-native release cache (both require network, only
 # needed once).
-apple-setup: apple-wgpu-fetch
+apple-setup: $(if $(filter 0,$(WEBGPU)),,apple-wgpu-fetch)
 	@echo "→ Installing Apple Rust targets..."
 	@rustup target add \
 		aarch64-apple-darwin \

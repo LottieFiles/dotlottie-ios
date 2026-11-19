@@ -9,7 +9,7 @@
 import SwiftUI
 import DotLottie
 
-#if (os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS)
+#if canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
 struct Example10_StressTest: View {
 
     /// Preferred heavy animation: drop a `stress-4k.lottie` (or `.json`) into

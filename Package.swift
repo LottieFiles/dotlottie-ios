@@ -26,7 +26,8 @@ let package = Package(
             name: "DotLottie",
             dependencies: [
                 "DotLottiePlayer",
-                .target(name: "WgpuNative", condition: .when(platforms: [.iOS, .macOS])),
+                // WebGPU renderer (requires a `make apple WEBGPU=1` build)
+                // .target(name: "WgpuNative", condition: .when(platforms: [.iOS, .macOS])),
             ],
             path: "Sources/DotLottie/"),
         .testTarget(
@@ -39,7 +40,7 @@ let package = Package(
                 // Use custom build
                 //            path: "./Sources/DotLottieCore/Custom/DotLottiePlayer.xcframework"
         ),
-        .binaryTarget(name: "WgpuNative", path: "./Sources/DotLottieCore/WgpuNative.xcframework"),
+        // .binaryTarget(name: "WgpuNative", path: "./Sources/DotLottieCore/WgpuNative.xcframework"),
         // Custom Framework Builder Plugin
         .plugin(
             name: "BuildCustomFramework",

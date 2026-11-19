@@ -11,7 +11,7 @@
 import SwiftUI
 import DotLottie
 
-#if (os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS)
+#if canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
 
 /// Looping animations from the bundle, cycled to fill the grid.
 private let benchmarkAnimationPool = [

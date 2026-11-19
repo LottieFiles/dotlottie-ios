@@ -86,7 +86,7 @@ import SwiftUI
                     #endif
                 }
 
-                #if canImport(SwiftUI) && ((os(iOS) && !targetEnvironment(macCatalyst)) || (os(macOS) && !targetEnvironment(macCatalyst)))
+                #if canImport(SwiftUI) && canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || (os(macOS) && !targetEnvironment(macCatalyst)))
                     Section(header: Text("Performance & Benchmarking")) {
                         NavigationLink("Test (CPU vs WebGPU)") {
                             Example10_StressTest()

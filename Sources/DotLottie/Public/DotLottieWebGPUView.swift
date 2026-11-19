@@ -1,4 +1,4 @@
-#if (os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS)
+#if canImport(WgpuNative) && ((os(iOS) && !targetEnvironment(macCatalyst)) || os(macOS))
 
 #if os(iOS)
 import UIKit

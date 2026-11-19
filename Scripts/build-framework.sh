@@ -54,11 +54,16 @@ fi
 # Parse JSON configuration
 echo "📖 Reading configuration..."
 
-# Extract enabled features dynamically from all keys in the "features" block
+# Extract enabled features dynamically from all keys in the "features" block.
+# "webgpu" is not a cargo feature: it switches the build to WEBGPU=1.
 FEATURES=""
+WEBGPU=0
 while IFS= read -r line; do
     FEATURE=$(echo "$line" | sed 's/.*"\([^"]*\)"[[:space:]]*:[[:space:]]*true.*/\1/')
-    if [ -n "$FEATURE" ]; then
+    if [ "$FEATURE" = "webgpu" ]; then
+        WEBGPU=1
+        echo -e "   ${BLUE}🎮 webgpu${NC}"
+    elif [ -n "$FEATURE" ]; then
         if [ -z "$FEATURES" ]; then
             FEATURES="$FEATURE"
         else
@@ -74,11 +79,8 @@ fi
 
 # `apple-build` stages the xcframework(s) under build/apple/ without
 # installing into Sources/ — installing there would clobber the repo's main
-# vendored copy with a custom-features build. WebGPU is required (Xcode
-# builds fail without it), so it always ships.
+# vendored copy with a custom-features build.
 MAKE_TARGET="apple-build"
-WEBGPU=1
-echo -e "   ${BLUE}🎮 Including WebGPU renderer${NC}"
 
 echo ""
 
@@ -158,11 +160,8 @@ echo -e "   ${GREEN}✓${NC} Framework copied to: $OUTPUT_DIR/DotLottiePlayer.xc
 # Simulator). Without it, a "webgpu" custom build crashes at launch with a
 # missing-library error, since the .xcframework alone doesn't carry it.
 BUILT_WGPU_FRAMEWORK="$REPO_ROOT/build/apple/WgpuNative.xcframework"
-if [ -d "$BUILT_WGPU_FRAMEWORK" ]; then
-    if [ -d "$OUTPUT_DIR/WgpuNative.xcframework" ]; then
-        echo "   Removing old WgpuNative.xcframework..."
-        rm -rf "$OUTPUT_DIR/WgpuNative.xcframework"
-    fi
+rm -rf "$OUTPUT_DIR/WgpuNative.xcframework"
+if [ "$WEBGPU" = 1 ] && [ -d "$BUILT_WGPU_FRAMEWORK" ]; then
     cp -R "$BUILT_WGPU_FRAMEWORK" "$OUTPUT_DIR/"
     echo -e "   ${GREEN}✓${NC} Framework copied to: $OUTPUT_DIR/WgpuNative.xcframework"
 fi
@@ -200,6 +199,12 @@ if [ "$VALIDATION_PASSED" = true ]; then
     echo ""
     echo "  2. Or if using as a local dependency, reference the custom build directory."
     echo ""
+    if [ "$WEBGPU" = 1 ]; then
+        echo "  3. Enable the two commented-out WgpuNative lines in Package.swift and point"
+        echo "     the binary target at:"
+        echo "     path: \"./Sources/DotLottieCore/Custom/WgpuNative.xcframework\""
+        echo ""
+    fi
     echo "Framework location:"
     echo "  $OUTPUT_DIR/DotLottiePlayer.xcframework"
 else
