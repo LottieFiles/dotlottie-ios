@@ -128,45 +128,56 @@ class Player: ObservableObject {
     }
 
     /// Advances playback by `dt` **milliseconds** (the core's tick contract)
-    /// and returns the rendered frame, or nil if nothing changed.
-    public func tick(dt: Float) -> CGImage? {
+    /// and, if a new frame was produced, invokes `body` with the raw
+    /// premultiplied-RGBA frame buffer (width × height 32-bit pixels).
+    ///
+    /// This is the zero-copy fast path: unlike `tick(dt:)` it never copies the
+    /// buffer into a `CGImage`. The pointer is only valid for the duration of
+    /// `body`. Returns nil when nothing changed.
+    internal func tickWithBuffer<T>(dt: Float, _ body: (UnsafeRawPointer, _ width: Int, _ height: Int) -> T) -> T? {
         if !self.isLoaded() {
             return nil
         }
 
-        let tick = dotLottiePlayer.tick(dt: dt)
+        let ticked = dotLottiePlayer.tick(dt: dt)
 
-        // Software mode: create CGImage from buffer
-        if tick || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized {
-            self.currFrame = dotLottiePlayer.currentFrame()
-            hasRenderedFirstFrame = true
-            hasResized = false
+        guard ticked || !hasRenderedFirstFrame || currFrame != dotLottiePlayer.currentFrame() || hasResized else {
+            return nil
+        }
+        self.currFrame = dotLottiePlayer.currentFrame()
+        hasRenderedFirstFrame = true
+        hasResized = false
 
-            // Use Swift-managed buffer
-            guard let pixelData = renderBuffer else {
-                return nil
-            }
+        guard let pixelData = renderBuffer else {
+            return nil
+        }
 
+        return body(UnsafeRawPointer(pixelData), Int(self.WIDTH), Int(self.HEIGHT))
+    }
+
+    /// Advances playback by `dt` **milliseconds** (the core's tick contract)
+    /// and returns the rendered frame, or nil if nothing changed.
+    public func tick(dt: Float) -> CGImage? {
+        // The outer optional collapses "no new frame" and "CGImage creation
+        // failed" into nil, matching the historical contract.
+        tickWithBuffer(dt: dt) { pixelData, width, height -> CGImage? in
             let bitsPerComponent = 8
-            let bytesPerRow = 4 * Int(self.WIDTH)
+            let bytesPerRow = 4 * width
             let colorSpace = CGColorSpaceCreateDeviceRGB()
 
-            if let context = CGContext(
-                data: pixelData,
-                width: Int(self.WIDTH),
-                height: Int(self.HEIGHT),
+            guard let context = CGContext(
+                data: UnsafeMutableRawPointer(mutating: pixelData),
+                width: width,
+                height: height,
                 bitsPerComponent: bitsPerComponent,
                 bytesPerRow: bytesPerRow,
                 space: colorSpace,
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-            ) {
-                if let newImage = context.makeImage() {
-                    return newImage
-                }
+            ) else {
+                return nil
             }
-        }
-
-        return nil
+            return context.makeImage()
+        } ?? nil
     }
     
     public func subscribe(observer: Observer) {
