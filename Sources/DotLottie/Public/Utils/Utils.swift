@@ -7,11 +7,17 @@
 
 import Foundation
 
-/// Fetches JSON or .lottie from requested URL.
-/// - Parameter url: Web URL to the animation.
+/// Fetches JSON or .lottie from requested URL, optionally using DotLottieCache.
+/// - Parameters:
+///   - url: Web URL to the animation.
+///   - shouldCache: Whether to use and store cached animation data (defaults to false).
 /// - Throws: invalidServerResponse
 /// - Returns: Data object from the response
-func fetchFileFromURL(url: URL) async throws -> Data {
+func fetchFileFromURL(url: URL, shouldCache: Bool = false) async throws -> Data {
+    if shouldCache, let cachedData = DotLottieCache.shared.get(for: url) {
+        return cachedData
+    }
+
     let session = URLSession.shared
     
     let (data, response) = try await session.data(from: url)
@@ -21,6 +27,9 @@ func fetchFileFromURL(url: URL) async throws -> Data {
         throw NetworkingErrors.invalidServerResponse
     }
     
+    if shouldCache {
+        DotLottieCache.shared.set(data, for: url)
+    }
     return data
 }
 
