@@ -5,6 +5,14 @@
 # The submodule root is deps/dotlottie-rs; the Cargo workspace lives one level deeper
 DOTLOTTIE_RS := deps/dotlottie-rs/dotlottie-rs
 
+# Release profile for the engine. dotlottie-rs leaves optimisation, LTO and the
+# panic strategy to whoever ships the binary, so they are set here. Cargo reads
+# these in place of [profile.release] in the crate's Cargo.toml.
+export CARGO_PROFILE_RELEASE_OPT_LEVEL ?= 2
+export CARGO_PROFILE_RELEASE_LTO ?= fat
+export CARGO_PROFILE_RELEASE_CODEGEN_UNITS ?= 1
+export CARGO_PROFILE_RELEASE_PANIC ?= abort
+
 XCODE_PATH ?= $(shell xcode-select -p 2>/dev/null || echo "/Applications/Xcode.app/Contents/Developer")
 MIN_IOS_VERSION ?= 13.0
 MIN_MACOS_VERSION ?= 11.0
