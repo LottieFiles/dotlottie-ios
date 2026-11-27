@@ -10,6 +10,7 @@ export CARGO_PROFILE_RELEASE_OPT_LEVEL ?= 2
 export CARGO_PROFILE_RELEASE_LTO ?= fat
 export CARGO_PROFILE_RELEASE_CODEGEN_UNITS ?= 1
 export CARGO_PROFILE_RELEASE_PANIC ?= abort
+export CARGO_PROFILE_RELEASE_STRIP ?= symbols
 
 XCODE_PATH ?= $(shell xcode-select -p 2>/dev/null || echo "/Applications/Xcode.app/Contents/Developer")
 MIN_IOS_VERSION ?= 13.0
